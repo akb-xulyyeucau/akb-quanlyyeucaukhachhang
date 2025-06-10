@@ -1,0 +1,26 @@
+{
+  "title": "顧客要求の管理と処理",
+  "menu": {
+    "home": "ホーム",
+    "users": "ユーザー",
+    "user_management": "ユーザー管理",
+    "customer": "顧客",
+    "customer_info": "顧客情報",
+    "customer_projects": "プロジェクト",
+    "customer_projects_request": "プロジェクト要求",
+    "system": "システム",
+    "system_email": "メール設定",
+    "system_setting": "システム設定"
+  },
+  "logout": "ログアウト",
+  "confirm_logout_title": "ログアウトの確認",
+  "confirm_logout_content": "本当にログアウトしますか？",
+  "ok_text": "ログアウト",
+  "cancel_text": "キャンセル",
+  "profile_info": {
+    "alias": "表示名",
+    "email": "メール",
+    "role": "役割"
+  },
+  "personal_info": "個人情報"
+}

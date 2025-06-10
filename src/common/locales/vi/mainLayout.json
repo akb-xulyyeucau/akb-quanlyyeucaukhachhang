@@ -1,0 +1,26 @@
+{
+  "title": "Quản lý và xử lý yêu cầu khách hàng",
+  "menu": {
+    "home": "Trang chủ",
+    "users": "Người dùng",
+    "user_management": "Quản lý người dùng",
+    "customer": "Khách hàng",
+    "customer_info": "Thông tin khách hàng",
+    "customer_projects": "Dự án",
+    "customer_projects_request": "Yêu cầu dự án",
+    "system": "Hệ thống",
+    "system_email": "Cấu hình E-Mail",
+    "system_setting": "Cài đặt hệ thống"
+  },
+  "logout": "Đăng xuất",
+  "confirm_logout_title": "Xác nhận đăng xuất",
+  "confirm_logout_content": "Bạn có chắc chắn muốn đăng xuất không?",
+  "ok_text": "Đăng xuất",
+  "cancel_text": "Hủy",
+  "profile_info": {
+    "alias": "Tên hiển thị",
+    "email": "Email",
+    "role": "Vai trò"
+  },
+  "personal_info": "Thông tin cá nhân"
+}

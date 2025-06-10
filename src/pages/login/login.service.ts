@@ -8,3 +8,12 @@ export const login = async (email: string, password: string) => {
       throw new Error(error.response?.data?.message || "Lỗi không xác định")
     }
   };
+
+  // export const me = async () => {
+  //   try {
+  //       const response = await api.get('/user/me');
+  //       return response.data;
+  //   } catch (error : any) {
+  //       throw new Error(error.response?.data?.message || "Lỗi không xác định");
+  //   }
+  // }

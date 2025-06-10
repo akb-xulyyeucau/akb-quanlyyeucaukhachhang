@@ -27,3 +27,21 @@ export const createProject = async (projectData : IProject) => {
         return error.message;
     }
 }
+
+export const updateProject = async (projectId: string, projectData: IProject) => {
+    try {
+        const res = await api.put(`/project/${projectId}`, projectData);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
+
+export const deleteProject = async (projectId: string) => {
+    try {
+        const res = await api.delete(`/project/${projectId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}

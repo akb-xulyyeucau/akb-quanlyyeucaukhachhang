@@ -14,10 +14,12 @@ export interface IProject {
     },
     status : string,
     day : Date,
+    isActive : boolean
     documentIds : any
 }
 
 export interface IDocument {
+   _id?: string;
    name : string,
    day: Date,
    files : Array<IFile>,

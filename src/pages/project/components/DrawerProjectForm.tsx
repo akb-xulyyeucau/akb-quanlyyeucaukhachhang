@@ -1,12 +1,19 @@
-import { Drawer, Form, Input, Button, Table } from 'antd';
+import { Drawer, Form, Input, Button, Table, DatePicker, Select } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
 import ModalUploadDocument from './ModalUploadDocument';
 import type { IDocument } from '../interfaces/project.interface';
 import dayjs from 'dayjs';
 
-const { TextArea } = Input;
+// Hard code customer data
+const customerOptions = [
+  {
+    value: '6837d4992e8694d80cc3a52f',
+    label: 'Customer 1'
+  }
+];
 
+// const { TextArea } = Input;
 interface DrawerProjectFormProps {
   open: boolean;
   onClose: () => void;
@@ -24,7 +31,15 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
 
   const handleSave = () => {
     form.validateFields().then((values) => {
-      onSave({ ...values, documents, status: 'Chưa kích hoạt', isActive: false });
+      const formattedValues = {
+        ...values,
+        documents,
+        status: 'Chưa kích hoạt',
+        isActive: false,
+        day: values.day.format('YYYY-MM-DD'),
+        documentIds: documents.map((doc: any) => doc._id).filter(Boolean)
+      };
+      onSave(formattedValues);
       form.resetFields();
       setDocuments([]);
       onClose();
@@ -42,11 +57,6 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
       dataIndex: 'day',
       key: 'day',
       render: (day: Date) => dayjs(day).format('DD/MM/YYYY'),
-    },
-    {
-      title: 'Người gửi',
-      dataIndex: 'sender',
-      key: 'sender',
     },
     {
       title: 'Số tệp',
@@ -77,16 +87,46 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
         >
           <Input placeholder="Nhập tên dự án" />
         </Form.Item>
+
         <Form.Item
-          name="alias"
-          label="Mã dự án"
-          rules={[{ required: true, message: 'Vui lòng nhập mã dự án!' }]}
+          name="pm"
+          label="Quản lý dự án"
         >
-          <Input placeholder="Nhập mã dự án" />
+          <Select
+            disabled
+            showSearch
+            placeholder="Chọn PM"
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              ((option?.label as string) ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+          />
         </Form.Item>
-        <Form.Item name="description" label="Mô tả">
-          <TextArea rows={4} placeholder="Nhập mô tả" />
+
+        <Form.Item
+          name="customer"
+          label="Khách hàng"
+          rules={[{ required: true, message: 'Vui lòng chọn khách hàng!' }]}
+        >
+          <Select
+            showSearch
+            placeholder="Chọn khách hàng"
+            optionFilterProp="children"
+            options={customerOptions}
+            filterOption={(input, option) =>
+              ((option?.label as string) ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+          />
         </Form.Item>
+
+        <Form.Item
+          name="day"
+          label="Ngày bắt đầu"
+          rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
+        >
+          <DatePicker style={{ width: '100%' }} />
+        </Form.Item>
+
         <Form.Item label="Tài liệu">
           <Button icon={<PlusOutlined />} onClick={() => setOpenModal(true)}>
             Thêm tài liệu

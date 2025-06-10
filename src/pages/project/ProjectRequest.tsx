@@ -1,15 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Button, Dropdown, Table, Tooltip } from 'antd';
+import { Button, Dropdown, Table, Tag, Tooltip, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
 import { getProjectRequest, createProject } from './services/project.service';
-import {uploadDocuments} from './services/document.service'
+import { updateTrashDocument } from './services/document.service';
 import { EditOutlined, DeleteOutlined, EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import DrawerProjectForm from './components/DrawerProjectForm';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../../common/stores/store'; // Điều chỉnh path theo cấu trúc store của bạn
- // Điều chỉnh path theo cấu trúc store của bạn
+import type { RootState } from '../../common/stores/store';
+
+const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
+
+const clearTempDocumentIds = () => {
+  localStorage.removeItem(TEMP_DOCUMENT_IDS_KEY);
+};
+
+const getTempDocumentIds = (): string[] => {
+  const ids = localStorage.getItem(TEMP_DOCUMENT_IDS_KEY);
+  return ids ? JSON.parse(ids) : [];
+};
 
 const CustomerProject = () => {
   const [projects, setProjects] = useState<IProject[]>([]);
@@ -41,14 +51,40 @@ const CustomerProject = () => {
     setOpenDrawer(true);
   };
 
+  const handleCloseDrawer = () => {
+    clearTempDocumentIds();
+    setOpenDrawer(false);
+  };
+
   const handleSaveProject = async (values: any) => {
-    const { documents, ...projectData } = values;
-    const newProject = await createProject(projectData);
-    if (documents && documents.length > 0) {
-      await uploadDocuments(documents); // Gọi hàm upload với documents
+    try {
+      const documentIds = getTempDocumentIds();
+      const projectData = {
+        ...values,
+        documentIds
+      };
+
+      const response = await createProject(projectData);
+      
+      if (response.success) {
+        if (documentIds.length > 0) {
+          try {
+            await Promise.all(documentIds.map(id => updateTrashDocument(id)));
+          } catch (error) {
+            console.error('Lỗi khi cập nhật trạng thái document:', error);
+          }
+        }
+
+        message.success('Tạo dự án thành công');
+        clearTempDocumentIds();
+        fetchProjectData();
+        setOpenDrawer(false);
+      } else {
+        message.error(response.message || 'Có lỗi xảy ra khi tạo dự án');
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Có lỗi xảy ra khi tạo dự án');
     }
-    console.log("userInfor -------------- " , user?.id )
-    fetchProjectData();
   };
 
   const columns: ColumnsType<IProject> = [
@@ -75,15 +111,6 @@ const CustomerProject = () => {
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Quản lý dự án',
-      dataIndex: ['pm', 'name'],
-      key: 'pm.name',
-      align: 'center',
-      render: (_: any, record: IProject) => (
-        <Tooltip title={record.pm?.name}>{record.pm?.name}</Tooltip>
-      ),
-    },
-    {
       title: "Khách hàng",
       dataIndex: ['customer', 'name'],
       key: 'customer.name',
@@ -97,7 +124,15 @@ const CustomerProject = () => {
       dataIndex: 'status',
       key: 'status',
       align: 'center',
-      render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
+      render: (_ : any , record : IProject) => {
+        let color = "default";
+        switch(record.isActive){
+          case true : color = "green"; break;
+          case false : color = "red" ; break;
+          default : color = "default"
+        }
+        return <Tag color= {color}> <Tooltip title={record.status}>{record.status}</Tooltip></Tag>
+      },
     },
     {
       title: 'Ngày bắt đầu',
@@ -182,7 +217,7 @@ const CustomerProject = () => {
       />
       <DrawerProjectForm
         open={openDrawer}
-        onClose={() => setOpenDrawer(false)}
+        onClose={handleCloseDrawer}
         onSave={handleSaveProject}
       />
     </div>

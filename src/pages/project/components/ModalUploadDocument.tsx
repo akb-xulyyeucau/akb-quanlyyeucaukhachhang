@@ -1,8 +1,8 @@
-import { Modal, Form, Input, DatePicker, Button, Upload, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, DatePicker, Button, Upload, message, Progress } from 'antd';
+import { PlusOutlined, UploadOutlined, CloseOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import React, { useState } from 'react';
-import type { IDocument, IFile } from '../interfaces/project.interface';
+import type { IDocument } from '../interfaces/project.interface';
 import { useSelector } from 'react-redux';
 import { selectAuthUser, selectIsAuthenticated } from '../../../common/stores/auth/authSelector';
 import { uploadDocument } from '../services/document.service';
@@ -29,9 +29,27 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const user = useSelector(selectAuthUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   
+  const simulateProgress = (fileName: string) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 10;
+      if (progress > 99) {
+        progress = 100;
+        clearInterval(interval);
+      }
+      setUploadProgress(prev => ({
+        ...prev,
+        [fileName]: Math.floor(progress)
+      }));
+    }, 200);
+
+    return () => clearInterval(interval);
+  };
+
   const handleOk = async () => {
     try {
       setLoading(true);
@@ -39,6 +57,11 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
       
       const files = fileList.map(file => file.originFileObj).filter(Boolean) as File[];
       
+      // Start progress simulation for each file
+      files.forEach(file => {
+        simulateProgress(file.name);
+      });
+
       const documentData = {
         name: values.name,
         day: values.day.toDate(),
@@ -68,6 +91,7 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
         message.success('Tài liệu đã được tải lên thành công');
         form.resetFields();
         setFileList([]);
+        setUploadProgress({});
         onClose();
       } else {
         message.error(response.message || 'Có lỗi xảy ra khi tải lên tài liệu');
@@ -78,24 +102,30 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
       setLoading(false);
     }
   };
-  
-  const handleClick = () => {
-    console.log("Authentication status:", isAuthenticated);
-    console.log("User data:", user?._id);
-  }
+
+  const handleCancel = () => {
+    form.resetFields();
+    setFileList([]);
+    setUploadProgress({});
+    onClose();
+  };
+
   return (
     <Modal
       title="Thêm tài liệu"
       open={open}
       onOk={handleOk}
-      onCancel={() => {
-        form.resetFields();
-        setFileList([]);
-        onClose();
-      }}
-      okText="Lưu"
-      cancelText="Hủy"
+      onCancel={handleCancel}
+      okText="Tải lên"
+      cancelText="Đóng"
       confirmLoading={loading}
+      okButtonProps={{ 
+        icon: <UploadOutlined />,
+        disabled: fileList.length === 0 
+      }}
+      cancelButtonProps={{ 
+        icon: <CloseOutlined /> 
+      }}
     >
       <Form form={form} layout="vertical">
         <Form.Item
@@ -112,21 +142,29 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
         >
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
-        {/* <Form.Item label="Người gửi" initialValue={user?.id || 'anonymous'}>
-          <Input disabled value={user?.id || 'anonymous'} />
-        </Form.Item> */}
-        <Form.Item label="Tệp đính kèm">
+        <Form.Item label="Tệp đính kèm" required>
           <Upload
             multiple
             fileList={fileList}
             onChange={({ fileList }) => setFileList(fileList)}
             beforeUpload={() => false}
+            itemRender={(originNode, file) => (
+              <div style={{ marginBottom: 8 }}>
+                {originNode}
+                {uploadProgress[file.name] !== undefined && (
+                  <Progress 
+                    percent={uploadProgress[file.name]} 
+                    size="small" 
+                    status={uploadProgress[file.name] === 100 ? "success" : "active"}
+                  />
+                )}
+              </div>
+            )}
           >
             <Button icon={<PlusOutlined />}>Chọn tệp</Button>
           </Upload>
         </Form.Item>
       </Form>
-      <Button onClick={handleClick}>test</Button>
     </Modal>
   );
 };

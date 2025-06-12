@@ -9,6 +9,7 @@ import Project from '../../pages/project/Project';
 import ProjectRequest from '../../pages/project/ProjectRequest';
 import Setting from '../../pages/system/Setting';
 import EmailConfig from '../../pages/system/EmailConfig';
+import UserProfile from '../../pages/user/UserProfile';
 
 const AppRoute = () => {
   return (
@@ -29,6 +30,7 @@ const AppRoute = () => {
       >
         <Route path="home" element={<Home />} />
         <Route path="user" element={<User />} />
+        <Route path = "user-profile/:uId" element= {<UserProfile/>}/>
         <Route path= "customers" element = {<Customer/>}></Route>
         <Route path='customers-projects' element= {<Project/>}/>
         <Route path='customers-projects-request' element= {<ProjectRequest/>}/>

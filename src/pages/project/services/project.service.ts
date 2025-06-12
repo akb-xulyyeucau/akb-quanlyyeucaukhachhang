@@ -45,3 +45,30 @@ export const deleteProject = async (projectId: string) => {
         return error.message;
     }
 }
+
+export const autoSeachCustomer = async (search: string) => {
+    try {
+        const res = await api.get(`/customer/auto-search?searchTerm=${search}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
+
+export const autoSearchPm = async (search: string) => {
+    try {
+        const res = await api.get(`/pm/auto-search?searchTerm=${search}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
+
+export const getProjectById  = async (projectId : string) => {
+    try {
+        const res = await api.get(`/project/${projectId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}

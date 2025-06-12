@@ -1,19 +1,24 @@
 import { Drawer, Form, Input, Button, Table, DatePicker, Select } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import React, { useState } from 'react';
+import { PlusOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
 import ModalUploadDocument from './ModalUploadDocument';
 import type { IDocument } from '../interfaces/project.interface';
 import dayjs from 'dayjs';
+import { autoSeachCustomer, autoSearchPm } from '../services/project.service';
+import { useDebounce } from '../../../common/hooks/useDebounce';
+import { useSelector } from 'react-redux';
+import { selectUserRole, selectUserProfile } from '../../../common/stores/auth/authSelector';
+interface ICustomer {
+  _id: string;
+  name: string;
+  alias: string;
+}
+interface IPM {
+  _id: string;
+  name: string;
+  alias: string;
+}
 
-// Hard code customer data
-const customerOptions = [
-  {
-    value: '6837d4992e8694d80cc3a52f',
-    label: 'Customer 1'
-  }
-];
-
-// const { TextArea } = Input;
 interface DrawerProjectFormProps {
   open: boolean;
   onClose: () => void;
@@ -24,9 +29,103 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
   const [form] = Form.useForm();
   const [documents, setDocuments] = useState<IDocument[]>([]);
   const [openModal, setOpenModal] = useState(false);
+  const [customerOptions, setCustomerOptions] = useState<{ value: string; label: string }[]>([]);
+  const [pmOptions, setPmOptions] = useState<{ value: string; label: string }[]>([]);
+  const [searchText, setSearchText] = useState('');
+  const [searchPmText, setSearchPmText] = useState('');
+  const debouncedSearchText = useDebounce(searchText, 400);
+  const debouncedSearchPmText = useDebounce(searchPmText, 400);
+
+  const userRole = useSelector(selectUserRole);
+  const customerProfile = useSelector(selectUserProfile);
+  const isCustomerRole = userRole === 'guest';
+
+  const fetchCustomers = async (searchTerm: string) => {
+    if (!isCustomerRole && open) {
+      try {
+        const response = await autoSeachCustomer(searchTerm);
+        if (response.success && response.data) {
+          const options = response.data.map((customer: ICustomer) => ({
+            value: customer._id,
+            label: `${customer.name} (${customer.alias})`
+          }));
+          setCustomerOptions(options);
+        }
+      } catch (error) {
+        console.error('Error searching customers:', error);
+        setCustomerOptions([]);
+      }
+    }
+  };
+
+  const fetchPMs = async (searchTerm: string) => {
+    if (open) {
+      try {
+        const response = await autoSearchPm(searchTerm);
+        if (response.success && response.data) {
+          const options = response.data.map((pm: IPM) => ({
+            value: pm._id,
+            label: `${pm.name} (${pm.alias})`
+          }));
+          setPmOptions(options);
+        }
+      } catch (error) {
+        console.error('Error searching PMs:', error);
+        setPmOptions([]);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (open && isCustomerRole && customerProfile) {
+      form.setFieldValue('customer', customerProfile._id);
+      setCustomerOptions([{
+        value: customerProfile._id,
+        label: `${customerProfile.name} (${customerProfile.alias})`
+      }]);
+    }
+  }, [open, isCustomerRole, customerProfile, form]);
+
+  const handleSearch = (value: string) => {
+    if (!isCustomerRole && open) {
+      setSearchText(value);
+      fetchCustomers(value);
+    }
+  };
+
+  const handleSearchPm = (value: string) => {
+    if (open) {
+      setSearchPmText(value);
+      fetchPMs(value);
+    }
+  };
+
+  const handleFocus = () => {
+    if (!isCustomerRole && open && !searchText) {
+      fetchCustomers('');
+    }
+  };
+
+  const handlePmFocus = () => {
+    if (open && !searchPmText) {
+      fetchPMs('');
+    }
+  };
 
   const handleAddDocument = (document: IDocument) => {
     setDocuments([...documents, document]);
+  };
+
+  const handleClose = () => {
+    if (!isCustomerRole) {
+      form.resetFields();
+    } else {
+      const currentCustomer = form.getFieldValue('customer');
+      form.resetFields();
+      form.setFieldValue('customer', currentCustomer);
+    }
+    setDocuments([]);
+    onClose();
   };
 
   const handleSave = () => {
@@ -40,9 +139,7 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
         documentIds: documents.map((doc: any) => doc._id).filter(Boolean)
       };
       onSave(formattedValues);
-      form.resetFields();
-      setDocuments([]);
-      onClose();
+      handleClose();
     });
   };
 
@@ -70,13 +167,25 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
     <Drawer
       title="Tạo yêu cầu dự án mới"
       width={720}
-      onClose={onClose}
+      onClose={handleClose}
       open={open}
       bodyStyle={{ paddingBottom: 80 }}
       extra={
-        <Button onClick={onClose} style={{ marginRight: 8 }}>
-          Hủy
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button 
+            onClick={handleClose} 
+            icon={<CloseOutlined />}
+          >
+            Đóng
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            type="primary"
+            icon={<SaveOutlined />}
+          >
+            Tạo yêu cầu dự án mới
+          </Button>
+        </div>
       }
     >
       <Form layout="vertical" form={form}>
@@ -91,15 +200,19 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
         <Form.Item
           name="pm"
           label="Quản lý dự án"
+          rules={[{ required: true, message: 'Vui lòng chọn quản lý dự án!' }]}
         >
           <Select
-            disabled
             showSearch
             placeholder="Chọn PM"
             optionFilterProp="children"
-            filterOption={(input, option) =>
-              ((option?.label as string) ?? '').toLowerCase().includes(input.toLowerCase())
-            }
+            options={pmOptions}
+            onSearch={handleSearchPm}
+            onFocus={handlePmFocus}
+            filterOption={false}
+            notFoundContent={null}
+            defaultActiveFirstOption={false}
+            showArrow={false}
           />
         </Form.Item>
 
@@ -108,15 +221,28 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
           label="Khách hàng"
           rules={[{ required: true, message: 'Vui lòng chọn khách hàng!' }]}
         >
-          <Select
-            showSearch
-            placeholder="Chọn khách hàng"
-            optionFilterProp="children"
-            options={customerOptions}
-            filterOption={(input, option) =>
-              ((option?.label as string) ?? '').toLowerCase().includes(input.toLowerCase())
-            }
-          />
+          {isCustomerRole ? (
+            <Select
+              value={customerProfile?._id}
+              options={customerOptions}
+              disabled={true}
+              style={{ cursor: 'not-allowed' }}
+              open={false}
+            />
+          ) : (
+            <Select
+              showSearch
+              placeholder="Tìm kiếm khách hàng"
+              optionFilterProp="children"
+              options={customerOptions}
+              onSearch={handleSearch}
+              onFocus={handleFocus}
+              filterOption={false}
+              notFoundContent={null}
+              defaultActiveFirstOption={false}
+              showArrow={false}
+            />
+          )}
         </Form.Item>
 
         <Form.Item
@@ -140,11 +266,6 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
           />
         </Form.Item>
       </Form>
-      <div style={{ textAlign: 'right', marginTop: 16 }}>
-        <Button onClick={handleSave} type="primary">
-          Lưu
-        </Button>
-      </div>
       <ModalUploadDocument
         open={openModal}
         onClose={() => setOpenModal(false)}

@@ -122,7 +122,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
     {
       title: 'Chi tiết',
       key: 'action',
-      render: (text: any, record: any) => (
+      render: (_: any, record: any) => (
         <Space direction="vertical" style={{ width: '100%' }}>
           {record.files.map((file: any, index: number) => (
             <Tooltip title="Nhấn để tải xuống" key={index}>

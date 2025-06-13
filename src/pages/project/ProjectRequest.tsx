@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button, Table, Tag, Tooltip, message, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
-import { getProjectRequest, createProject, deleteProject } from './services/project.service';
+import { getProjectRequest, createProject, deleteProject , approveProject } from './services/project.service';
 import { updateTrashDocument } from './services/document.service';
 import { EditOutlined, DeleteOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -30,12 +30,21 @@ const CustomerProject = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>('');
+  const [tableLoading, setTableLoading] = useState<boolean>(false);
   const user = useSelector((state: RootState) => state.auth.user);
 
   const fetchProjectData = async () => {
-    const response = await getProjectRequest();
-    setProjects(response.data || []);
-    setTotal(response.pagination?.total || response.data?.length || 0);
+    setTableLoading(true);
+    try {
+      const response = await getProjectRequest();
+      setProjects(response.data || []);
+      setTotal(response.pagination?.total || response.data?.length || 0);
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách dự án:', error);
+      message.error('Có lỗi xảy ra khi lấy danh sách dự án');
+    } finally {
+      setTableLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -98,6 +107,21 @@ const CustomerProject = () => {
       }
     } catch (error: any) {
       message.error(error.message || 'Có lỗi xảy ra khi xóa dự án');
+    }
+  };
+
+  const handleApproveProject = async (projectId: string) => {
+    try {
+      const res = await approveProject(projectId);
+      if (res.success) {
+        message.success('Duyệt dự án thành công');
+      } else {
+        message.error(res.message || 'Có lỗi xảy ra khi duyệt dự án');
+      }
+      await fetchProjectData();
+    } catch (error: any) {
+      console.error('Lỗi khi duyệt dự án:', error);
+      message.error(error.message || 'Có lỗi xảy ra khi duyệt dự án');
     }
   };
 
@@ -177,7 +201,7 @@ const CustomerProject = () => {
       key: 'day',
       align: 'center',
       render: (text: string) =>
-        text ? dayjs(new Date(text).toLocaleDateString('vi-VN')).format('DD/MM/YYYY') : '',
+        text ? dayjs(text).format('DD/MM/YYYY') : '',
     },
     {
       title: 'Chức năng',
@@ -223,6 +247,7 @@ const CustomerProject = () => {
         rowKey="_id"
         columns={columns}
         dataSource={projects}
+        loading={tableLoading}
         pagination={{
           current: page,
           pageSize: limit,
@@ -244,6 +269,7 @@ const CustomerProject = () => {
       <ModalApproveProject
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onApprove={handleApproveProject}
         projectId={selectedProject}
       />
     </div>

@@ -40,6 +40,18 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
   const customerProfile = useSelector(selectUserProfile);
   const isCustomerRole = userRole === 'guest';
 
+  useEffect(() => {
+    if (!isCustomerRole && open && debouncedSearchText !== undefined) {
+      fetchCustomers(debouncedSearchText);
+    }
+  }, [debouncedSearchText, isCustomerRole, open]);
+
+  useEffect(() => {
+    if (open && debouncedSearchPmText !== undefined) {
+      fetchPMs(debouncedSearchPmText);
+    }
+  }, [debouncedSearchPmText, open]);
+
   const fetchCustomers = async (searchTerm: string) => {
     if (!isCustomerRole && open) {
       try {
@@ -89,26 +101,24 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
   const handleSearch = (value: string) => {
     if (!isCustomerRole && open) {
       setSearchText(value);
-      fetchCustomers(value);
     }
   };
 
   const handleSearchPm = (value: string) => {
     if (open) {
       setSearchPmText(value);
-      fetchPMs(value);
     }
   };
 
   const handleFocus = () => {
     if (!isCustomerRole && open && !searchText) {
-      fetchCustomers('');
+      setSearchText('');
     }
   };
 
   const handlePmFocus = () => {
     if (open && !searchPmText) {
-      fetchPMs('');
+      setSearchPmText('');
     }
   };
 
@@ -169,7 +179,7 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
       width={720}
       onClose={handleClose}
       open={open}
-      bodyStyle={{ paddingBottom: 80 }}
+      styles={{ body: { paddingBottom: 80 } }}
       extra={
         <div style={{ display: 'flex', gap: '8px' }}>
           <Button 

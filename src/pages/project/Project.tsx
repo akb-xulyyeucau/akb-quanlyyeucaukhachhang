@@ -1,22 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Button, Dropdown, Table, Tooltip} from 'antd';
+import { Button, Dropdown, Table, Tooltip , Tag} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
 import { getAllProject } from './services/project.service';
-import { EditOutlined, DeleteOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, EllipsisOutlined} from '@ant-design/icons';
 import dayjs from 'dayjs';
-// import dayjs from 'dayjs';
-
-// const { Option } = Select;
 
 const CustomerProject = () => {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  // const [openModal, setOpenModal] = useState(false);
-  // const [form] = Form.useForm();
-  // const [loading, setLoading] = useState(false);
+
 
   const fetchProjectData = async () => {
     const response = await getAllProject();
@@ -36,9 +31,6 @@ const CustomerProject = () => {
   const handleViewLog = (record: IProject) => {
     console.log("Lịch sử ", record)
   }
-
-
- 
 
   const columns: ColumnsType<IProject> = [
     {
@@ -69,7 +61,7 @@ const CustomerProject = () => {
       key: 'pm.name',
       align: 'center',
       render: (_: any, record: IProject) => (
-        <Tooltip title={record.pm?.name}>{record.pm?.name}</Tooltip>
+        <Tag color="blue"><Tooltip title={record.pm?.name}>{record.pm?.name}</Tooltip></Tag>
       ),
     },
     {
@@ -78,7 +70,7 @@ const CustomerProject = () => {
       key: 'customer.name',
       align: 'center',
       render: (_: any, record: IProject) => (
-        <Tooltip title={record.customer?.name}>{record.customer?.name}</Tooltip>
+        <Tag color="green"><Tooltip title={record.customer?.name}>{record.customer?.name}</Tooltip></Tag>
       ),
     },
     {
@@ -86,7 +78,15 @@ const CustomerProject = () => {
       dataIndex: 'status',
       key: 'status',
       align: 'center',
-      render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
+      render: (text: string) => {
+        let color = '';
+        if (text === 'Đang thực hiện') {
+          color = 'purple';
+        } else if (text === 'Đã nghiệm thu') {
+          color = 'green';
+        }
+        return <Tag color={color}><Tooltip title={text}>{text}</Tooltip></Tag>;
+      },
     },
     {
       title: 'Ngày bắt đầu',
@@ -94,7 +94,7 @@ const CustomerProject = () => {
       key: 'day',
       align: 'center',
       render: (text: string) =>
-        text ? dayjs(new Date(text).toLocaleDateString('vi-VN')).format('DD/MM/YYYY') : '',
+        text ? dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY') : '',
     },
     {
       title: 'Chức năng',

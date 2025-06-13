@@ -72,3 +72,12 @@ export const getProjectById  = async (projectId : string) => {
         return error.message;
     }
 }
+
+export const approveProject = async (projectId  : string) => {
+    try {
+        const res = await api.patch(`/project/active/${projectId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}

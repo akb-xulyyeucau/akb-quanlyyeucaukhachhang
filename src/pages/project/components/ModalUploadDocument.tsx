@@ -25,6 +25,17 @@ const addTempDocumentId = (id: string) => {
   localStorage.setItem(TEMP_DOCUMENT_IDS_KEY, JSON.stringify([...ids, id]));
 };
 
+const getSafeFileName = (file: File | UploadFile): string => {
+  // Lấy tên file gốc
+  const originalName = file instanceof File ? file.name : file.originFileObj?.name || file.name;
+  
+  // Chuyển đổi tên file thành chuỗi UTF-8 an toàn
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder('utf-8');
+  const bytes = encoder.encode(originalName);
+  return decoder.decode(bytes);
+};
+
 const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose, onUpload }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -55,9 +66,18 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
       setLoading(true);
       const values = await form.validateFields();
       
-      const files = fileList.map(file => file.originFileObj).filter(Boolean) as File[];
+      const files = fileList.map(file => {
+        if (file.originFileObj) {
+          const safeName = getSafeFileName(file);
+          return new File(
+            [file.originFileObj],
+            safeName,
+            { type: file.originFileObj.type }
+          );
+        }
+        return null;
+      }).filter(Boolean) as File[];
       
-      // Start progress simulation for each file
       files.forEach(file => {
         simulateProgress(file.name);
       });
@@ -73,14 +93,13 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
       
       if (response.success) {
         const documentId = response.data._id;
-        // Lưu document ID vào localStorage
         addTempDocumentId(documentId);
 
         const document: IDocument = {
           ...documentData,
           _id: documentId,
           files: files.map(file => ({
-            originalName: file.name,
+            originalName: getSafeFileName(file),
             path: file.name,
             size: file.size,
             type: file.type,

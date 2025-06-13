@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Table, Input, Button, Select, Space, Dropdown, message, Modal, Tooltip } from 'antd';
+import { Table, Input, Button, Select, Space, message, Modal, Tooltip  , Tag} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { ICustomer } from './interface/customer.interface';
 import { getCustomerPanition , updateCustomerById , deleteCustomerById , updateUserActive} from './services/customer.service';
 import { useDebounce } from '../../common/hooks/useDebounce';
-import { EditOutlined, DeleteOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { DeleteOutlined , EyeOutlined } from '@ant-design/icons';
 import ModalProfileForm from '../user/components/ModalProfileForm';
 
 const { Option } = Select;
@@ -21,7 +21,6 @@ const Customer = () => {
   const [openProfileModal, setOpenProfileModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<ICustomer | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
-  // Debounce search
   const debouncedSearch = useDebounce(search, 400);
 
   const fetchCustomers = async () => {
@@ -109,12 +108,12 @@ const handleDelete = (record: ICustomer) => {
 
     },
     {
-      title: 'Tên nhân viên',
+      title: 'Tên khách hàng',
       dataIndex: 'name',
       key: 'name',
       align: 'center',
       width: 180,
-      render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
+      render: (text: string) => <Tag color="green"><Tooltip title={text}>{text}</Tooltip></Tag>,
 
     },
     {
@@ -149,40 +148,28 @@ const handleDelete = (record: ICustomer) => {
       title: 'Chức năng',
       key: 'action',
       align: 'center',
-      width: 110,
-      render: (_: any, record: ICustomer) => {
-        const items = [
-          {
-            key: 'edit',
-            label: (
-              <span>
-                <EditOutlined style={{ color: '#faad14', marginRight: 6 }} />
-                Chỉnh sửa
-              </span>
-            ),
-            onClick: () => handleEdit(record),
-          },
-          {
-            key: 'delete',
-            label: (
-              <span>
-                <DeleteOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />
-                Xóa
-              </span>
-            ),
-            onClick: () => handleDelete(record),
-          },
-        ];
-        return (
-          <Dropdown
-            menu={{ items }}
-            trigger={['click']}
-            placement="bottomLeft" // Hướng menu về bên trái
+      width: 200,
+      render: (_: any, record: ICustomer) => (
+        <Space>
+          <Button
+            type="primary"
+            icon={<EyeOutlined />}
+            onClick={() => handleEdit(record)}
+            size="small"
           >
-            <Button icon={<EllipsisOutlined />} />
-          </Dropdown>
-        );
-      },
+            Chi tiết
+          </Button>
+          <Button
+            type="default"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record)}
+            size="small"
+          >
+            Xóa
+          </Button>
+        </Space>
+      ),
     },
   ];
 

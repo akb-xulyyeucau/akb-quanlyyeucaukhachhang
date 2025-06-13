@@ -11,7 +11,7 @@ export const uploadDocument = async (document: {
   formData.append('day', document.day.toISOString());
   formData.append('sender', document.sender);
   
-  document.files.forEach((file, index) => {
+  document.files.forEach((file) => {
     formData.append(`files`, file);
   });
 
@@ -35,3 +35,14 @@ export const updateTrashDocument = async (documentId: string) => {
     throw error;
   }
 }
+
+export const downloadFile = async (filePath: string) => {
+  try {
+    const response = await api.get(`/document/download/${filePath}`, {
+      responseType: 'blob',
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};

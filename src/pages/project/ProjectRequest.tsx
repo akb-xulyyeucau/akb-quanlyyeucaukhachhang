@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import { Button, Table, Tag, Tooltip, message, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
-import { getProjectRequest, createProject, deleteProject , approveProject } from './services/project.service';
+import { getProjectRequest, createProject, deleteProject , approveProject , getProjectByCustomerRequest } from './services/project.service';
 import { updateTrashDocument } from './services/document.service';
 import { EditOutlined, DeleteOutlined, PlusOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import DrawerProjectForm from './components/DrawerProjectForm';
 import ModalApproveProject from './components/ModalApproveProject';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../../common/stores/store';
+import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
+
 
 const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
 
@@ -31,14 +32,21 @@ const CustomerProject = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [tableLoading, setTableLoading] = useState<boolean>(false);
-  const user = useSelector((state: RootState) => state.auth.user);
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile);
 
   const fetchProjectData = async () => {
     setTableLoading(true);
     try {
-      const response = await getProjectRequest();
-      setProjects(response.data || []);
-      setTotal(response.pagination?.total || response.data?.length || 0);
+      if(user?.role === "guest" && profile?._id) {
+        const response = await getProjectByCustomerRequest(profile?._id);
+        setProjects(response.data || []);
+        setTotal(response.pagination?.total || response.data?.length || 0);
+      } else {
+        const response = await getProjectRequest();
+        setProjects(response.data || []);
+        setTotal(response.pagination?.total || response.data?.length || 0);
+      }
     } catch (error) {
       console.error('Lỗi khi lấy danh sách dự án:', error);
       message.error('Có lỗi xảy ra khi lấy danh sách dự án');

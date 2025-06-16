@@ -5,12 +5,14 @@ export interface IProject {
     pm : {
         _id : string,
         name : string,
-        emailContact : string
+        emailContact : string,
+        phoneContact : string
     },
     customer : {
         _id : string,
         name : string,
-        emailContact: string
+        emailContact: string,
+        phoneContact : string
     },
     status : string,
     day : Date,

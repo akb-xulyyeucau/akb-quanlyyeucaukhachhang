@@ -2,30 +2,40 @@ import { useState, useEffect } from 'react';
 import { Button, Dropdown, Table, Tooltip , Tag} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
-import { getAllProject } from './services/project.service';
+import { getAllProject , getProjectByCustomerId} from './services/project.service';
 import { EditOutlined, DeleteOutlined, EllipsisOutlined} from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
 
 const CustomerProject = () => {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState<IProject[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-
-
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile); 
   const fetchProjectData = async () => {
-    const response = await getAllProject();
-    setProjects(response.data || []);
-    setTotal(response.pagination?.total || response.data?.length || 0);
+    if(user?.role === "guest" && profile?._id) {
+      const response = await getProjectByCustomerId(profile?._id);
+      setProjects(response.data || []);
+      setTotal(response.pagination?.total || response.data?.length || 0);
+    } else {
+      const response = await getAllProject();
+      setProjects(response.data || []);
+      setTotal(response.pagination?.total || response.data?.length || 0);
+    }
   };
 
   useEffect(() => {
     fetchProjectData();
-    // eslint-disable-next-line
   }, [page, limit]);
 
   const handleViewDetail = (record: IProject) => {
-    console.log("chi tiết : ", record)
+    console.log("chi tiết : ", record);
+    navigate(`/project/${record._id}`);
   }
 
   const handleViewLog = (record: IProject) => {

@@ -81,3 +81,30 @@ export const approveProject = async (projectId  : string) => {
         return error.message;
     }
 }
+
+export const getProjectDetail = async (projectId : string) => {
+    try {
+        const res = await api.get(`/project/${projectId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
+
+export const getProjectByCustomerId  = async (cId : string) => {
+    try {
+        const res = await api.get(`/project/customer/${cId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
+
+export const getProjectByCustomerRequest = async (cId : string) => {
+    try {
+        const res = await api.get(`/project/request/${cId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}

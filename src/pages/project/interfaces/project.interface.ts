@@ -5,19 +5,23 @@ export interface IProject {
     pm : {
         _id : string,
         name : string,
-        emailContact : string
+        emailContact : string,
+        phoneContact : string
     },
     customer : {
         _id : string,
         name : string,
-        emailContact: string
+        emailContact: string,
+        phoneContact : string
     },
     status : string,
     day : Date,
+    isActive : boolean
     documentIds : any
 }
 
 export interface IDocument {
+   _id?: string;
    name : string,
    day: Date,
    files : Array<IFile>,

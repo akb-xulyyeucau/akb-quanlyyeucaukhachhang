@@ -56,6 +56,10 @@ const MainLayout: React.FC = () => {
     navigate(`/${key}`);
   };
 
+  const handleUserProfile = (uId : string )=>{
+    navigate(`/user-profile/${uId}`);
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header
@@ -109,7 +113,7 @@ const MainLayout: React.FC = () => {
                 {
                   key: 'action',
                   label: (
-                    <Button onClick={handleLogout} type="link">
+                    <Button onClick={()=>{handleUserProfile(user?._id?? '')}} type="link">
                       {t('personal_info')}
                     </Button>
                   ),

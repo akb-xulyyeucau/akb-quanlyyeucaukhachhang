@@ -3,10 +3,10 @@ import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../../common/stores/auth/authSlice';
+import { loginSuccess , setProfile } from '../../common/stores/auth/authSlice';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../../common/components/LanguageSwitcher';
-import { login } from './login.service';
+import { login , me } from './login.service';
 import { useNavigate } from 'react-router-dom';
 
 interface LoginForm {
@@ -19,20 +19,32 @@ const Login: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  const [userProfile , setUserProfile] = useState<any>(null);
+  
   const onFinish = async (values: LoginForm) => {
     setLoading(true);
     try {
       const response = await login(values.email, values.password);
       if (response && response.data && response.data.accessToken) {
         const { accessToken, ...userData } = response.data;
-
         Cookies.set('accessToken', accessToken, { expires: 7 });
         dispatch(loginSuccess({ 
           user: userData,
           token: accessToken 
         }));
-      //  message.success(response.message);
+      try {
+        const meResponse = await me(userData._id);
+        if(meResponse && meResponse.data.user.isActive){
+          setUserProfile(meResponse.data.profile);
+          dispatch(setProfile(meResponse.data.profile));
+        }else{
+          dispatch(setProfile(null));
+        }
+      } catch (error: any) {
+        console.error('Error fetching profile:', error);
+        dispatch(setProfile(null));
+        message.error(error.message);
+      }
       setTimeout(() => {
         navigate('/home');
       }, 150);

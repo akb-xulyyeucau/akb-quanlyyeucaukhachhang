@@ -1,20 +1,18 @@
 import api from '../../../common/configs/apis/axios.config';
-import { useSelector } from 'react-redux';
-import { selectAuthUser } from '../../../common/stores/auth/authSelector';
 
-export const uploadDocuments = async (documents: any[]) => {
+export const uploadDocument = async (document: {
+  name: string;
+  day: Date;
+  sender: string;
+  files: File[];
+}) => {
   const formData = new FormData();
-  const user = useSelector(selectAuthUser); // Lấy user từ Redux store
-
-  documents.forEach((doc, index) => {
-    formData.append(`documents[${index}][name]`, doc.name);
-    formData.append(`documents[${index}][day]`, doc.day.toISOString());
-    formData.append(`documents[${index}][sender]`, user?.id || 'anonymous'); // Sử dụng user.id từ Redux
-    doc.files.forEach((file: any, fileIndex: number) => {
-      if (file.originFileObj) {
-        formData.append(`documents[${index}][files][${fileIndex}]`, file.originFileObj);
-      }
-    });
+  formData.append('name', document.name);
+  formData.append('day', document.day.toISOString());
+  formData.append('sender', document.sender);
+  
+  document.files.forEach((file) => {
+    formData.append(`files`, file);
   });
 
   try {
@@ -24,6 +22,27 @@ export const uploadDocuments = async (documents: any[]) => {
     return response.data;
   } catch (error) {
     console.error('Lỗi khi upload tài liệu:', error);
+    throw error;
+  }
+};
+
+export const updateTrashDocument = async (documentId: string) => {
+  try {
+    const response = await api.patch(`/document/trash/${documentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi xóa tài liệu:', error);
+    throw error;
+  }
+}
+
+export const downloadFile = async (filePath: string) => {
+  try {
+    const response = await api.get(`/document/download/${filePath}`, {
+      responseType: 'blob',
+    });
+    return response;
+  } catch (error) {
     throw error;
   }
 };

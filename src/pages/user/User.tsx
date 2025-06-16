@@ -158,10 +158,10 @@ const User = () => {
       key: "action",
       render: (_: any, record: any) => (
         <Space>
-          <Button type="default" icon={<EyeOutlined />} onClick={() => showView(record)}>
+          <Button type="primary" icon={<EyeOutlined />} size="small" onClick={() => showView(record)}>
             {t('user_page.table.view_button')}
           </Button>
-          <Button type="primary" icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(record)}>
+          <Button type="default" danger icon={<DeleteOutlined />} size="small" onClick={() => showDeleteConfirm(record)}>
             {t('user_page.table.delete_button')}
           </Button>
         </Space>

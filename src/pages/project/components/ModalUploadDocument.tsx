@@ -1,11 +1,11 @@
-import { Modal, Form, Input, DatePicker, Button, Upload } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Modal, Form, Input, DatePicker, Button, Upload, message, Progress } from 'antd';
+import { PlusOutlined, UploadOutlined, CloseOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import React, { useState } from 'react';
-import type { IDocument, IFile } from '../interfaces/project.interface';
+import type { IDocument } from '../interfaces/project.interface';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../../../common/stores/store'; // Điều chỉnh path theo cấu trúc store của bạn
- // Điều chỉnh path theo cấu trúc store của bạn
+import { selectAuthUser, selectIsAuthenticated } from '../../../common/stores/auth/authSelector';
+import { uploadDocument } from '../services/document.service';
 
 interface ModalUploadDocumentProps {
   open: boolean;
@@ -13,32 +13,120 @@ interface ModalUploadDocumentProps {
   onUpload: (document: IDocument) => void;
 }
 
+const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
+
+const getTempDocumentIds = (): string[] => {
+  const ids = localStorage.getItem(TEMP_DOCUMENT_IDS_KEY);
+  return ids ? JSON.parse(ids) : [];
+};
+
+const addTempDocumentId = (id: string) => {
+  const ids = getTempDocumentIds();
+  localStorage.setItem(TEMP_DOCUMENT_IDS_KEY, JSON.stringify([...ids, id]));
+};
+
+const getSafeFileName = (file: File | UploadFile): string => {
+  // Lấy tên file gốc
+  const originalName = file instanceof File ? file.name : file.originFileObj?.name || file.name;
+  
+  // Chuyển đổi tên file thành chuỗi UTF-8 an toàn
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder('utf-8');
+  const bytes = encoder.encode(originalName);
+  return decoder.decode(bytes);
+};
+
 const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose, onUpload }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const user = useSelector((state: RootState) => state.auth.user); // Lấy user từ Redux store
-
-  const handleOk = () => {
-    form.validateFields().then((values) => {
-      const files: IFile[] = fileList.map((file) => ({
-        originalName: file.name,
-        path: file.uid, // Giả lập path, thay bằng API thực tế
-        size: file.size || 0,
-        type: file.type || '',
+  const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+  const user = useSelector(selectAuthUser);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  
+  const simulateProgress = (fileName: string) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 10;
+      if (progress > 99) {
+        progress = 100;
+        clearInterval(interval);
+      }
+      setUploadProgress(prev => ({
+        ...prev,
+        [fileName]: Math.floor(progress)
       }));
+    }, 200);
 
-      const document: IDocument = {
+    return () => clearInterval(interval);
+  };
+
+  const handleOk = async () => {
+    try {
+      setLoading(true);
+      const values = await form.validateFields();
+      
+      const files = fileList.map(file => {
+        if (file.originFileObj) {
+          const safeName = getSafeFileName(file);
+          return new File(
+            [file.originFileObj],
+            safeName,
+            { type: file.originFileObj.type }
+          );
+        }
+        return null;
+      }).filter(Boolean) as File[];
+      
+      files.forEach(file => {
+        simulateProgress(file.name);
+      });
+
+      const documentData = {
         name: values.name,
         day: values.day.toDate(),
-        files,
-        sender: user?.id || 'anonymous', // Sử dụng user.id từ userSelector
+        sender: isAuthenticated && user?._id ? user._id : 'anonymous',
+        files
       };
 
-      onUpload(document);
-      form.resetFields();
-      setFileList([]);
-      onClose();
-    });
+      const response = await uploadDocument(documentData);
+      
+      if (response.success) {
+        const documentId = response.data._id;
+        addTempDocumentId(documentId);
+
+        const document: IDocument = {
+          ...documentData,
+          _id: documentId,
+          files: files.map(file => ({
+            originalName: getSafeFileName(file),
+            path: file.name,
+            size: file.size,
+            type: file.type,
+          }))
+        };
+
+        onUpload(document);
+        message.success('Tài liệu đã được tải lên thành công');
+        form.resetFields();
+        setFileList([]);
+        setUploadProgress({});
+        onClose();
+      } else {
+        message.error(response.message || 'Có lỗi xảy ra khi tải lên tài liệu');
+      }
+    } catch (error: any) {
+      message.error(error.message || 'Có lỗi xảy ra khi tải lên tài liệu');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setFileList([]);
+    setUploadProgress({});
+    onClose();
   };
 
   return (
@@ -46,13 +134,17 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
       title="Thêm tài liệu"
       open={open}
       onOk={handleOk}
-      onCancel={() => {
-        form.resetFields();
-        setFileList([]);
-        onClose();
+      onCancel={handleCancel}
+      okText="Tải lên"
+      cancelText="Đóng"
+      confirmLoading={loading}
+      okButtonProps={{ 
+        icon: <UploadOutlined />,
+        disabled: fileList.length === 0 
       }}
-      okText="Lưu"
-      cancelText="Hủy"
+      cancelButtonProps={{ 
+        icon: <CloseOutlined /> 
+      }}
     >
       <Form form={form} layout="vertical">
         <Form.Item
@@ -69,15 +161,24 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
         >
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="Người gửi" initialValue={user?.id || 'anonymous'}>
-          <Input disabled value={user?.id || 'anonymous'} />
-        </Form.Item>
-        <Form.Item label="Tệp đính kèm">
+        <Form.Item label="Tệp đính kèm" required>
           <Upload
             multiple
             fileList={fileList}
             onChange={({ fileList }) => setFileList(fileList)}
             beforeUpload={() => false}
+            itemRender={(originNode, file) => (
+              <div style={{ marginBottom: 8 }}>
+                {originNode}
+                {uploadProgress[file.name] !== undefined && (
+                  <Progress 
+                    percent={uploadProgress[file.name]} 
+                    size="small" 
+                    status={uploadProgress[file.name] === 100 ? "success" : "active"}
+                  />
+                )}
+              </div>
+            )}
           >
             <Button icon={<PlusOutlined />}>Chọn tệp</Button>
           </Upload>

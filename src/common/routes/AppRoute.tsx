@@ -11,6 +11,7 @@ import Setting from '../../pages/system/Setting';
 import EmailConfig from '../../pages/system/EmailConfig';
 import UserProfile from '../../pages/user/UserProfile';
 import ProjectDetail from '../../pages/project/ProjectDetail';
+import RequestResponse from '../../pages/project/RequestResponse';
 
 const AppRoute = () => {
   return (
@@ -36,6 +37,7 @@ const AppRoute = () => {
         <Route path='customers-projects' element= {<Project/>}/>
         <Route path='customers-projects-request' element= {<ProjectRequest/>}/>
         <Route path='project/:pid' element= {<ProjectDetail/>}/>
+        <Route path='/request-response/:pId' element= {<RequestResponse/>}/>
         <Route path='system-email' element= {<EmailConfig/>}/>
         <Route path='system-setting' element= {<Setting/>}/>
         {/* Thêm các route con khác tại đây */}

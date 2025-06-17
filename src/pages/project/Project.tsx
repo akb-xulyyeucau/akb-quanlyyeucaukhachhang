@@ -40,6 +40,7 @@ const CustomerProject = () => {
 
   const handleViewLog = (record: IProject) => {
     console.log("Lịch sử ", record)
+    navigate(`/request-response/${record._id}`);
   }
 
   const columns: ColumnsType<IProject> = [
@@ -118,7 +119,7 @@ const CustomerProject = () => {
             label: (
               <span>
                 <EditOutlined style={{ color: '#faad14', marginRight: 6 }} />
-                Chi tiết  dự án
+                Chi tiết dự án
               </span>
             ),
           },
@@ -127,7 +128,7 @@ const CustomerProject = () => {
             label: (
               <span>
                 <DeleteOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />
-                Xem lịch sử
+                Yêu cầu và phản hồi
               </span>
             ),
           },

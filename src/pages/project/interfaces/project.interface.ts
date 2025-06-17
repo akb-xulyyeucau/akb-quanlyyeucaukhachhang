@@ -21,16 +21,25 @@ export interface IProject {
 }
 
 export interface IDocument {
-   _id?: string;
-   name : string,
-   day: Date,
-   files : Array<IFile>,
-   sender : string
+    _id?: string;
+    name: string;
+    day: Date | string;
+    files: IFile[];
+    sender: {
+        _id: string;
+        email: string;
+        role: string;
+        alias: string;
+    };
+    isTrash: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface IFile {
-    originalName : string,
-    path: string,
-    size: number ,
-    type : string
+    _id?: string;
+    originalName: string;
+    path: string;
+    size: number;
+    type: string;
 }

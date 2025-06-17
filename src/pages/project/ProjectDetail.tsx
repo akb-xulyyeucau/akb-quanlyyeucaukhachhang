@@ -1,12 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import type { IProject, IDocument } from './interfaces/project.interface';
 import { useState, useEffect } from 'react';
-import { getProjectDetail } from './services/project.service';
-import { Card, Descriptions, Tag, Typography, Table, Space, Button, Tooltip, message } from 'antd';
-import { DownloadOutlined, FileOutlined, MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons';
+import { getProjectDetail , addDocumentToProject} from './services/project.service';
+import { Card, Descriptions, Tag, Typography, Table, Space, Button, Tooltip, message, Modal } from 'antd';
+import { DownloadOutlined, MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, FileExcelOutlined, FilePdfOutlined, FileWordOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { downloadFile } from './services/document.service';
-import ModalUploadDocument from './components/ModalUploadDocument';
+import { downloadFile , deleteDocument , updateTrashDocument} from './services/document.service';
+import ModalAddDocument from './components/ModalAddDocument';
+import PhaseProject from './components/PhaseProject';
+import ReportTable from './components/ReportTable';
+import ModalEditDocument from './components/ModalEditDocument';
+import type { ColumnsType } from 'antd/es/table';
+// import { title } from 'process';
 
 const { Title, Link } = Typography;
 
@@ -14,8 +19,10 @@ const ProjectDetail = () => {
   const { pid } = useParams();
   const [project, setProject] = useState<IProject>();
   const [loading, setLoading] = useState(false);
-  const [openModalUpload, setOpenModalUpload] = useState(false);
+  const [openModalAdd, setOpenModalAdd] = useState(false);
   const navigate = useNavigate();
+  const [selectedDocument, setSelectedDocument] = useState<IDocument | null>(null);
+  const [openModalEdit, setOpenModalEdit] = useState(false);
 
   const fetchProjectDetail = async () => {
     setLoading(true);
@@ -26,6 +33,21 @@ const ProjectDetail = () => {
       console.error("Error fetching project details:", error);
     } finally {
       setLoading(false);
+    }
+  };
+    const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'doc':
+      case 'docx':
+        return <FileWordOutlined style={{ color: '#2B579A' }} />;
+      case 'xls':
+      case 'xlsx':
+        return <FileExcelOutlined style={{ color: '#217346' }} />;
+      case 'pdf':
+        return <FilePdfOutlined style={{ color: '#FF0000' }} />;
+      default:
+        return <FileWordOutlined />;
     }
   };
 
@@ -51,53 +73,108 @@ const ProjectDetail = () => {
     }
   };
 
-  const handleAddDocument = (document: IDocument) => {
-    if (project) {
-      setProject({
-        ...project,
-        documentIds: [...(project.documentIds || []), document]
-      });
+  const handleAddDocument = async (document: IDocument) => {
+    try {
+      const response = await addDocumentToProject(pid || '', document._id || '');
+      await updateTrashDocument(document._id|| '');
+      await fetchProjectDetail();
+      message.success(response.message || 'Document added successfully');
+      // await updateTrashDocument(document._id|| '');
+    } catch (error: any) {
+      console.error('Error adding document:', error);
+      message.error(error.response?.data?.message || 'Failed to add document to project');
     }
   };
 
-  const documentColumns = [
+  const handleEditDocument = (record: IDocument) => {
+    setSelectedDocument(record);
+    setOpenModalEdit(true);
+  };
+
+  const handleDeleteDocument = (record : any) => {
+    Modal.confirm({
+      title : `Xác nhận xóa tài liệu ${record.name}`,
+      content : `Bạn có muốn xóa tài liệu này không ?`,
+      okText: 'Xóa',
+      okType : 'danger',
+      cancelText: 'Hủy',
+      onOk : async () => {
+        try {
+          const response = await deleteDocument(record._id);
+          await fetchProjectDetail();
+          message.success(response.message);
+        } catch (error : any) {
+          message.error(error.message);
+        }
+      }
+
+    })
+    console.log("Xóa document : " , record)
+  }
+
+  const documentColumns : ColumnsType<any>= [
     {
       title: 'Tên tài liệu',
       dataIndex: 'name',
       key: 'name',
+      align : 'center',
     },
     {
       title: 'Ngày tạo',
       dataIndex: 'day',
       key: 'day',
+      align : "center",
       render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
     },
     {
       title: 'Người gửi',
       dataIndex: 'sender',
       key: 'sender',
-      render: (sender: any) => sender.email,
+      align : "center",
+      render: (sender: any) => {
+        let color = 'default';
+        if(sender.role === 'pm' || sender.role === 'admin') {
+          color = "blue";
+        }
+        else{
+          color = "green";
+        }
+        return <Tag color= {color}>{sender.email}</Tag>
+      },
     },
     {
       title: 'Tệp đính kèm',
       dataIndex: 'files',
       key: 'files',
-      render: (files: any[]) => (
-        <Space>
-          {files.map((file, index) => (
-            <Tooltip title={file.originalName} key={index}>
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={() => handleDownloadFile(file.path)}
-                type="link"
-              >
-                {file.originalName}
-              </Button>
+      // width : 300,
+     render: (_: any, record: any) => (
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {record.files.map((file: any, index: number) => (
+            <Tooltip title="Nhấn để tải xuống" key={index}>
+              <Typography.Link onClick={() => handleDownloadFile(file.path)}>
+                <Space>
+                  {getFileIcon(file.originalName)}
+                  {file.originalName}
+                  <DownloadOutlined />
+                </Space>
+              </Typography.Link>
             </Tooltip>
           ))}
         </Space>
-      ),
+      )
     },
+    {
+      title : "Chức năng",
+      key: "action",
+      align : "center",
+      width : 300,
+      render :(_:any , record : any) =>(
+       <Space>
+        <Button type='primary' onClick={()=>{handleEditDocument(record)}} icon = {<EditOutlined/>} >Sửa</Button>
+        <Button type='default' danger onClick={()=> {handleDeleteDocument(record)}} icon={<DeleteOutlined/>}>Xóa</Button>
+       </Space>
+      )
+    }
   ];
 
   const ContactInfo = ({ email, phone }: { email?: string; phone?: string }) => (
@@ -130,8 +207,11 @@ const ProjectDetail = () => {
             <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers-projects')}>
               Quay lại
             </Button>
+            
           </Space>
-          
+          <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
+              Xem yêu cầu và phản hồi
+            </Button>
           <Descriptions bordered column={2}>
             <Descriptions.Item label="Mã dự án">{project?.alias}</Descriptions.Item>
             <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
@@ -173,7 +253,7 @@ const ProjectDetail = () => {
               <Button 
                 type="primary" 
                 icon={<PlusOutlined />} 
-                onClick={() => setOpenModalUpload(true)}
+                onClick={() => setOpenModalAdd(true)}
               >
                 Thêm tài liệu
               </Button>
@@ -187,18 +267,26 @@ const ProjectDetail = () => {
           </div>
           <div>
             <Title level={3}>Tiến dộ dự án {project?.name}</Title>
-            
+            <PhaseProject />
           </div>
           <div>
             <Title level={3}>Danh sách báo cáo dự án {project?.name}</Title>
+            <ReportTable />
           </div>
         </Space>
       </Card>
 
-      <ModalUploadDocument
-        open={openModalUpload}
-        onClose={() => setOpenModalUpload(false)}
+      <ModalAddDocument
+        open={openModalAdd}
+        onClose={() => setOpenModalAdd(false)}
         onUpload={handleAddDocument}
+      />
+
+      <ModalEditDocument
+        open={openModalEdit}
+        onClose={() => setOpenModalEdit(false)}
+        document={selectedDocument}
+        onSuccess={fetchProjectDetail}
       />
     </div>
   );

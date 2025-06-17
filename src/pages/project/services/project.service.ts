@@ -108,3 +108,13 @@ export const getProjectByCustomerRequest = async (cId : string) => {
         return error.message;
     }
 }
+
+export const addDocumentToProject = async (projectId : string, documentId : string) =>{
+    try {
+        const res = await api.patch(`/project/add-document/${projectId}`, {dId : documentId} );
+        return res.data;
+    } catch (error : any) {
+        throw error;
+    }
+}
+

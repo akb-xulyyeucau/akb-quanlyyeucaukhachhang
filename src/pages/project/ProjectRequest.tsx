@@ -198,7 +198,7 @@ const CustomerProject = () => {
         switch(record.isActive){
           case true : color = "green"; break;
           case false : color = "warning" ; break;
-          default : color = "default"
+          default : color = "default" 
         }
         return <Tag color= {color}> <Tooltip title={record.status}>{record.status}</Tooltip></Tag>
       },

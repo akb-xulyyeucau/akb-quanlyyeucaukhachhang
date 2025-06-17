@@ -4,7 +4,7 @@ import type { UploadFile } from 'antd/es/upload/interface';
 import React, { useState } from 'react';
 import type { IDocument } from '../interfaces/project.interface';
 import { useSelector } from 'react-redux';
-import { selectAuthUser, selectIsAuthenticated } from '../../../common/stores/auth/authSelector';
+import { selectAuthUser } from '../../../common/stores/auth/authSelector';
 import { uploadDocument } from '../services/document.service';
 
 interface ModalAddDocumentProps {
@@ -31,9 +31,9 @@ const removeTempDocumentId = (id: string) => {
   localStorage.setItem(TEMP_DOCUMENT_IDS_KEY, JSON.stringify(filteredIds));
 };
 
-const cleanupTempDocuments = () => {
-  localStorage.removeItem(TEMP_DOCUMENT_IDS_KEY);
-};
+// const cleanupTempDocuments = () => {
+//   localStorage.removeItem(TEMP_DOCUMENT_IDS_KEY);
+// };
 
 const getSafeFileName = (file: File | UploadFile): string => {
   // Lấy tên file gốc
@@ -52,7 +52,7 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const user = useSelector(selectAuthUser);
-  const isAuthenticated = useSelector(selectIsAuthenticated);
+//   const isAuthenticated = useSelector(selectIsAuthenticated);
   
   const simulateProgress = (fileName: string) => {
     let progress = 0;

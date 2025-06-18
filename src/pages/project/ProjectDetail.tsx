@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import type { IProject, IDocument } from './interfaces/project.interface';
 import { useState, useEffect } from 'react';
-import { getProjectDetail , addDocumentToProject} from './services/project.service';
+import { getProjectDetail , addDocumentToProject, endingProject} from './services/project.service';
 import { Card, Descriptions, Tag, Typography, Table, Space, Button, Tooltip, message, Modal } from 'antd';
-import { DownloadOutlined, MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, FileExcelOutlined, FilePdfOutlined, FileWordOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DownloadOutlined, MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, FileExcelOutlined, FilePdfOutlined, FileWordOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, CommentOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { downloadFile , deleteDocument , updateTrashDocument} from './services/document.service';
 import ModalAddDocument from './components/ModalAddDocument';
@@ -79,7 +79,6 @@ const ProjectDetail = () => {
       await updateTrashDocument(document._id|| '');
       await fetchProjectDetail();
       message.success(response.message || 'Document added successfully');
-      // await updateTrashDocument(document._id|| '');
     } catch (error: any) {
       console.error('Error adding document:', error);
       message.error(error.response?.data?.message || 'Failed to add document to project');
@@ -91,6 +90,33 @@ const ProjectDetail = () => {
     setOpenModalEdit(true);
   };
 
+   const handleEndingProject = async (projectId : string) => {
+     try {
+          const res = await endingProject(projectId);
+          if (res.success) {
+            message.success('Duyệt dự án thành công');
+            await fetchProjectDetail();
+          } else {
+            message.error(res.message || 'Có lỗi xảy ra khi duyệt dự án');
+          }
+        } catch (error: any) {
+          console.error('Lỗi khi duyệt dự án:', error);
+          message.error(error.message || 'Có lỗi xảy ra khi duyệt dự án');
+        }
+  }
+
+  const showEndingPhaseConfirm = (projectId : string) => {
+    Modal.confirm({
+      title : 'Xác nhận kết thúc dự án',
+      icon : <ExclamationCircleOutlined />,
+      content : "Bạn có chăc chắn muốn kết thúc dự án này, hành động không thể hoàn thác!",
+      okText : 'Xác nhận',
+      cancelText : 'Hủy',
+      onOk() {
+        handleEndingProject(projectId);
+      }
+    })
+  }
   const handleDeleteDocument = (record : any) => {
     Modal.confirm({
       title : `Xác nhận xóa tài liệu ${record.name}`,
@@ -203,13 +229,13 @@ const ProjectDetail = () => {
       <Card loading={loading}>
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <Space style={{ justifyContent: 'space-between', width: '100%' }}>
-            <Title level={2}>Thông tin dự án  {project?.name}</Title>
+            <Title level={3}>Thông tin dự án  {project?.name}</Title>
             <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers-projects')}>
               Quay lại
             </Button>
             
           </Space>
-          <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
+          <Button type="primary" icon={<CommentOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
               Xem yêu cầu và phản hồi
             </Button>
           <Descriptions bordered column={2}>
@@ -266,8 +292,13 @@ const ProjectDetail = () => {
             />
           </div>
           <div>
-            <Title level={3}>Tiến dộ dự án {project?.name}</Title>
-            <PhaseProject />
+            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                 <Title level={3}>Tiến dộ dự án {project?.name}</Title>
+            </Space>
+            <PhaseProject 
+              projectId={pid || ''} 
+              onEndingProject={showEndingPhaseConfirm} 
+            />
           </div>
           <div>
             <Title level={3}>Danh sách báo cáo dự án {project?.name}</Title>

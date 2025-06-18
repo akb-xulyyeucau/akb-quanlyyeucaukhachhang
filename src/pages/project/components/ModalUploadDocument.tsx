@@ -85,7 +85,19 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
       const documentData = {
         name: values.name,
         day: values.day.toDate(),
-        sender: isAuthenticated && user?._id ? user._id : 'anonymous',
+        sender: isAuthenticated && user && user._id
+          ? {
+              _id: user._id,
+              email: user.email,
+              role: user.role,
+              alias: user.alias,
+            }
+          : {
+              _id: 'anonymous',
+              email: '',
+              role: '',
+              alias: '',
+            },
         files
       };
 
@@ -103,7 +115,8 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
             path: file.name,
             size: file.size,
             type: file.type,
-          }))
+          })),
+          isTrash: false
         };
 
         onUpload(document);

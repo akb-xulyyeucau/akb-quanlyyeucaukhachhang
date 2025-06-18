@@ -43,3 +43,18 @@ export interface IFile {
     size: number;
     type: string;
 }
+
+export interface IPhase {
+    _id?: string,
+    projectId: string,
+    name : string, 
+    phases : Array<IPhaseItem>
+    currentPhase : number
+}
+export interface IPhaseItem {
+    name: string,
+    order: number,
+    description: string,
+    day : Date
+}
+

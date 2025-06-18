@@ -93,7 +93,7 @@ const CustomerProject = () => {
         let color = '';
         if (text === 'Đang thực hiện') {
           color = 'purple';
-        } else if (text === 'Đã nghiệm thu') {
+        } else if (text === 'Đã hoàn thành') {
           color = 'green';
         }
         return <Tag color={color}><Tooltip title={text}>{text}</Tooltip></Tag>;

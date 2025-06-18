@@ -118,3 +118,13 @@ export const addDocumentToProject = async (projectId : string, documentId : stri
     }
 }
 
+export const endingProject = async (projectId : string) =>{
+     try {
+        const res = await api.patch(`/project/ending/${projectId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
+
+

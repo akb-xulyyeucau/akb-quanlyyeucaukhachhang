@@ -5,6 +5,7 @@ const steps = [
   {
     title: 'First',
     content: 'First-content',
+    data : "he"
   },
   {
     title: 'Second',
@@ -29,7 +30,7 @@ const PhaseProject: React.FC = () => {
   };
 
   const items = steps.map((item) => ({ key: item.title, title: item.title }));
-
+  
   const contentStyle: React.CSSProperties = {
     lineHeight: '260px',
     textAlign: 'center',

@@ -32,6 +32,8 @@ const User = () => {
   const debouncedIsActive = useDebounce(isActive, 400);
   const [viewUser, setViewUser] = useState<any>(null);
   const [openView, setOpenView] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -212,24 +214,41 @@ const User = () => {
     setLoading(true);
     try {
       const res = await createUser(values);
-      if (res.success) {
-        message.success(res.message);
-        fetchUsers();
-      } else {
-        message.error(res.message);
+      if (!res.success) {
+        setOpen(true); // Keep modal open
+        setIsError(true);
+        setErrorMessage(res.message);
+        return; // Stop execution
       }
+      // Success case
+      message.success(res.message);
+      fetchUsers();
+      setOpen(false); // Close modal
+      setIsError(false); // Clear error state
+      setErrorMessage(''); // Clear error message
     } catch (error: any) {
-      message.error(error.message);
+      setOpen(true);
+      setIsError(true);
+      setErrorMessage(error.message);
     } finally {
       setLoading(false);
-      setOpen(false);
+      // setIsError(false);
+      // setErrorMessage('');
     }
   };
-
   const showView = (record: any) => {
     setViewUser(record);
     setOpenView(true);
   };
+  const handleCloseModal = () => {
+    setOpen(false);
+    setIsError(false); // Reset trạng thái lỗi
+    setErrorMessage(''); // Reset thông báo lỗi
+  };
+  const handleResetError = () => {
+  setIsError(false);
+  setErrorMessage('');
+};
 
   return (
     <div>
@@ -317,11 +336,14 @@ const User = () => {
         open={open}
         onOk={handleAddUser}
         onCancel={() => setOpen(false)}
+        isError={isError}
+        errorMessage={errorMessage}
+        onResetError={handleResetError}
       />
       <ModalUserDetail
         open={openView}
         user={viewUser}
-        onCancel={() => setOpenView(false)}
+        onCancel={handleCloseModal}
         onRefreshData={fetchUsers}
       />
     </div>

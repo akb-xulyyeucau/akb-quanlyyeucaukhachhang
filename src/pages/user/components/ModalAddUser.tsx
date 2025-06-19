@@ -40,7 +40,7 @@ const ModalAddUser = ({ open, onOk, onCancel }: ModalAddUserProps) => {
       }}
       okText={t('modal_add_user.ok_text')}
       cancelText={t('modal_add_user.cancel_text')}
-      destroyOnClose
+      destroyOnHidden 
     >
       <Form
         form={form}

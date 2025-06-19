@@ -241,7 +241,7 @@ const User = () => {
     setOpenView(true);
   };
   const handleCloseModal = () => {
-    setOpen(false);
+    setOpenView(false);
     setIsError(false); // Reset trạng thái lỗi
     setErrorMessage(''); // Reset thông báo lỗi
   };

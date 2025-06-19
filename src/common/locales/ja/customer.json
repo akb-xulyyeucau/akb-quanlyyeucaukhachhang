@@ -1,22 +1,22 @@
 {
-    "customer": {
-        "title": "顧客管理",
-        "add": "顧客を追加",
-        "edit": "顧客を編集",
-        "delete": "顧客を削除",
-        "view": "顧客を表示",
-        "search": "顧客を検索", 
-        "name": "顧客名",
-        "email": "メール",
-        "phone": "電話番号",
-        "address": "住所",
-        "status": {
-            "active": "アクティブ",
-            "inactive": "非アクティブ"
+    "customer_page": {
+        "table": {
+            "stt": "番号",
+            "alias": "エイリアス",
+            "name": "顧客名",
+            "email": "メールアドレス",
+            "phone": "電話番号",
+            "company": "会社名",
+            "address": "住所",
+            "function": "機能",
+            "detail_function": "詳細",
+            "delete_function": "削除"
         },
-        "actions": {
-            "save": "保存",
-            "cancel": "キャンセル" 
-        }
+        "search_placeholder": "名前で検索",
+        "sort_by_name": "名前でソート",
+        "sort_by_alias": "エイリアスでソート",
+        "sort_asc": "昇順",
+        "sort_desc": "降順"
+      
     }
 }

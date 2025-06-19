@@ -1,5 +1,21 @@
 {
-    "customer": {
-      
-        }
+    "customer_page": {
+        "table": {
+            "stt": "STT",
+            "alias": "Mã",
+            "name": "Tên khách hàng",
+            "email": "Email liên hệ",
+            "phone": "Số điện thoại",
+            "company": "Công ty",
+            "address": "Địa chỉ",
+            "function": "Chức năng",
+            "detail_function": "Chi tiết",
+            "delete_function": "Xóa"
+    }
+        },
+        "search_placeholder": "Tìm kiếm theo tên",
+        "sort_by_name": "Sắp xếp theo tên",
+        "sort_by_alias": "Sắp xếp theo mã",
+        "sort_asc": "Tăng dần",
+        "sort_desc": "Giảm dần"
     }

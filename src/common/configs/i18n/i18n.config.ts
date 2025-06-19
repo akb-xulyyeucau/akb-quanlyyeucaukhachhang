@@ -8,6 +8,8 @@ import jaMainLayout from '../../locales/ja/mainLayout.json';
 import viMainlayout from '../../locales/vi/mainLayout.json';
 import jaUser from '../../locales/ja/user.json';
 import viUser from '../../locales/vi/user.json';
+import jaCustomer from '../../locales/ja/customer.json';
+import viCustomer from '../../locales/vi/customer.json';
 
 const savedLanguage = localStorage.getItem('language') || 'vi';
 
@@ -19,14 +21,16 @@ i18n
         common: viCommon,
         login : viLogin,
         mainLayout : viMainlayout,
-        user : viUser
+        user : viUser,
+        customer : viCustomer
         // login: viLogin,
       },
       ja: {
         common: jaCommon,
         login : jaLogin,
         mainLayout : jaMainLayout,
-        user : jaUser
+        user : jaUser,
+        customer : jaCustomer
         // login: jaLogin,
       },
     },

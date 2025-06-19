@@ -93,7 +93,7 @@ const handleDelete = (record: ICustomer) => {
   };
   const columns: ColumnsType<ICustomer> = [
     {
-      title: 'STT',
+      title: t('customer_page.table.stt'),
       dataIndex: 'stt',
       key: 'stt',
       render: (_: any, __: any, idx: number) => (page - 1) * limit + idx + 1,
@@ -101,7 +101,7 @@ const handleDelete = (record: ICustomer) => {
       width: 60,
     },
     {
-      title: 'Mã',
+      title: t('customer_page.table.alias'),
       dataIndex: 'alias',
       key: 'alias',
       align: 'center',
@@ -110,7 +110,7 @@ const handleDelete = (record: ICustomer) => {
 
     },
     {
-      title: 'Tên khách hàng',
+      title: t('customer_page.table.name'),
       dataIndex: 'name',
       key: 'name',
       align: 'center',
@@ -119,35 +119,35 @@ const handleDelete = (record: ICustomer) => {
 
     },
     {
-      title: 'Email liên hệ',
+      title:t('customer_page.table.email'),
       dataIndex: 'emailContact',
       key: 'emailContact',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Số điện thoại',
+      title: t('customer_page.table.phone'),
       dataIndex: 'phoneContact',
       key: 'phoneContact',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Công ty',
+      title: t('customer_page.table.company'),
       dataIndex: 'companyName',
       key: 'companyName',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Địa chỉ',
+      title: t('customer_page.table.address'),
       dataIndex: 'address',
       key: 'address',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Chức năng',
+      title:  t('customer_page.table.function'),
       key: 'action',
       align: 'center',
       width: 200,
@@ -159,7 +159,7 @@ const handleDelete = (record: ICustomer) => {
             onClick={() => handleEdit(record)}
             size="small"
           >
-            Chi tiết
+             {t('customer_page.table.detail_function')}
           </Button>
           <Button
             type="default"
@@ -168,7 +168,7 @@ const handleDelete = (record: ICustomer) => {
             onClick={() => handleDelete(record)}
             size="small"
           >
-            Xóa
+             {t('customer_page.table.delete_function')}
           </Button>
         </Space>
       ),
@@ -179,17 +179,18 @@ const handleDelete = (record: ICustomer) => {
     <div>
       <Space style={{ marginBottom: 16 }}>
         <Input
-          placeholder="Tìm kiếm theo tên"
-          value={search}
-          onChange={e => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          allowClear
-          style={{ width: 200 }}
-        />
+  placeholder="Tìm kiếm theo tên"
+  value={search}
+  onChange={(e) => {
+    setSearch(e.target.value);
+    setPage(1);
+  }}
+  allowClear
+  style={{ width: 200 }}
+/>
         <Select value={sortBy} onChange={v => setSortBy(v)} style={{ width: 150 }}>
-          <Option value="alias">Sắp xếp theo mã</Option>
+          <Option value="alias">Sắp xếp theo mã
+          </Option>
           <Option value="name">Sắp xếp theo tên</Option>
         </Select>
         <Select value={sort} onChange={v => setSort(v)} style={{ width: 150 }}>

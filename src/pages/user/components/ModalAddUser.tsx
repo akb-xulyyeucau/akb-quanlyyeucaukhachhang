@@ -1,5 +1,6 @@
 import { Modal, Form, Input, Select } from "antd";
 import { useTranslation } from 'react-i18next';
+import { useEffect } from "react";
 
 const { Option } = Select;
 
@@ -12,6 +13,12 @@ interface ModalAddUserProps {
 const ModalAddUser = ({ open, onOk, onCancel }: ModalAddUserProps) => {
   const { t } = useTranslation('user');
   const [form] = Form.useForm();
+
+  useEffect(() => {
+  if (open) {
+    form.resetFields();
+  }
+}, [open]);
 
   const handleOk = async () => {
     try {
@@ -33,7 +40,7 @@ const ModalAddUser = ({ open, onOk, onCancel }: ModalAddUserProps) => {
       }}
       okText={t('modal_add_user.ok_text')}
       cancelText={t('modal_add_user.cancel_text')}
-      destroyOnHidden
+      destroyOnClose
     >
       <Form
         form={form}

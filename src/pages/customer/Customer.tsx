@@ -6,6 +6,7 @@ import { getCustomerPanition , updateCustomerById , deleteCustomerById , updateU
 import { useDebounce } from '../../common/hooks/useDebounce';
 import { DeleteOutlined , EyeOutlined } from '@ant-design/icons';
 import ModalProfileForm from '../user/components/ModalProfileForm';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 

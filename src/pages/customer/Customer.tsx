@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 const { Option } = Select;
 
 const Customer = () => {
+  const { t } = useTranslation('customer');
   const [customers, setCustomers] = useState<ICustomer[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);

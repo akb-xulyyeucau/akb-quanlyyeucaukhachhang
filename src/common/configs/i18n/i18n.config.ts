@@ -32,7 +32,7 @@ i18n
     },
     lng: savedLanguage,
     fallbackLng: 'vi',
-    ns: ['common', 'login' , 'mainLayout' , 'user'], // Định nghĩa các namespace
+    ns: ['common', 'login' , 'mainLayout' , 'user','customer'], // Định nghĩa các namespace
     defaultNS: 'common', // Namespace mặc định
     interpolation: {
       escapeValue: false,

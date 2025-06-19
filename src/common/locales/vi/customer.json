@@ -1,22 +1,5 @@
 {
     "customer": {
-        "title": "Khách hàng",
-        "add": "Thêm khách hàng",
-        "edit": "Chỉnh sửa khách hàng",
-        "delete": "Xóa khách hàng",
-        "view": "Xem khách hàng",
-        "search": "Tìm kiếm khách hàng",
-        "name": "Tên khách hàng",
-        "email": "Email",
-        "phone": "Số điện thoại",
-        "address": "Địa chỉ",
-        "status": {
-        "active": "Hoạt động",
-        "inactive": "Không hoạt động"
-        },
-        "actions": {
-        "save": "Lưu",
-        "cancel": "Hủy bỏ"
+      
         }
     }
-}

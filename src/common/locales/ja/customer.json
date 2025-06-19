@@ -1,6 +1,6 @@
 {
     "customer": {
-        "title": "Khách hàng",
+        "title": "顧客管理",
         "add": "顧客を追加",
         "edit": "顧客を編集",
         "delete": "顧客を削除",

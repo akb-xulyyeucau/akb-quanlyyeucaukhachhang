@@ -144,7 +144,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
 
   return (
     <Modal
-      title= {t('ModalApproveProject.ProjectDetail.title')}
+      title= {t('ModalApproveProject.projectDetail.title')}
       open={isOpen}
       onCancel={onClose}
       onOk={handleApprove}
@@ -183,7 +183,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
           </Descriptions>
 
           <Typography.Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>
-            Danh sách tài liệu
+            {t('ModalApproveProject.documents.title')}
           </Typography.Title>
           
           <Table 

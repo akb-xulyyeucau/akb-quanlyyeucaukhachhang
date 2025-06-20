@@ -24,7 +24,7 @@
 
         },
         "createProjectRequest": "Tạo yêu cầu dự án",
-        "createProjectsuccess": "Tạo dự án thành công",
+        "createProjectSuccess": "Tạo dự án thành công",
         "createProjectError": "Có lỗi xảy ra khi tạo dự án",
         "getProjectsError": "Có lỗi xảy ra khi lấy danh sách dự án"
     } ,
@@ -64,6 +64,7 @@
             "approve": "Duyệt"
         },
         "documents": {
+            "title": "Danh sách tài liệu",
             "name": "Tên tài liệu",
             "day": "Ngày tạo",
             "files": "Số lượng file",

@@ -1,7 +1,7 @@
 {
     "pjRequest_page": {
         "table": {
-            "stt": "No.",
+            "stt": "番号",
             "alias": "コード",
             "name": "プロジェクト名",
             "customer": "顧客名",
@@ -23,7 +23,7 @@
             "deleteError": "プロジェクトの削除中にエラーが発生しました"
         },
         "createProjectRequest": "プロジェクト要求を作成する",
-        "createProjectsuccess": "プロジェクトの作成に成功しました",
+        "createProjectSuccess": "プロジェクトの作成に成功しました",
         "createProjectError": "プロジェクトの作成中にエラーが発生しました",
         "getProjectsError": "プロジェクトリストの取得中にエラーが発生しました"
     },
@@ -63,6 +63,7 @@
             "approve": "承認"
         },
         "documents": {
+            "title": "ドキュメント一覧",
             "name": "ドキュメント名",
             "day": "作成日",
             "files": "ファイル数",

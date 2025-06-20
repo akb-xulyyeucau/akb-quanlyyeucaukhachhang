@@ -66,3 +66,38 @@ export interface IReportTable {
     day: Date,
 }
 
+export interface IReport {
+    _id : string ,
+    projectId : {
+        _id: string,
+        name: string,
+        alias: string
+    },
+    mainContent : string,
+    sender : {
+        _id: string;
+        email: string;
+        role: string;
+        alias: string;
+    },
+    day : Date | string,
+    subContent : Array<ISubContent>,
+    createdAt : Date | string,
+    updatedAt : Date | string,
+    __v?: number
+}
+
+export interface ISubContent {
+    _id?: string,
+    contentName: string,
+    files?: Array<IFile>,
+    fileIndices?: number[]
+}
+
+export interface IPayloadReport {
+    projectId : string,
+    mainContent : string,
+    sender : string,
+    day : Date | string,
+    subContent : Array<ISubContent>,
+}

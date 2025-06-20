@@ -6,10 +6,12 @@ import { getCustomerPanition , updateCustomerById , deleteCustomerById , updateU
 import { useDebounce } from '../../common/hooks/useDebounce';
 import { DeleteOutlined , EyeOutlined } from '@ant-design/icons';
 import ModalProfileForm from '../user/components/ModalProfileForm';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
 const Customer = () => {
+  const { t } = useTranslation('customer');
   const [customers, setCustomers] = useState<ICustomer[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -57,14 +59,14 @@ const Customer = () => {
       if (editingCustomer?._id) {
         await updateCustomerById(editingCustomer._id, values);
       } else {
-        throw new Error('Không tìm thấy ID khách hàng để cập nhật.');
+        throw new Error(t('updateCustomer.findIdtoUpdate_error'));
       }
-      message.success('Cập nhật khách hàng thành công!');
+      message.success(t('updateCustomer.updateSuccess'));
       setOpenProfileModal(false);
       setEditingCustomer(null);
       fetchCustomers();
     } catch (err: any) {
-      message.error('Cập nhật thất bại!');
+      message.error(t('updateCustomer.updateEror'));
     } finally {
       setProfileLoading(false);
     }
@@ -72,26 +74,26 @@ const Customer = () => {
 
 const handleDelete = (record: ICustomer) => {
     Modal.confirm({
-      title: 'Xác nhận xóa khách hàng?',
-      content: 'Bạn có chắc chắn muốn xóa khách hàng này không?',
-      okText: 'Xóa',
+      title: t('handleDelete.title_confirm'),
+      content:  t('handleDelete.content_confirm'),
+      okText:  t('handleDelete.okText'),
       okType: 'danger',
-      cancelText: 'Hủy',
+      cancelText:  t('handleDelete.cancelText'),
       onOk: async () => {
         try {
           await deleteCustomerById(record._id);
           await updateUserActive(record.userId, false);
-          message.success('Đã xóa khách hàng!');
+          message.success( t('handleDelete.success_message'));
           fetchCustomers();
         } catch (err: any) {
-          message.error('Xóa thất bại!');
+          message.error( t('handleDelete.error_message'));
         }
       },
     });
   };
   const columns: ColumnsType<ICustomer> = [
     {
-      title: 'STT',
+      title: t('customer_page.table.stt'),
       dataIndex: 'stt',
       key: 'stt',
       render: (_: any, __: any, idx: number) => (page - 1) * limit + idx + 1,
@@ -99,7 +101,7 @@ const handleDelete = (record: ICustomer) => {
       width: 60,
     },
     {
-      title: 'Mã',
+      title: t('customer_page.table.alias'),
       dataIndex: 'alias',
       key: 'alias',
       align: 'center',
@@ -108,7 +110,7 @@ const handleDelete = (record: ICustomer) => {
 
     },
     {
-      title: 'Tên khách hàng',
+      title: t('customer_page.table.name'),
       dataIndex: 'name',
       key: 'name',
       align: 'center',
@@ -117,35 +119,35 @@ const handleDelete = (record: ICustomer) => {
 
     },
     {
-      title: 'Email liên hệ',
+      title:t('customer_page.table.email'),
       dataIndex: 'emailContact',
       key: 'emailContact',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Số điện thoại',
+      title: t('customer_page.table.phone'),
       dataIndex: 'phoneContact',
       key: 'phoneContact',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Công ty',
+      title: t('customer_page.table.company'),
       dataIndex: 'companyName',
       key: 'companyName',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Địa chỉ',
+      title: t('customer_page.table.address'),
       dataIndex: 'address',
       key: 'address',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: 'Chức năng',
+      title:  t('customer_page.table.function'),
       key: 'action',
       align: 'center',
       width: 200,
@@ -157,7 +159,7 @@ const handleDelete = (record: ICustomer) => {
             onClick={() => handleEdit(record)}
             size="small"
           >
-            Chi tiết
+             {t('customer_page.table.detail_function')}
           </Button>
           <Button
             type="default"
@@ -166,7 +168,7 @@ const handleDelete = (record: ICustomer) => {
             onClick={() => handleDelete(record)}
             size="small"
           >
-            Xóa
+             {t('customer_page.table.delete_function')}
           </Button>
         </Space>
       ),
@@ -177,22 +179,25 @@ const handleDelete = (record: ICustomer) => {
     <div>
       <Space style={{ marginBottom: 16 }}>
         <Input
-          placeholder="Tìm kiếm theo tên"
-          value={search}
-          onChange={e => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-          allowClear
-          style={{ width: 200 }}
-        />
+  placeholder={t('customer_page.search_placeholder')}
+  value={search}
+  onChange={(e) => {
+    setSearch(e.target.value);
+    setPage(1);
+  }}
+  allowClear
+  style={{ width: 200 }}
+/>
         <Select value={sortBy} onChange={v => setSortBy(v)} style={{ width: 150 }}>
-          <Option value="alias">Sắp xếp theo mã</Option>
-          <Option value="name">Sắp xếp theo tên</Option>
+          <Option value="alias">{t('customer_page.sort_by_alias')}
+          </Option>
+          <Option value="name">{t('customer_page.sort_by_name')}</Option>
         </Select>
-        <Select value={sort} onChange={v => setSort(v)} style={{ width: 150 }}>
-          <Option value="asc">Tăng dần</Option>
-          <Option value="desc">Giảm dần</Option>
+        <Select value={sort} 
+        onChange={v => setSort(v)} 
+        style={{ width: 150 }}>
+          <Option value="asc">{t('customer_page.sort_asc')}</Option>
+          <Option value="desc">{t('customer_page.sort_desc')}</Option>
         </Select>
       </Space>
       <Table

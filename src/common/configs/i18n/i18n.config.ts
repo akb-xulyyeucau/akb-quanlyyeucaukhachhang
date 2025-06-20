@@ -10,6 +10,9 @@ import jaUser from '../../locales/ja/user.json';
 import viUser from '../../locales/vi/user.json';
 import jaCustomer from '../../locales/ja/customer.json';
 import viCustomer from '../../locales/vi/customer.json';
+import jaProjectRequest from '../../locales/ja/projectRequest.json';
+import viProjectRequest from '../../locales/vi/projectRequest.json';
+
 
 
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -23,7 +26,8 @@ i18n
         login : viLogin,
         mainLayout : viMainlayout,
         user : viUser,
-        customer : viCustomer
+        customer : viCustomer,
+        projectRequest: viProjectRequest,
         // login: viLogin,
       },
       ja: {
@@ -31,13 +35,14 @@ i18n
         login : jaLogin,
         mainLayout : jaMainLayout,
         user : jaUser,
-        customer : jaCustomer
+        customer : jaCustomer,
+        projectRequest: jaProjectRequest,
         // login: jaLogin,
       },
     },
     lng: savedLanguage,
     fallbackLng: 'vi',
-    ns: ['common', 'login' , 'mainLayout' , 'user','customer'], // Định nghĩa các namespace
+    ns: ['common', 'login' , 'mainLayout' , 'user','customer', 'projectRequest'], // Định nghĩa các namespace
     defaultNS: 'common', // Namespace mặc định
     interpolation: {
       escapeValue: false,

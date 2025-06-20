@@ -8,6 +8,8 @@ import { autoSeachCustomer, autoSearchPm } from '../services/project.service';
 import { useDebounce } from '../../../common/hooks/useDebounce';
 import { useSelector } from 'react-redux';
 import { selectUserRole, selectUserProfile } from '../../../common/stores/auth/authSelector';
+import { useTranslation } from 'react-i18next';
+
 interface ICustomer {
   _id: string;
   name: string;
@@ -26,6 +28,7 @@ interface DrawerProjectFormProps {
 }
 
 const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, onSave }) => {
+  const { t } = useTranslation('projectRequest');
   const [form] = Form.useForm();
   const [documents, setDocuments] = useState<IDocument[]>([]);
   const [openModal, setOpenModal] = useState(false);
@@ -155,18 +158,18 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
 
   const documentColumns = [
     {
-      title: 'Tên tài liệu',
+      title: t('DrawerProjectForm.upedDoc_name'),
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Ngày',
+      title: t('DrawerProjectForm.upedDoc_Day'),
       dataIndex: 'day',
       key: 'day',
       render: (day: Date) => dayjs(day).format('DD/MM/YYYY'),
     },
     {
-      title: 'Số tệp',
+      title: t('DrawerProjectForm.upedDoc_files'),
       dataIndex: 'files',
       key: 'files',
       render: (files: any[]) => files.length,
@@ -175,7 +178,7 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
 
   return (
     <Drawer
-      title="Tạo yêu cầu dự án mới"
+      title= {t('DrawerProjectForm.drawertitle')}
       width={720}
       onClose={handleClose}
       open={open}
@@ -186,14 +189,14 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
             onClick={handleClose} 
             icon={<CloseOutlined />}
           >
-            Đóng
+            {t('DrawerProjectForm.close')}
           </Button>
           <Button 
             onClick={handleSave} 
             type="primary"
             icon={<SaveOutlined />}
           >
-            Tạo yêu cầu dự án mới
+            {t('DrawerProjectForm.drawertitle')}
           </Button>
         </div>
       }
@@ -201,20 +204,20 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
       <Form layout="vertical" form={form}>
         <Form.Item
           name="name"
-          label="Tên dự án"
-          rules={[{ required: true, message: 'Vui lòng nhập tên dự án!' }]}
+          label= {t('DrawerProjectForm.pjname')}
+          rules={[{ required: true, message: t('DrawerProjectForm.pjname_required') }]}
         >
-          <Input placeholder="Nhập tên dự án" />
+          <Input placeholder= {t('DrawerProjectForm.pjname_placeholder')} />
         </Form.Item>
 
         <Form.Item
           name="pm"
-          label="Quản lý dự án"
-          rules={[{ required: true, message: 'Vui lòng chọn quản lý dự án!' }]}
+          label= {t('DrawerProjectForm.PM')}
+          rules={[{ required: true, message: t('DrawerProjectForm.PM_required') }]}
         >
           <Select
             showSearch
-            placeholder="Chọn PM"
+            placeholder= {t('DrawerProjectForm.PM_placeholder')}
             optionFilterProp="children"
             options={pmOptions}
             onSearch={handleSearchPm}
@@ -228,8 +231,8 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
 
         <Form.Item
           name="customer"
-          label="Khách hàng"
-          rules={[{ required: true, message: 'Vui lòng chọn khách hàng!' }]}
+          label= {t('DrawerProjectForm.customer')}
+          rules={[{ required: true, message: t('DrawerProjectForm.customer_required') }]}
         >
           {isCustomerRole ? (
             <Select
@@ -242,7 +245,7 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
           ) : (
             <Select
               showSearch
-              placeholder="Tìm kiếm khách hàng"
+              placeholder= {t('DrawerProjectForm.customer_placeholder')}
               optionFilterProp="children"
               options={customerOptions}
               onSearch={handleSearch}
@@ -257,15 +260,15 @@ const DrawerProjectForm: React.FC<DrawerProjectFormProps> = ({ open, onClose, on
 
         <Form.Item
           name="day"
-          label="Ngày bắt đầu"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu!' }]}
+          label= {t('DrawerProjectForm.startDate')}
+          rules={[{ required: true, message: t('DrawerProjectForm.startDate_required') }]}
         >
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
 
-        <Form.Item label="Tài liệu">
+        <Form.Item label= {t('DrawerProjectForm.document')}>
           <Button icon={<PlusOutlined />} onClick={() => setOpenModal(true)}>
-            Thêm tài liệu
+            {t('DrawerProjectForm.addDocument')}
           </Button>
           <Table
             rowKey={(record) => record.name}

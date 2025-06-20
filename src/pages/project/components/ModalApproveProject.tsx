@@ -11,6 +11,7 @@ import {
 import { getProjectById } from '../services/project.service';
 import { downloadFile } from '../services/document.service';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 interface ModalApproveProjectProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
   onApprove,
   projectId
 }) => {
+  const { t } = useTranslation('projectRequest');
   const [projectData, setProjectData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [approving, setApproving] = useState<boolean>(false);
@@ -40,7 +42,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
           }
         } catch (error) {
           console.error('Lỗi khi lấy thông tin dự án:', error);
-          message.error('Có lỗi xảy ra khi lấy thông tin dự án');
+          message.error(t('ModalApproveProject.getProjectInforError'));
         } finally {
           setLoading(false);
         }
@@ -83,7 +85,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
       window.URL.revokeObjectURL(url);
     } catch (error: any) {
       console.error('Lỗi khi tải file:', error);
-      message.error('Có lỗi xảy ra khi tải file');
+      message.error(t('ModalApproveProject.dowFileError'));
     }
   };
 
@@ -91,11 +93,11 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
     setApproving(true);
     try {
       await onApprove(projectData._id);
-      message.success('Duyệt dự án thành công');
+      message.success(t('ModalApproveProject.approveSuccess'));
       onClose();
     } catch (error) {
       console.error('Lỗi khi duyệt dự án:', error);
-      message.error('Có lỗi xảy ra khi duyệt dự án');
+      message.error(t('ModalApproveProject.approveError'));
     } finally {
       setApproving(false);
     }
@@ -103,29 +105,29 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
 
   const documentColumns = [
     {
-      title: 'Tên tài liệu',
+      title: t('ModalApproveProject.documents.name'),
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Ngày tạo',
+      title: t('ModalApproveProject.documents.day'),
       dataIndex: 'day',
       key: 'day',
       render: (date: string) => dayjs(date).format('DD/MM/YYYY')
     },
     {
-      title: 'Số lượng file',
+      title: t('ModalApproveProject.documents.files'),
       dataIndex: 'files',
       key: 'fileCount',
       render: (files: any[]) => files.length
     },
     {
-      title: 'Chi tiết',
+      title: t('ModalApproveProject.documents.detail'),
       key: 'action',
       render: (_: any, record: any) => (
         <Space direction="vertical" style={{ width: '100%' }}>
           {record.files.map((file: any, index: number) => (
-            <Tooltip title="Nhấn để tải xuống" key={index}>
+            <Tooltip title={t('ModalApproveProject.documents.detailHover')} key={index}>
               <Typography.Link onClick={() => handleDownload(file)}>
                 <Space>
                   {getFileIcon(file.originalName)}
@@ -142,7 +144,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
 
   return (
     <Modal
-      title="Chi tiết dự án"
+      title= {t('ModalApproveProject.ProjectDetail.title')}
       open={isOpen}
       onCancel={onClose}
       onOk={handleApprove}
@@ -150,7 +152,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
       confirmLoading={approving}
       footer={[
         <Button key="cancel" icon={<CloseCircleOutlined />} onClick={onClose}>
-          Hủy
+          {t('ModalApproveProject.projectDetail.cancel')}
         </Button>,
         <Button 
           key="save" 
@@ -159,7 +161,7 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
           onClick={handleApprove}
           loading={approving}
         >
-          Duyệt
+          {t('ModalApproveProject.projectDetail.approve')}
         </Button>
       ]}
     >
@@ -170,14 +172,14 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
       ) : projectData && (
         <>
           <Descriptions bordered column={2}>
-            <Descriptions.Item label="Mã dự án">{projectData.alias}</Descriptions.Item>
-            <Descriptions.Item label="Tên dự án">{projectData.name}</Descriptions.Item>
-            <Descriptions.Item label="Quản lý dự án">{projectData.pm.name}</Descriptions.Item>
-            <Descriptions.Item label="Email quản lý dự án">{projectData.pm.emailContact}</Descriptions.Item>
-            <Descriptions.Item label="Khách hàng">{projectData.customer.name}</Descriptions.Item>
-            <Descriptions.Item label="Email khách hàng">{projectData.customer.emailContact}</Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">{projectData.status}</Descriptions.Item>
-            <Descriptions.Item label="Ngày dự kiến">{dayjs(projectData.day).format('DD/MM/YYYY')}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.alias')}>{projectData.alias}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.name')}>{projectData.name}</Descriptions.Item>
+            <Descriptions.Item label= {t('ModalApproveProject.projectDetail.PM')}>{projectData.pm.name}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.PMEmail')}>{projectData.pm.emailContact}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.customer')}>{projectData.customer.name}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.customerEmail')}>{projectData.customer.emailContact}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.status')}>{projectData.status}</Descriptions.Item>
+            <Descriptions.Item label={t('ModalApproveProject.projectDetail.startDate')}>{dayjs(projectData.day).format('DD/MM/YYYY')}</Descriptions.Item>
           </Descriptions>
 
           <Typography.Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>

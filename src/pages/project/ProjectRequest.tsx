@@ -24,7 +24,7 @@ const getTempDocumentIds = (): string[] => {
 };
 
 const CustomerProject = () => {
-  const { t } = useTranslation('projectRequest');
+  const { t,  i18n } = useTranslation('projectRequest');
   const [projects, setProjects] = useState<IProject[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -201,7 +201,13 @@ const CustomerProject = () => {
           case false : color = "warning" ; break;
           default : color = "default" 
         }
-        return <Tag color= {color}> <Tooltip title={record.status}>{record.status}</Tooltip></Tag>
+        let statusText = "";
+        if(i18n.language === 'vi') {
+          statusText = "Chưa kích hoạt";
+        }else{
+          statusText = "未有効";
+        }
+        return <Tag color= {color}> <Tooltip title= {statusText}>{statusText}</Tooltip></Tag>
       },
     },
     {

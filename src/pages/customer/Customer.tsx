@@ -59,14 +59,14 @@ const Customer = () => {
       if (editingCustomer?._id) {
         await updateCustomerById(editingCustomer._id, values);
       } else {
-        throw new Error('Không tìm thấy ID khách hàng để cập nhật.');
+        throw new Error(t('updateCustomer.findIdtoUpdate_error'));
       }
-      message.success('Cập nhật khách hàng thành công!');
+      message.success(t('updateCustomer.updateSuccess'));
       setOpenProfileModal(false);
       setEditingCustomer(null);
       fetchCustomers();
     } catch (err: any) {
-      message.error('Cập nhật thất bại!');
+      message.error(t('updateCustomer.updateEror'));
     } finally {
       setProfileLoading(false);
     }
@@ -74,19 +74,19 @@ const Customer = () => {
 
 const handleDelete = (record: ICustomer) => {
     Modal.confirm({
-      title: 'Xác nhận xóa khách hàng?',
-      content: 'Bạn có chắc chắn muốn xóa khách hàng này không?',
-      okText: 'Xóa',
+      title: t('handleDelete.title_confirm'),
+      content:  t('handleDelete.content_confirm'),
+      okText:  t('handleDelete.okText'),
       okType: 'danger',
-      cancelText: 'Hủy',
+      cancelText:  t('handleDelete.cancelText'),
       onOk: async () => {
         try {
           await deleteCustomerById(record._id);
           await updateUserActive(record.userId, false);
-          message.success('Đã xóa khách hàng!');
+          message.success( t('handleDelete.success_message'));
           fetchCustomers();
         } catch (err: any) {
-          message.error('Xóa thất bại!');
+          message.error( t('handleDelete.error_message'));
         }
       },
     });
@@ -179,7 +179,7 @@ const handleDelete = (record: ICustomer) => {
     <div>
       <Space style={{ marginBottom: 16 }}>
         <Input
-  placeholder="Tìm kiếm theo tên"
+  placeholder={t('customer_page.search_placeholder')}
   value={search}
   onChange={(e) => {
     setSearch(e.target.value);
@@ -189,13 +189,15 @@ const handleDelete = (record: ICustomer) => {
   style={{ width: 200 }}
 />
         <Select value={sortBy} onChange={v => setSortBy(v)} style={{ width: 150 }}>
-          <Option value="alias">Sắp xếp theo mã
+          <Option value="alias">{t('customer_page.sort_by_alias')}
           </Option>
-          <Option value="name">Sắp xếp theo tên</Option>
+          <Option value="name">{t('customer_page.sort_by_name')}</Option>
         </Select>
-        <Select value={sort} onChange={v => setSort(v)} style={{ width: 150 }}>
-          <Option value="asc">Tăng dần</Option>
-          <Option value="desc">Giảm dần</Option>
+        <Select value={sort} 
+        onChange={v => setSort(v)} 
+        style={{ width: 150 }}>
+          <Option value="asc">{t('customer_page.sort_asc')}</Option>
+          <Option value="desc">{t('customer_page.sort_desc')}</Option>
         </Select>
       </Space>
       <Table

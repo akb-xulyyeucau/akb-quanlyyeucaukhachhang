@@ -9,6 +9,7 @@ import viMainlayout from '../../locales/vi/mainLayout.json';
 import jaUser from '../../locales/ja/user.json';
 import viUser from '../../locales/vi/user.json';
 
+
 const savedLanguage = localStorage.getItem('language') || 'vi';
 
 i18n
@@ -32,7 +33,7 @@ i18n
     },
     lng: savedLanguage,
     fallbackLng: 'vi',
-    ns: ['common', 'login' , 'mainLayout' , 'user'], // Định nghĩa các namespace
+    ns: ['common', 'login' , 'mainLayout' , 'user' ], // Định nghĩa các namespace
     defaultNS: 'common', // Namespace mặc định
     interpolation: {
       escapeValue: false,

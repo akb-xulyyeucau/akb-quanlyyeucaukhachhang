@@ -244,7 +244,7 @@ const ProjectDetail = () => {
             
             <Descriptions.Item label="Quản lý dự án">
               <div>
-                <div>{project?.pm?.name}</div>
+                <Tag color='blue'> <div>{project?.pm?.name}</div></Tag>
                 <ContactInfo 
                   email={project?.pm?.emailContact} 
                   phone={project?.pm?.phoneContact}
@@ -254,9 +254,9 @@ const ProjectDetail = () => {
             
             <Descriptions.Item label="Khách hàng">
               <div>
-                <div>{project?.customer?.name}</div>
-                <ContactInfo 
-                  email={project?.customer?.emailContact} 
+                <Tag color='green'> <div>{project?.customer?.name}</div></Tag>
+                <ContactInfo
+                  email={project?.customer?.emailContact}
                   phone={project?.customer?.phoneContact}
                 />
               </div>
@@ -296,7 +296,8 @@ const ProjectDetail = () => {
                  <Title level={3}>Tiến dộ dự án {project?.name}</Title>
             </Space>
             <PhaseProject 
-              projectId={pid || ''} 
+              projectId={pid || ''}
+              projectStatus= {project?.status || ''}
               onEndingProject={showEndingPhaseConfirm} 
             />
           </div>

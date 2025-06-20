@@ -10,7 +10,7 @@ import DrawerProjectForm from './components/DrawerProjectForm';
 import ModalApproveProject from './components/ModalApproveProject';
 import { useSelector } from 'react-redux';
 import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
-
+import { useTranslation } from 'react-i18next';
 
 const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
 
@@ -24,6 +24,7 @@ const getTempDocumentIds = (): string[] => {
 };
 
 const CustomerProject = () => {
+  const { t } = useTranslation('projectRequest');
   const [projects, setProjects] = useState<IProject[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -48,8 +49,8 @@ const CustomerProject = () => {
         setTotal(response.pagination?.total || response.data?.length || 0);
       }
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách dự án:', error);
-      message.error('Có lỗi xảy ra khi lấy danh sách dự án');
+      console.error('Có lỗi xảy ra khi lấy danh sách dự án:', error);
+      message.error(t('pjRequest_page.table.getProjectError'));
     } finally {
       setTableLoading(false);
     }
@@ -92,15 +93,15 @@ const CustomerProject = () => {
           }
         }
 
-        message.success('Tạo dự án thành công');
+        message.success(t('pjRequest_page.createProjectSuccess'));
         clearTempDocumentIds();
         fetchProjectData();
         setOpenDrawer(false);
       } else {
-        message.error(response.message || 'Có lỗi xảy ra khi tạo dự án');
+        message.error(response.message || t('pjRequest_page.createProjectError'));
       }
     } catch (error: any) {
-      message.error(error.message || 'Có lỗi xảy ra khi tạo dự án');
+      message.error(error.message || t('pjRequest_page.createProjectError'));
     }
   };
 
@@ -108,13 +109,13 @@ const CustomerProject = () => {
     try {
       const response = await deleteProject(projectId);
       if (response.success) {
-        message.success('Xóa dự án thành công');
+        message.success(t('pjRequest_page.table.deleteSuccess'));
         fetchProjectData();
       } else {
-        message.error(response.message || 'Có lỗi xảy ra khi xóa dự án');
+        message.error(response.message || t('pjRequest_page.table.deleteError'));
       }
     } catch (error: any) {
-      message.error(error.message || 'Có lỗi xảy ra khi xóa dự án');
+      message.error(error.message ||t('pjRequest_page.table.deleteError'));
     }
   };
 
@@ -122,25 +123,25 @@ const CustomerProject = () => {
     try {
       const res = await approveProject(projectId);
       if (res.success) {
-        message.success('Duyệt dự án thành công');
+        message.success(t('pjRequest_page.table.approveSuccess'));
       } else {
-        message.error(res.message || 'Có lỗi xảy ra khi duyệt dự án');
+        message.error(res.message ||t('pjRequest_page.table.approveError'));
       }
       await fetchProjectData();
     } catch (error: any) {
-      console.error('Lỗi khi duyệt dự án:', error);
-      message.error(error.message || 'Có lỗi xảy ra khi duyệt dự án');
+      console.error('Lỗi xảy ra khi duyệt dự án:', error);
+      message.error(error.message || t('pjRequest_page.table.approveError'));
     }
   };
 
   const showDeleteConfirm = (record: IProject) => {
     Modal.confirm({
-      title: 'Xác nhận xóa',
+      title: t('pjRequest_page.table.deletetitle'),
       icon: <ExclamationCircleOutlined />,
-      content: `Bạn có chắc chắn muốn xóa yêu cầu dự án "${record.name}" không?`,
-      okText: 'Xóa',
+      content: t('pjRequest_page.table.deleteconfirm', { name: record.name }),
+      okText: t('pjRequest_page.table.deleteok'),
       okType: 'danger',
-      cancelText: 'Hủy',
+      cancelText: t('pjRequest_page.table.deletecancel'),
       onOk() {
         handleDeleteProject(record._id);
       },
@@ -149,7 +150,7 @@ const CustomerProject = () => {
 
   const columns: ColumnsType<IProject> = [
     {
-      title: "STT",
+      title: t('pjRequest_page.table.stt'),
       dataIndex: 'stt',
       key: 'stt',
       render: (_: any, __: IProject, index: number) => (page - 1) * limit + index + 1,
@@ -157,21 +158,21 @@ const CustomerProject = () => {
       width: 60,
     },
     {
-      title: "Mã dự án",
+      title: t('pjRequest_page.table.alias'),
       dataIndex: 'alias',
       key: 'alias',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: "Tên dự án",
+      title: t('pjRequest_page.table.name'),
       dataIndex: 'name',
       key: 'name',
       align: 'center',
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title: "Khách hàng",
+      title: t('pjRequest_page.table.customer'),
       dataIndex: ['customer', 'name'],
       key: 'customer.name',
       align: 'center',
@@ -180,7 +181,7 @@ const CustomerProject = () => {
       ),
     },
     {
-      title: "Quản lý dự án",
+      title: t('pjRequest_page.table.PM'),
       dataIndex: ['pm', 'name'],
       key: 'pm.name',
       align: 'center',
@@ -189,7 +190,7 @@ const CustomerProject = () => {
       ),
     },
     {
-      title: 'Trạng thái',
+      title:  t('pjRequest_page.table.status'),
       dataIndex: 'status',
       key: 'status',
       align: 'center',
@@ -204,7 +205,7 @@ const CustomerProject = () => {
       },
     },
     {
-      title: 'Ngày bắt đầu',
+      title:t('pjRequest_page.table.startDate'),
       dataIndex: 'day',
       key: 'day',
       align: 'center',
@@ -212,7 +213,7 @@ const CustomerProject = () => {
         text ? dayjs(text).format('DD/MM/YYYY') : '',
     },
     {
-      title: 'Chức năng',
+      title: t('pjRequest_page.table.action'),
       key: 'action',
       align: 'center',
       width: 160,
@@ -225,7 +226,7 @@ const CustomerProject = () => {
               onClick={() => handleViewDetail(record)}
               size="small"
             >
-              Duyệt
+              {t('pjRequest_page.table.approve')}
             </Button>
           )}
           <Button
@@ -234,7 +235,7 @@ const CustomerProject = () => {
             onClick={() => showDeleteConfirm(record)}
             size="small"
           >
-            Xóa
+            {t('pjRequest_page.table.delete')}
           </Button>
         </div>
       ),
@@ -249,7 +250,7 @@ const CustomerProject = () => {
         style={{ marginBottom: 16 }}
         onClick={handleCreateProject}
       >
-        Tạo yêu cầu dự án
+        {t('pjRequest_page.createProjectRequest')}
       </Button>
       <Table
         rowKey="_id"

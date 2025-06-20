@@ -2,7 +2,7 @@
     "customer_page": {
         "table": {
             "stt": "番号",
-            "alias": "エイリアス",
+            "alias": "コード",
             "name": "顧客名",
             "email": "メールアドレス",
             "phone": "電話番号",

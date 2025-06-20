@@ -11,10 +11,11 @@ import PhaseFormModal from './PhaseFormModal';
 import { PlusOutlined, EditOutlined, StepForwardOutlined } from '@ant-design/icons';
 interface IPhaseProject {
   projectId: string,
+  projectStatus?: string,
   onEndingProject: (projectId: string) => void
 }
 
-const PhaseProject: React.FC<IPhaseProject> = ({ projectId, onEndingProject }) => {
+const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEndingProject }) => {
   const [phase, setPhase] = useState<IPhase>();
   const [showPhaseForm, setShowPhaseForm] = useState(false);
   const [phaseFormMode, setPhaseFormMode] = useState<'create' | 'edit'>('create');
@@ -120,11 +121,12 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, onEndingProject }) =
             icon={<EditOutlined />}
             onClick={handleEdit}
             loading={loading}
+            disabled = {projectStatus === 'Đã hoàn thành' ? true : false}
           >
             Chỉnh sửa giai đoạn
           </Button>
           {phase.currentPhase === steps.length - 1 && (
-              <Button type="primary" onClick={() => onEndingProject(projectId)}>
+              <Button type="primary" onClick={() => onEndingProject(projectId)} disabled={projectStatus === 'Đã hoàn thành'}>
                 Hoàn thành
               </Button>
             )}

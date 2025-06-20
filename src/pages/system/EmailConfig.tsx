@@ -4,6 +4,6 @@ const EmailConfig = () => {
       EmailConfig
     </div>
   )
-}
+} 
 
 export default EmailConfig

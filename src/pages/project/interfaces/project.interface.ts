@@ -58,3 +58,11 @@ export interface IPhaseItem {
     day : Date
 }
 
+export interface IReportTable {
+    _id : string,
+    projectId: string,
+    mainContent: string,
+    sender : string,
+    day: Date,
+}
+

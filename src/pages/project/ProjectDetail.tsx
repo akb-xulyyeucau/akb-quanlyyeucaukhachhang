@@ -236,7 +236,7 @@ const ProjectDetail = () => {
             
           </Space>
           <Button type="primary" icon={<CommentOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
-              Xem yêu cầu và phản hồi
+              Xem đánh giá dự án
             </Button>
           <Descriptions bordered column={2}>
             <Descriptions.Item label="Mã dự án">{project?.alias}</Descriptions.Item>
@@ -303,7 +303,9 @@ const ProjectDetail = () => {
           </div>
           <div>
             <Title level={3}>Danh sách báo cáo dự án {project?.name}</Title>
-            <ReportTable />
+            <ReportTable 
+              projectId={pid || ''}
+            />
           </div>
         </Space>
       </Card>

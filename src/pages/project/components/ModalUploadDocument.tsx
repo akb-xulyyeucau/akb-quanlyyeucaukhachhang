@@ -6,6 +6,7 @@ import type { IDocument } from '../interfaces/project.interface';
 import { useSelector } from 'react-redux';
 import { selectAuthUser, selectIsAuthenticated } from '../../../common/stores/auth/authSelector';
 import { uploadDocument } from '../services/document.service';
+import dayjs from 'dayjs';
 
 interface ModalUploadDocumentProps {
   open: boolean;
@@ -159,7 +160,9 @@ const ModalUploadDocument: React.FC<ModalUploadDocumentProps> = ({ open, onClose
         icon: <CloseOutlined /> 
       }}
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" initialValues={{
+        day: dayjs(),
+      }}>
         <Form.Item
           name="name"
           label="Tên tài liệu"

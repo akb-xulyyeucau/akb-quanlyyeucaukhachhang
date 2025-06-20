@@ -1,8 +1,9 @@
 import React , {useEffect , useState}from 'react';
-import { Space, Table, Tag } from 'antd';
+import { Button, Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
 import {getReportByProjectId} from '../services/report.service';
 import dayjs from 'dayjs';
+import { PlusOutlined } from '@ant-design/icons';
 
 interface DataType {
   key: string;
@@ -52,29 +53,31 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
     {
       title: 'Người tạo',
       dataIndex: 'sender',
-      key: 'sender.email',
-      render: (record) => <a>{record.sender }</a>,
+      key: 'sender',
+      render: (text) => <a>{text.email}</a>,
     },
     {
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (text) => dayjs( new Date(text).toLocaleDateString()).format('DD/MM/YYYY'),
+      align: "center",
     },
     {
       title: 'Hành động',
       key: 'action',
+      align: "center",
       render: (_, record) => (
         <Space size="middle">
-          <a onClick={() => console.log('Xem báo cáo', record)}>Xem</a>
-          <a onClick={() => console.log('Xóa báo cáo', record)}>Xóa</a>
+          <Button type="primary" onClick={() => console.log('Xem chi tiết', record)}>Xem chi tiết</Button>
+          <Button type="default" onClick={() => console.log('Chỉnh sửa báo cáo', record)}>Chỉnh sửa</Button>
         </Space>
       ),
     },
   ];
   return (
     <div>
-      <button onClick={fetchReport}>Refresh Report</button>
+      <Button type='primary' icon={<PlusOutlined />} onClick={() => console.log('Thêm báo cáo')}>Thêm báo cáo</Button>
       <Table<DataType>
         columns={columns}
         dataSource={report}

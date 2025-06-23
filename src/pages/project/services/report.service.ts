@@ -1,5 +1,5 @@
 import api from '../../../common/configs/apis/axios.config';
-import type { IReport, IPayloadReport } from '../interfaces/project.interface';
+// import type { IReport, IPayloadReport } from '../interfaces/project.interface';
 
 export const getReportByProjectId = async (projectId: string) => {
     try {
@@ -13,7 +13,7 @@ export const getReportByProjectId = async (projectId: string) => {
 
 export const createReport = async (formData: FormData) => {
     try {
-        const response = await api.post('/report', formData, {
+        const response = await api.post('/report/create', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

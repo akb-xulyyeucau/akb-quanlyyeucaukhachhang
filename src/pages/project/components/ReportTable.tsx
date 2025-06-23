@@ -1,11 +1,11 @@
 import React , {useEffect , useState}from 'react';
 import { Button, Space, Table, Tag, message } from 'antd';
 import type { TableProps } from 'antd';
-import {getReportByProjectId, createReport, updateReport} from '../services/report.service';
+import {getReportByProjectId, createReport} from '../services/report.service';
 import dayjs from 'dayjs';
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
 import ReportFormModal from './ReportFormModal';
-import type { IReport, IPayloadReport } from '../interfaces/project.interface';
+import type { IReport } from '../interfaces/project.interface';
 
 interface ReportTableProps{
   projectId: string;
@@ -13,9 +13,8 @@ interface ReportTableProps{
 
 const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
   const [report , setReport] = useState<IReport[]>([]);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<IReport | undefined>();
   const limit = 10; // page size for pagination
 
   const fetchReport  = async () => {
@@ -34,50 +33,88 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
     fetchReport();
   }, [projectId]);
 
-  const handleOpenModal = (record?: IReport) => {
-    setSelectedReport(record);
+  const handleOpenModal = () => {
     setIsModalOpen(true);
-    console.log("thông tin báo cáo", record);
   };
 
   const handleCloseModal = () => {
-    setSelectedReport(undefined);
     setIsModalOpen(false);
   };
 
   const handleSubmit = async (values: any) => {
     try {
+      console.log('Starting submit with values:', values);
       const formData = new FormData();
       
       // Add basic report data
       formData.append('projectId', projectId);
       formData.append('mainContent', values.mainContent);
-      formData.append('sender', "user_id"); // This should be replaced with actual user ID
       formData.append('day', new Date().toISOString());
 
-      // Add subContent data
-      const subContentData = values.subContent.map((content: any) => ({
-        contentName: content.contentName,
-        fileIndices: content.files.map((_: any, index: number) => index)
-      }));
-      formData.append('subContent', JSON.stringify(subContentData));
-
-      // Add files
-      values.subContent.forEach((content: any) => {
-        content.files.forEach((file: any) => {
-          if (file.originFileObj) {
-            formData.append('files', file.originFileObj);
+      // First, collect all files and create a continuous index
+      let allFiles: Array<{ file: any; subContentIndex: number }> = [];
+      values.subContent.forEach((content: any, subContentIndex: number) => {
+        const contentFiles = content.files || [];
+        contentFiles.forEach((file: any) => {
+          const fileObj = file.originFileObj || file;
+          if (fileObj && typeof fileObj === 'object' && 'type' in fileObj) {
+            allFiles.push({ file: fileObj, subContentIndex });
           }
         });
       });
 
-      if (selectedReport) {
-        await updateReport(selectedReport._id, formData);
-        message.success('Cập nhật báo cáo thành công');
-      } else {
-        await createReport(formData);
-        message.success('Tạo báo cáo thành công');
+      // Now create subContentData with correct fileIndices
+      const subContentData = values.subContent.map((content: any, subContentIndex: number) => {
+        const contentFiles = content.files || [];
+        const fileIndices: number[] = [];
+        
+        contentFiles.forEach((file: any) => {
+          const fileObj = file.originFileObj || file;
+          if (fileObj && typeof fileObj === 'object' && 'type' in fileObj) {
+            // Find the index of this file in the allFiles array
+            const globalIndex = allFiles.findIndex(
+              f => f.file === fileObj && f.subContentIndex === subContentIndex
+            );
+            if (globalIndex !== -1) {
+              fileIndices.push(globalIndex);
+            }
+          }
+        });
+
+        return {
+          contentName: content.contentName,
+          fileIndices
+        };
+      });
+
+      formData.append('subContent', JSON.stringify(subContentData));
+
+      // Add all files to formData in order
+      allFiles.forEach(({ file }, index) => {
+        console.log(`Adding file ${index} to formData:`, {
+          type: file.type,
+          size: file.size,
+          name: file.name
+        });
+        formData.append('files', file);
+      });
+
+      console.log('Total files added to formData:', allFiles.length);
+
+      // Log all entries in formData
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof Blob) {
+          console.log(`FormData ${key}:`, {
+            type: value.type,
+            size: value.size
+          });
+        } else {
+          console.log(`FormData ${key}:`, value);
+        }
       }
+
+      await createReport(formData);
+      message.success('Tạo báo cáo thành công');
       
       handleCloseModal();
       fetchReport(); // Refresh the table data
@@ -144,11 +181,10 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       title: 'Hành động',
       key: 'action',
       align: "center",
-      width: 200, 
+      width: 150, 
       render: (_, record: IReport) => (
         <Space size="middle">
           <Button type="primary" size='small' icon={<EyeOutlined />} onClick={() => console.log('Chi tiết', record)}>Chi tiết</Button>
-          <Button type="default" size='small' icon={<EditOutlined />} onClick={() => handleOpenModal(record)}>Chỉnh sửa</Button>
           <Button type="default" size='small' icon={<DeleteOutlined />} danger onClick={() => console.log('Xóa báo cáo', record)}>Xóa</Button>
         </Space>
       ),
@@ -157,7 +193,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
 
   return (
     <div>
-      <Button type='primary' icon={<PlusOutlined />} onClick={() => handleOpenModal()}>Thêm báo cáo</Button>
+      <Button type='primary' icon={<PlusOutlined />} onClick={handleOpenModal}>Thêm báo cáo</Button>
       <Table<IReport>
         columns={columns}
         dataSource={report}
@@ -169,8 +205,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
         open={isModalOpen}
         onCancel={handleCloseModal}
         onSubmit={handleSubmit}
-        initialValues={selectedReport}
-        title={selectedReport ? 'Chỉnh sửa báo cáo' : 'Thêm báo cáo'}
+        title='Thêm báo cáo'
       />
     </div>
   )

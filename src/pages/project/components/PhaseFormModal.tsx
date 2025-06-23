@@ -204,6 +204,7 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
                           label="Ngày bắt đầu"
                           name={[name, 'day']}
                           style={{ flex: 1 }}
+                          rules={[{ required: true, message: 'Không được để trống' }]}
                         >
                           <DatePicker style={{ width: '100%' }} />
                         </Form.Item>

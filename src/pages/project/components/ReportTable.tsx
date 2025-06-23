@@ -13,7 +13,7 @@ interface ReportTableProps{
 
 const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
   const [report , setReport] = useState<IReport[]>([]);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const limit = 10; // page size for pagination
 

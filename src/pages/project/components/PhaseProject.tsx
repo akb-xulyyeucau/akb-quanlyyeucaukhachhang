@@ -68,13 +68,14 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEn
       if (phaseFormMode === 'create') {
         await createPhase(phaseData);
         message.success('Tạo giai đoạn thành công');
-      } else if (phase?._id) {
+      } else if (phaseFormMode === 'edit' && phase?._id) {
         await updatePhaseById(phase._id, phaseData);
         message.success('Cập nhật giai đoạn thành công');
       }
 
       // Refresh data
       await fetchPhase();
+      setShowPhaseForm(false); // Đóng modal sau khi hoàn thành
     } catch (error: any) {
       message.error(error.message || 'Có lỗi xảy ra khi xử lý giai đoạn');
     } finally {

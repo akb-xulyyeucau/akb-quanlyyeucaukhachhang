@@ -211,6 +211,8 @@ const RequestResponse = () => {
         <Row gutter={24}>
           <Col span={6}>
             <Text strong>Khách hàng:</Text> <br /> Hệ thống giáo dục SteamX
+             <Text strong>Đánh giá:</Text> <br />
+            <Rate disabled defaultValue={5} />
           </Col>
           <Col span={6}>
             <Text strong>Đánh giá:</Text> <br />
@@ -222,7 +224,11 @@ const RequestResponse = () => {
               "Nhóm phát triển hỗ trợ tốt, phản hồi nhanh.
               Giao diện rõ ràng nhưng cần cải thiện phần báo cáo xuất file."
             </div>
-
+              <Text strong>Góp ý:</Text>
+            <div style={{ marginTop: 4 }}>
+              "Nhóm phát triển hỗ trợ tốt, phản hồi nhanh.
+              Giao diện rõ ràng nhưng cần cải thiện phần báo cáo xuất file."
+            </div>
           </Col>
 
         </Row>

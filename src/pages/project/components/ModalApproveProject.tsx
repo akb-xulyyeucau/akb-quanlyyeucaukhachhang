@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Descriptions, Table, Typography, Space, Tooltip, message, Spin } from 'antd';
+import { Modal, Button, Descriptions, Table, Typography, Space, Spin, message } from 'antd';
 import { 
   SaveOutlined, 
-  CloseCircleOutlined, 
-  FileWordOutlined,
-  FileExcelOutlined,
-  FilePdfOutlined,
-  DownloadOutlined 
+  CloseCircleOutlined
 } from '@ant-design/icons';
 import { getProjectById } from '../services/project.service';
-import { downloadFile } from '../services/document.service';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
+import FileText from '../../../common/components/FileText';
 
 interface ModalApproveProjectProps {
   isOpen: boolean;
@@ -54,46 +50,10 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
     }
   }, [projectId, isOpen]);
 
-  const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'doc':
-      case 'docx':
-        return <FileWordOutlined style={{ color: '#2B579A' }} />;
-      case 'xls':
-      case 'xlsx':
-        return <FileExcelOutlined style={{ color: '#217346' }} />;
-      case 'pdf':
-        return <FilePdfOutlined style={{ color: '#FF0000' }} />;
-      default:
-        return <FileWordOutlined />;
-    }
-  };
-
-  const handleDownload = async (file: any) => {
-    try {
-      const response = await downloadFile(file.path);
-      
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', file.originalName);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error: any) {
-      console.error('Lỗi khi tải file:', error);
-      message.error(t('ModalApproveProject.dowFileError'));
-    }
-  };
-
   const handleApprove = async () => {
     setApproving(true);
     try {
       await onApprove(projectData._id);
-      message.success(t('ModalApproveProject.approveSuccess'));
       onClose();
     } catch (error) {
       console.error('Lỗi khi duyệt dự án:', error);
@@ -127,15 +87,11 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
       render: (_: any, record: any) => (
         <Space direction="vertical" style={{ width: '100%' }}>
           {record.files.map((file: any, index: number) => (
-            <Tooltip title={t('ModalApproveProject.documents.detailHover')} key={index}>
-              <Typography.Link onClick={() => handleDownload(file)}>
-                <Space>
-                  {getFileIcon(file.originalName)}
-                  {file.originalName}
-                  <DownloadOutlined />
-                </Space>
-              </Typography.Link>
-            </Tooltip>
+            <FileText
+              key={index}
+              originalName={file.originalName}
+              filePath={file.path}
+            />
           ))}
         </Space>
       )

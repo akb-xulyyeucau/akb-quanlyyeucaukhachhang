@@ -124,10 +124,11 @@ const CustomerProject = () => {
       const res = await approveProject(projectId);
       if (res.success) {
         message.success(t('pjRequest_page.table.approveSuccess'));
+        await fetchProjectData();
+        setIsModalOpen(false);
       } else {
-        message.error(res.message ||t('pjRequest_page.table.approveError'));
+        message.error(res.message || t('pjRequest_page.table.approveError'));
       }
-      await fetchProjectData();
     } catch (error: any) {
       console.error('Lỗi xảy ra khi duyệt dự án:', error);
       message.error(error.message || t('pjRequest_page.table.approveError'));

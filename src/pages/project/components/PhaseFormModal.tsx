@@ -67,17 +67,6 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
         }))
       };
 
-      if (mode === 'create') {
-        await createPhase(transformedValues);
-        message.success('Tạo giai đoạn thành công!');
-      } else {
-        if (!phaseData?._id) {
-          throw new Error('Không tìm thấy ID giai đoạn');
-        }
-        await updatePhaseById(phaseData._id, transformedValues);
-        message.success('Cập nhật giai đoạn thành công!');
-      }
-
       onSubmit(transformedValues);
       onClose();
     } catch (error: any) {

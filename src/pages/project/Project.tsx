@@ -15,17 +15,24 @@ const CustomerProject = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false); // Thêm dòng này
+
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile); 
   const fetchProjectData = async () => {
-    if(user?.role === "guest" && profile?._id) {
-      const response = await getProjectByCustomerId(profile?._id);
-      setProjects(response.data || []);
-      setTotal(response.pagination?.total || response.data?.length || 0);
-    } else {
-      const response = await getAllProject();
-      setProjects(response.data || []);
-      setTotal(response.pagination?.total || response.data?.length || 0);
+    setLoading(true); // Bắt đầu loading
+    try {
+      if (user?.role === "guest" && profile?._id) {
+        const response = await getProjectByCustomerId(profile?._id);
+        setProjects(response.data || []);
+        setTotal(response.pagination?.total || response.data?.length || 0);
+      } else {
+        const response = await getAllProject();
+        setProjects(response.data || []);
+        setTotal(response.pagination?.total || response.data?.length || 0);
+      }
+    } finally {
+      setLoading(false); // Kết thúc loading
     }
   };
 
@@ -57,14 +64,14 @@ const CustomerProject = () => {
       dataIndex: 'alias',
       key: 'alias',
       align: 'center',
-      render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
+      render: (text: string) => <Tag><Tooltip title={text}>{text}</Tooltip></Tag>,
     },
     {
       title: "Tên dự án",
       dataIndex: 'name',
       key: 'name',
       align: 'center',
-      render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
+      render: (text: string) => <Tag><Tooltip title={text}>{text}</Tooltip></Tag>,
     },
     {
       title: 'Quản lý dự án',
@@ -158,6 +165,7 @@ const CustomerProject = () => {
       <Table
         rowKey="_id"
         columns={columns}
+        loading={loading}
         dataSource={projects}
         pagination={{
           current: page,

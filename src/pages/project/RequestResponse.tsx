@@ -10,14 +10,16 @@ import {
   Button,
   Space,
   Tag,
+  Avatar
 
 } from 'antd';
 import { Line } from 'react-chartjs-2';
 import { Pie } from 'react-chartjs-2';
-import { ArrowLeftOutlined, FileTextOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined, FileSearchOutlined, StarOutlined } from '@ant-design/icons';
 import { Chart, registerables } from 'chart.js';
 import { useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
+// import { color } from 'chart.js/helpers';
 
 
 
@@ -30,7 +32,7 @@ const RequestResponse = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const projectName = 'Nền tảng Quản lý ABC';
+  const projectName = 'Nền Tảng Quản Lý Nhân Sự UWU';
 
   const progressLabels = [
     'Giai đoạn 1',
@@ -85,7 +87,10 @@ const RequestResponse = () => {
             >
               Quay lại danh sách
             </Button>
-            <Button onClick={() => navigate(`/project/${pId}`)}>
+            <Button
+              icon={<FileSearchOutlined />}
+              onClick={() => navigate(`/project/${pId}`)}
+            >
               Xem chi tiết dự án
             </Button>
           </Space>
@@ -100,7 +105,10 @@ const RequestResponse = () => {
           </Title>
         </Col>
         <Col>
-          <Button type="primary" onClick={() => setIsModalOpen(true)}>
+
+          <Button type="primary"
+            icon={<StarOutlined />}
+            onClick={() => setIsModalOpen(true)}>
             Đánh giá dự án
           </Button>
         </Col>
@@ -108,31 +116,29 @@ const RequestResponse = () => {
 
       {/* THÔNG TIN DỰ ÁN */}
       <Card style={{ marginBottom: 15 }}>
-        {/* Tên dự án nổi bật */}
-        <div
-        >
-          <Title level={5} style={{ marginBottom: 7, fontSize: 20 }}>
-            Dự án: <span style={{ color: '#1890ff' }}>{projectName}</span>
-          </Title>
-        </div>
+        {/* Tiêu đề dự án */}
+        <Title level={5} style={{ marginBottom: 12, fontSize: 20 }}>
+          Dự án: <span style={{ color: '#1890ff' }}>{projectName}</span>
+        </Title>
 
-        {/* Hàng thông tin khách hàng */}
-        <Row style={{ marginBottom: 7 }}>
-          <Col span={24}>
+        {/* Grid thông tin khách hàng và thời gian */}
+        <Row gutter={24}>
+          <Col span={12} style={{ marginBottom: 7 }}>
             <Text strong>Khách hàng:</Text> Hệ thống giáo dục SteamX
           </Col>
-        </Row>
 
-        {/* Hàng thông tin thời gian */}
-        <Row gutter={24}>
-          <Col span={12}>
-            <Text strong>Thời gian bắt đầu:</Text>  01/06/2025
+          <Col span={12} style={{ marginBottom: 7 }}>
+            <Text strong>Thời gian bắt đầu:</Text> 01/06/2025
+          </Col>
+          <Col span={12} style={{ marginBottom: 7 }}>
+            <Text strong>Quản lý dự án:</Text> Duy minh
           </Col>
           <Col span={12}>
-            <Text strong>Thời gian kết thúc dự kiến:</Text> 30/07/2025
+            <Text strong>Thời gian kết thúc (dự kiến):</Text> 30/07/2025
           </Col>
         </Row>
       </Card>
+
 
 
       {/* BIỂU ĐỒ & THỐNG KÊ */}
@@ -207,28 +213,53 @@ const RequestResponse = () => {
       </Row>
 
       {/* ĐÁNH GIÁ TỪ KHÁCH HÀNG */}
-      <Card title=" Đánh giá từ khách hàng">
-        <Row gutter={24}>
-          <Col span={6}>
-            <Text strong>Khách hàng:</Text> <br /> Hệ thống giáo dục SteamX
-          </Col>
-          <Col span={6}>
-            <Text strong>Đánh giá:</Text> <br />
-            <Rate disabled defaultValue={5} />
+      <Card
+        title="🗣️ Đánh giá từ khách hàng"
+        style={{
+          backgroundColor: '#f6ffed', // nền xanh lá nhạt
+          border: '1px solid #b7eb8f',
+          borderRadius: 8,
+        }}
+      >
+        {/* Hàng 1: Avatar + Tên khách hàng / Đánh giá sao */}
+        <Row gutter={24} style={{ marginBottom: 12 }} align="middle">
+          <Col span={12}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Avatar size={32} icon={<UserOutlined />} />
+              <div>
+                <Text strong>Khách hàng:</Text>
+                <div>Hệ thống giáo dục SteamX</div>
+              </div>
+            </div>
           </Col>
           <Col span={12}>
+            <Text strong>Đánh giá:</Text>
+            <div>
+              <Rate disabled defaultValue={5} />
+            </div>
+          </Col>
+        </Row>
+
+        {/* Hàng 2: Nhận xét */}
+        <Row style={{ marginBottom: 12 }}>
+          <Col span={24}>
             <Text strong>Nhận xét:</Text>
             <div style={{ marginTop: 4 }}>
-              "Nhóm phát triển hỗ trợ tốt, phản hồi nhanh.
-              Giao diện rõ ràng nhưng cần cải thiện phần báo cáo xuất file."
+              Nhóm phát triển hỗ trợ tốt, phản hồi nhanh.
+              Giao diện rõ ràng nhưng cần cải thiện phần báo cáo xuất file.
             </div>
-
           </Col>
-
         </Row>
-        <Button onClick={() => navigate(`/project/${pId}`)}>
-          Xem chi tiết
-        </Button>
+
+        {/* Hàng 3: Góp ý thêm */}
+        <Row>
+          <Col span={24}>
+            <Text strong>Góp ý thêm:</Text>
+            <div style={{ marginTop: 4 }}>
+              Nhóm cần bổ sung chức năng xuất báo cáo định dạng PDF, cải thiện tốc độ phản hồi khi gửi yêu cầu.
+            </div>
+          </Col>
+        </Row>
       </Card>
 
       {/* MODAL ĐÁNH GIÁ */}
@@ -240,7 +271,7 @@ const RequestResponse = () => {
         }}
         onCancel={() => setIsModalOpen(false)}
       />
-    </div>
+    </div >
 
   );
 };

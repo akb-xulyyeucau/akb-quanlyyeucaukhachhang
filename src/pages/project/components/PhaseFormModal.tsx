@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { IPhase } from '../interfaces/project.interface';
-import { createPhase, updatePhaseById } from '../services/phase.service';
+// import { createPhase, updatePhaseById } from '../services/phase.service';
 
 interface Props {
   mode: 'create' | 'edit';
@@ -66,17 +66,6 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
           day: phase.day ? phase.day.toISOString() : null,
         }))
       };
-
-      if (mode === 'create') {
-        await createPhase(transformedValues);
-        message.success('Tạo giai đoạn thành công!');
-      } else {
-        if (!phaseData?._id) {
-          throw new Error('Không tìm thấy ID giai đoạn');
-        }
-        await updatePhaseById(phaseData._id, transformedValues);
-        message.success('Cập nhật giai đoạn thành công!');
-      }
 
       onSubmit(transformedValues);
       onClose();
@@ -215,6 +204,7 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
                           label="Ngày bắt đầu"
                           name={[name, 'day']}
                           style={{ flex: 1 }}
+                          rules={[{ required: true, message: 'Không được để trống' }]}
                         >
                           <DatePicker style={{ width: '100%' }} />
                         </Form.Item>

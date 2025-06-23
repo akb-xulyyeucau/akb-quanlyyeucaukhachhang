@@ -123,17 +123,8 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
           }))
         };
 
-        try {
-          await onUpload(document);
-          // Nếu onUpload thành công (thêm vào project thành công), xóa ID khỏi localStorage
-          removeTempDocumentId(documentId);
-          message.success('Tài liệu đã được tải lên và thêm vào dự án thành công');
-        } catch (error) {
-          // Nếu thêm vào project thất bại, giữ ID trong localStorage để có thể xử lý sau
-          message.error('Tải lên tài liệu thành công nhưng không thể thêm vào dự án');
-          throw error;
-        }
-
+        await onUpload(document);
+        removeTempDocumentId(documentId);
         handleCleanup();
       } else {
         message.error(response.message || 'Có lỗi xảy ra khi tải lên tài liệu');
@@ -141,7 +132,6 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
     } catch (error: any) {
       console.error('Error in document upload process:', error);
       message.error(error.message || 'Có lỗi xảy ra trong quá trình xử lý');
-      // Nếu có lỗi và documentId đã được tạo, xóa nó khỏi localStorage
       if (documentId) {
         removeTempDocumentId(documentId);
       }

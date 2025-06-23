@@ -2,16 +2,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { IProject, IDocument } from './interfaces/project.interface';
 import { useState, useEffect } from 'react';
 import { getProjectDetail , addDocumentToProject, endingProject} from './services/project.service';
-import { Card, Descriptions, Tag, Typography, Table, Space, Button, Tooltip, message, Modal } from 'antd';
-import { DownloadOutlined, MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, FileExcelOutlined, FilePdfOutlined, FileWordOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, CommentOutlined } from '@ant-design/icons';
+import { Card, Descriptions, Tag, Typography, Table, Space, Button, message, Modal } from 'antd';
+import { MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, CommentOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { downloadFile , deleteDocument , updateTrashDocument} from './services/document.service';
+import { deleteDocument , updateTrashDocument} from './services/document.service';
 import ModalAddDocument from './components/ModalAddDocument';
 import PhaseProject from './components/PhaseProject';
 import ReportTable from './components/ReportTable';
 import ModalEditDocument from './components/ModalEditDocument';
 import type { ColumnsType } from 'antd/es/table';
-// import { title } from 'process';
+import FileText from '../../common/components/FileText';
 
 const { Title, Link } = Typography;
 
@@ -35,53 +35,25 @@ const ProjectDetail = () => {
       setLoading(false);
     }
   };
-    const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    switch (extension) {
-      case 'doc':
-      case 'docx':
-        return <FileWordOutlined style={{ color: '#2B579A' }} />;
-      case 'xls':
-      case 'xlsx':
-        return <FileExcelOutlined style={{ color: '#217346' }} />;
-      case 'pdf':
-        return <FilePdfOutlined style={{ color: '#FF0000' }} />;
-      default:
-        return <FileWordOutlined />;
-    }
-  };
 
   useEffect(() => {
     fetchProjectDetail();
   }, [pid]);
 
-  const handleDownloadFile = async (path: string) => {
-    try {
-      const response = await downloadFile(path);
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', path.split('/').pop() || 'download');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      message.error('Failed to download file');
-    }
-  };
-
   const handleAddDocument = async (document: IDocument) => {
     try {
       const response = await addDocumentToProject(pid || '', document._id || '');
-      await updateTrashDocument(document._id|| '');
-      await fetchProjectDetail();
-      message.success(response.message || 'Document added successfully');
+      if (response.success) {
+        await updateTrashDocument(document._id || '');
+        await fetchProjectDetail();
+        message.success('Tài liệu đã được thêm vào dự án thành công');
+        setOpenModalAdd(false);
+      } else {
+        message.error(response.message || 'Không thể thêm tài liệu vào dự án');
+      }
     } catch (error: any) {
       console.error('Error adding document:', error);
-      message.error(error.response?.data?.message || 'Failed to add document to project');
+      message.error(error.response?.data?.message || 'Không thể thêm tài liệu vào dự án');
     }
   };
 
@@ -133,24 +105,42 @@ const ProjectDetail = () => {
           message.error(error.message);
         }
       }
-
     })
-    console.log("Xóa document : " , record)
   }
 
   const documentColumns : ColumnsType<any>= [
     {
-      title: 'Tên tài liệu',
-      dataIndex: 'name',
-      key: 'name',
-      align : 'center',
-    },
+    title: 'STT',
+    key: 'stt',
+    align: 'center',
+    width: 60,
+    render: (_: any, __: any, index: number) => index + 1,
+  },
+  {
+    title: 'Tên tài liệu',
+    // dataIndex: 'name',
+    key: 'name',
+    // align : 'center',
+    render: (_: any, record: any) => {
+      let color = "blue";
+      if (record.sender.role === 'guest') {
+        color = 'green';
+      } else if (record.sender.role === 'pm' || record.sender.role === 'admin') {
+        color = 'blue';
+      }
+      return (
+        <Tag color= {color} >
+          {record.name}
+        </Tag>
+      );
+    }
+  },
     {
       title: 'Ngày tạo',
       dataIndex: 'day',
       key: 'day',
       align : "center",
-      render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
+      render: (date: string) => <Tag color='purple'> {dayjs(date).format('DD/MM/YYYY')}</Tag>,
     },
     {
       title: 'Người gửi',
@@ -172,19 +162,14 @@ const ProjectDetail = () => {
       title: 'Tệp đính kèm',
       dataIndex: 'files',
       key: 'files',
-      // width : 300,
-     render: (_: any, record: any) => (
+      render: (_: any, record: any) => (
         <Space direction="vertical" style={{ width: '100%' }}>
           {record.files.map((file: any, index: number) => (
-            <Tooltip title="Nhấn để tải xuống" key={index}>
-              <Typography.Link onClick={() => handleDownloadFile(file.path)}>
-                <Space>
-                  {getFileIcon(file.originalName)}
-                  {file.originalName}
-                  <DownloadOutlined />
-                </Space>
-              </Typography.Link>
-            </Tooltip>
+            <FileText
+              key={index}
+              originalName={file.originalName}
+              filePath={file.path}
+            />
           ))}
         </Space>
       )
@@ -196,8 +181,8 @@ const ProjectDetail = () => {
       width : 300,
       render :(_:any , record : any) =>(
        <Space>
-        <Button type='primary' onClick={()=>{handleEditDocument(record)}} icon = {<EditOutlined/>} >Sửa</Button>
-        <Button type='default' danger onClick={()=> {handleDeleteDocument(record)}} icon={<DeleteOutlined/>}>Xóa</Button>
+        <Button type='primary' onClick={()=>{handleEditDocument(record)}} icon = {<EditOutlined/>} size='small'>Sửa</Button>
+        <Button type='default' danger onClick={()=> {handleDeleteDocument(record)}} icon={<DeleteOutlined/>} size='small'>Xóa</Button>
        </Space>
       )
     }
@@ -229,61 +214,59 @@ const ProjectDetail = () => {
       <Card loading={loading}>
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <Space style={{ justifyContent: 'space-between', width: '100%' }}>
-            <Title level={3}>Thông tin dự án  {project?.name}</Title>
+            <Title level={3}>Thông tin dự án {project?.name}</Title>
             <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers-projects')}>
               Quay lại
             </Button>
-            
           </Space>
           <Button type="primary" icon={<CommentOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
               Xem đánh giá dự án
-            </Button>
+          </Button>
           <Descriptions bordered column={2}>
-            <Descriptions.Item label="Mã dự án">{project?.alias}</Descriptions.Item>
-            <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
-            
-            <Descriptions.Item label="Quản lý dự án">
-              <div>
-                <Tag color='blue'> <div>{project?.pm?.name}</div></Tag>
-                <ContactInfo 
-                  email={project?.pm?.emailContact} 
-                  phone={project?.pm?.phoneContact}
-                />
-              </div>
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Khách hàng">
-              <div>
-                <Tag color='green'> <div>{project?.customer?.name}</div></Tag>
-                <ContactInfo
-                  email={project?.customer?.emailContact}
-                  phone={project?.customer?.phoneContact}
-                />
-              </div>
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Trạng thái">
-              <Tag color={project?.status === 'Đang thực hiện' ? 'purple' : 'green'}>
-                {project?.status}
-              </Tag>
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Ngày bắt đầu ">
-              {project?.day ? dayjs(project.day).format('DD/MM/YYYY') : 'N/A'}
-            </Descriptions.Item>
-          </Descriptions>
+          <Descriptions.Item label="Mã dự án"><Tag>{project?.alias}</Tag></Descriptions.Item>
+          <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
+
+          <Descriptions.Item label="Quản lý dự án" span={1}>
+            <Tag color='blue'>{project?.pm?.name}</Tag>
+            <br />
+            <ContactInfo 
+              email={project?.pm?.emailContact} 
+              phone={project?.pm?.phoneContact}
+            />
+          </Descriptions.Item>
+          <Descriptions.Item label="Khách hàng" span={1}>
+            <Tag color='green'>{project?.customer?.name}</Tag>
+            <br />
+            <ContactInfo
+              email={project?.customer?.emailContact}
+              phone={project?.customer?.phoneContact}
+            />
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Trạng thái">
+            <Tag color={project?.status === 'Đang thực hiện' ? 'purple' : 'green'}>
+              {project?.status}
+            </Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="Ngày bắt đầu ">
+            {project?.day ? dayjs(project.day).format('DD/MM/YYYY') : 'N/A'}
+          </Descriptions.Item>
+        </Descriptions>
 
           <div>
-            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '6px' }}>
               <Title level={3}>Tài liệu dự án {project?.name}</Title>
-              <Button 
+             
+            </Space>
+             <div style={{ display: 'flex', justifyContent: 'flex-end'  , marginBottom: '16px'}}>
+                <Button 
                 type="primary" 
                 icon={<PlusOutlined />} 
                 onClick={() => setOpenModalAdd(true)}
               >
                 Thêm tài liệu
               </Button>
-            </Space>
+              </div>
             <Table
               dataSource={project?.documentIds || []}
               columns={documentColumns}

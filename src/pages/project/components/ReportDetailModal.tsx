@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Typography, Card, Space, Tag, List, Tooltip } from 'antd';
+import { Modal, Typography, Card, Space, Tag, List } from 'antd';
 import type { IReport, IFile } from '../interfaces/project.interface';
 import dayjs from 'dayjs';
 import FileText from '../../../common/components/FileText';

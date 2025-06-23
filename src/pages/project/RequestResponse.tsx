@@ -19,7 +19,7 @@ import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined,
 import { Chart, registerables } from 'chart.js';
 import { useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
-import { color } from 'chart.js/helpers';
+// import { color } from 'chart.js/helpers';
 
 
 

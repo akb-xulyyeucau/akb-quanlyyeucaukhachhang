@@ -110,17 +110,37 @@ const ProjectDetail = () => {
 
   const documentColumns : ColumnsType<any>= [
     {
-      title: 'Tên tài liệu',
-      dataIndex: 'name',
-      key: 'name',
-      align : 'center',
-    },
+    title: 'STT',
+    key: 'stt',
+    align: 'center',
+    width: 60,
+    render: (_: any, __: any, index: number) => index + 1,
+  },
+  {
+    title: 'Tên tài liệu',
+    // dataIndex: 'name',
+    key: 'name',
+    // align : 'center',
+    render: (_: any, record: any) => {
+      let color = "blue";
+      if (record.sender.role === 'guest') {
+        color = 'green';
+      } else if (record.sender.role === 'pm' || record.sender.role === 'admin') {
+        color = 'blue';
+      }
+      return (
+        <Tag color= {color} >
+          {record.name}
+        </Tag>
+      );
+    }
+  },
     {
       title: 'Ngày tạo',
       dataIndex: 'day',
       key: 'day',
       align : "center",
-      render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
+      render: (date: string) => <Tag color='purple'> {dayjs(date).format('DD/MM/YYYY')}</Tag>,
     },
     {
       title: 'Người gửi',
@@ -194,7 +214,7 @@ const ProjectDetail = () => {
       <Card loading={loading}>
         <Space direction="vertical" size="middle" style={{ width: '100%' }}>
           <Space style={{ justifyContent: 'space-between', width: '100%' }}>
-            <Title level={3}>Thông tin dự án  {project?.name}</Title>
+            <Title level={3}>Thông tin dự án {project?.name}</Title>
             <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers-projects')}>
               Quay lại
             </Button>
@@ -203,51 +223,50 @@ const ProjectDetail = () => {
               Xem đánh giá dự án
           </Button>
           <Descriptions bordered column={2}>
-            <Descriptions.Item label="Mã dự án">{project?.alias}</Descriptions.Item>
-            <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
-            
-            <Descriptions.Item label="Quản lý dự án">
-              <div>
-                <Tag color='blue'> <div>{project?.pm?.name}</div></Tag>
-                <ContactInfo 
-                  email={project?.pm?.emailContact} 
-                  phone={project?.pm?.phoneContact}
-                />
-              </div>
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Khách hàng">
-              <div>
-                <Tag color='green'> <div>{project?.customer?.name}</div></Tag>
-                <ContactInfo
-                  email={project?.customer?.emailContact}
-                  phone={project?.customer?.phoneContact}
-                />
-              </div>
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Trạng thái">
-              <Tag color={project?.status === 'Đang thực hiện' ? 'purple' : 'green'}>
-                {project?.status}
-              </Tag>
-            </Descriptions.Item>
-            
-            <Descriptions.Item label="Ngày bắt đầu ">
-              {project?.day ? dayjs(project.day).format('DD/MM/YYYY') : 'N/A'}
-            </Descriptions.Item>
-          </Descriptions>
+          <Descriptions.Item label="Mã dự án"><Tag>{project?.alias}</Tag></Descriptions.Item>
+          <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
+
+          <Descriptions.Item label="Quản lý dự án" span={1}>
+            <Tag color='blue'>{project?.pm?.name}</Tag>
+            <br />
+            <ContactInfo 
+              email={project?.pm?.emailContact} 
+              phone={project?.pm?.phoneContact}
+            />
+          </Descriptions.Item>
+          <Descriptions.Item label="Khách hàng" span={1}>
+            <Tag color='green'>{project?.customer?.name}</Tag>
+            <br />
+            <ContactInfo
+              email={project?.customer?.emailContact}
+              phone={project?.customer?.phoneContact}
+            />
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Trạng thái">
+            <Tag color={project?.status === 'Đang thực hiện' ? 'purple' : 'green'}>
+              {project?.status}
+            </Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="Ngày bắt đầu ">
+            {project?.day ? dayjs(project.day).format('DD/MM/YYYY') : 'N/A'}
+          </Descriptions.Item>
+        </Descriptions>
 
           <div>
-            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '6px' }}>
               <Title level={3}>Tài liệu dự án {project?.name}</Title>
-              <Button 
+             
+            </Space>
+             <div style={{ display: 'flex', justifyContent: 'flex-end'  , marginBottom: '16px'}}>
+                <Button 
                 type="primary" 
                 icon={<PlusOutlined />} 
                 onClick={() => setOpenModalAdd(true)}
               >
                 Thêm tài liệu
               </Button>
-            </Space>
+              </div>
             <Table
               dataSource={project?.documentIds || []}
               columns={documentColumns}

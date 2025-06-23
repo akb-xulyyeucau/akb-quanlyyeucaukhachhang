@@ -191,7 +191,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       key: 'subContentCount',
       width: 120, // Thêm width
       render: (count) => (
-        <Tag color="purple">
+        <Tag color="warning">
           {count}
         </Tag>
       ),
@@ -222,7 +222,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 130, // Thêm width
-      render: (text) => dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY'),
+      render: (text) => <Tag color='purple'>{ dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY')}</Tag>,
       align: "center",
     },
     {
@@ -241,7 +241,11 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
 
   return (
     <div>
-      <Button type='primary' icon={<PlusOutlined />} onClick={handleOpenModal}>Thêm báo cáo</Button>
+       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Button type='primary' icon={<PlusOutlined />} onClick={handleOpenModal}>
+        Thêm báo cáo
+      </Button>
+    </div>
      <Table<IReport>
         columns={columns}
         dataSource={report}

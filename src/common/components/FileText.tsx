@@ -96,10 +96,11 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
   };
 
   // Get the full URL for the file
-  const getFileUrl = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL?.split('/api')[0] || 'http://localhost:5050';
-    return `${baseUrl}/uploads/${filePath}`;
-  };
+  // const getFileUrl = () => {
+  //   const baseUrl = import.meta.env.VITE_API_BASE_URL?.split('/api')[0];
+  //   return `${baseUrl}/uploads/${filePath}`;
+  // };
+  const API_UPLOADS_URL = import.meta.env.VITE_API_UPLOAD_URL + `/${filePath}`;
 
   return (
     <>
@@ -127,7 +128,7 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
       {isImage(originalName) ? (
         <Image
           style={{ display: 'none' }}
-          src={getFileUrl()}
+          src={API_UPLOADS_URL}
           preview={{
             visible: previewVisible,
             onVisibleChange: (visible) => setPreviewVisible(visible),
@@ -143,7 +144,7 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
           bodyStyle={{ height: '80vh', padding: 0 }}
         >
           <iframe
-            src={getFileUrl()}
+            src={API_UPLOADS_URL}
             style={{ width: '100%', height: '100%', border: 'none' }}
             title={originalName}
           />

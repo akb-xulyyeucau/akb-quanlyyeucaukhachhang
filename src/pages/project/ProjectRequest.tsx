@@ -207,7 +207,7 @@ const CustomerProject = () => {
         }else{
           statusText = "未有効";
         }
-        return <Tag color= {color}> <Tooltip title= {statusText}>{statusText}</Tooltip></Tag>
+        return <Tag color= {color}> <Tooltip title={statusText}>{statusText}</Tooltip></Tag>
       },
     },
     {

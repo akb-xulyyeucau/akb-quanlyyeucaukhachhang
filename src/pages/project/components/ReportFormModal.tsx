@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, Upload, Space, Card, Typography } from 'antd';
+import { Modal, Form, Input, Button, Upload, Space, Card, Typography, message, Progress } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, UploadOutlined, FilePdfOutlined, FileOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import type { UploadFile, RcFile } from 'antd/es/upload/interface';
 import type { ItemRender } from 'antd/es/upload/interface';
-import type { IReport, ISubContent, IFile } from '../interfaces/project.interface';
 
 const { Text } = Typography;
 
@@ -11,29 +10,50 @@ interface ReportFormModalProps {
   open: boolean;
   onCancel: () => void;
   onSubmit: (values: any) => void;
-  initialValues?: IReport;
-  title?: string;
+  title: string;
+}
+
+interface FileWithGlobalIndex extends Omit<UploadFile, 'originFileObj'> {
+  globalIndex?: number;
+  originFileObj?: RcFile;
+}
+
+interface FileListType {
+  [key: string]: FileWithGlobalIndex[];
+}
+
+interface FileProgress {
+  [key: string]: number;
 }
 
 const ReportFormModal: React.FC<ReportFormModalProps> = ({
   open,
   onCancel,
   onSubmit,
-  initialValues,
-  title = 'Thêm báo cáo'
+  title
 }) => {
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState<{ [key: string]: UploadFile[] }>({});
-  const [originalFiles, setOriginalFiles] = useState<{ [key: string]: IFile[] }>({});
+  const [fileList, setFileList] = useState<FileListType>({});
+  const [uploadProgress, setUploadProgress] = useState<FileProgress>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Reset form when modal closes
   useEffect(() => {
     if (!open) {
       form.resetFields();
       setFileList({});
-      setOriginalFiles({});
+      setUploadProgress({});
+      setIsSubmitting(false);
+      setIsUploading(false);
     }
   }, [open, form]);
+
+  // Check if any file is still uploading
+  useEffect(() => {
+    const hasUploadingFiles = Object.values(uploadProgress).some(progress => progress < 100);
+    setIsUploading(hasUploadingFiles);
+  }, [uploadProgress]);
 
   // Convert size to readable format
   const formatFileSize = (bytes: number): string => {
@@ -50,93 +70,120 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
     return <FileOutlined />;
   };
 
-  // Set initial values when editing
-  useEffect(() => {
-    if (initialValues && open) {
-      console.log('Initial values:', initialValues); // Debug log
-      const initialFileList: { [key: string]: UploadFile[] } = {};
-      const initialOriginalFiles: { [key: string]: IFile[] } = {};
-      
-      if (initialValues.subContent && Array.isArray(initialValues.subContent)) {
-        initialValues.subContent.forEach((subContent, index) => {
-          if (subContent.files && Array.isArray(subContent.files)) {
-            initialFileList[index] = subContent.files.map(file => ({
-              uid: file._id || `-${index}`,
-              name: file.originalName,
-              status: 'done',
-              url: file.path,
-              size: file.size,
-              type: file.type
-            }));
-            initialOriginalFiles[index] = subContent.files;
-          }
-        });
+  const handleFileChange = (index: number, info: any) => {
+    console.log('File change event:', info);
+    
+    // Simulate upload progress for new files
+    info.fileList.forEach((file: UploadFile) => {
+      if (file.originFileObj && !uploadProgress[file.uid]) {
+        simulateProgress(file.uid);
       }
-      
-      setFileList(initialFileList);
-      setOriginalFiles(initialOriginalFiles);
+    });
+    
+    // Map the files to maintain both new and existing files
+    const updatedFiles = info.fileList.map((file: UploadFile): FileWithGlobalIndex => ({
+      ...file,
+      status: uploadProgress[file.uid] >= 100 ? 'done' : 'uploading',
+      originFileObj: file.originFileObj
+    }));
 
-      // Set form values
+    console.log('Updated files for index', index, ':', updatedFiles);
+
+    // Update fileList and recalculate global indices
+    setFileList(prev => {
+      const newFileList: FileListType = {
+        ...prev,
+        [index]: updatedFiles
+      };
+
+      // Calculate global index for display purposes
+      let globalIndex = 0;
+      Object.keys(newFileList).sort((a, b) => Number(a) - Number(b)).forEach(subContentIndex => {
+        newFileList[subContentIndex] = newFileList[subContentIndex].map(file => ({
+          ...file,
+          globalIndex: globalIndex++
+        }));
+      });
+
+      return newFileList;
+    });
+  };
+
+  const simulateProgress = (fileId: string) => {
+    let percent = 0;
+    const interval = setInterval(() => {
+      if (percent >= 100) {
+        clearInterval(interval);
+        setUploadProgress(prev => ({
+          ...prev,
+          [fileId]: 100
+        }));
+      } else {
+        percent += Math.floor(Math.random() * 20) + 10;
+        percent = Math.min(percent, 100);
+        setUploadProgress(prev => ({
+          ...prev,
+          [fileId]: percent
+        }));
+      }
+    }, 200);
+  };
+
+  // Update the Upload component props
+  const uploadProps = {
+    beforeUpload: (file: File) => {
+      const isLt50M = file.size / 1024 / 1024 < 50;
+      if (!isLt50M) {
+        message.error('File phải nhỏ hơn 50MB!');
+        return Upload.LIST_IGNORE;
+      }
+      console.log('File passed validation:', file);
+      return false; // Prevent auto upload
+    },
+    multiple: true,
+    maxCount: 5,
+    accept: '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar',
+  };
+
+  const handleSubmit = async (values: any) => {
+    setIsSubmitting(true);
+    try {
+      // Transform fileList into the form values
       const formValues = {
-        mainContent: initialValues.mainContent,
-        subContent: initialValues.subContent?.map((content, index) => ({
-          _id: content._id,
-          contentName: content.contentName,
-          files: initialFileList[index] || []
+        ...values,
+        subContent: values.subContent.map((content: any, index: number) => ({
+          ...content,
+          files: fileList[index] || []
         }))
       };
-      
-      console.log('Setting form values:', formValues); // Debug log
-      form.setFieldsValue(formValues);
+      console.log('Submitting form with values:', formValues);
+      await onSubmit(formValues);
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [initialValues, open, form]);
-
-  const handleSubmit = (values: any) => {
-    console.log('Submitting values:', values); // Debug log
-    const formattedValues = {
-      ...values,
-      subContent: values.subContent?.map((content: any, index: number) => {
-        const currentFiles = fileList[index] || [];
-        
-        return {
-          _id: content._id,
-          contentName: content.contentName,
-          files: currentFiles.map((file, fileIndex) => ({
-            originalName: file.name,
-            path: file.url || '',
-            size: file.size || 0,
-            type: file.type || '',
-            index: fileIndex
-          }))
-        };
-      }) || []
-    };
-    console.log('Formatted values:', formattedValues); // Debug log
-    onSubmit(formattedValues);
   };
 
-  const handleFileChange = (index: number, info: any) => {
-    console.log('File change at index', index, ':', info.fileList); // Debug log
-    setFileList(prev => ({
-      ...prev,
-      [index]: info.fileList.map((file: UploadFile) => ({
-        ...file,
-        status: 'done'
-      }))
-    }));
-  };
-
-  const renderUploadItem: ItemRender = (originNode, file, fileList, actions) => (
+  const renderUploadItem: ItemRender = (_originNode, file: FileWithGlobalIndex, _fileList, actions) => (
     <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0' }}>
       {getFileIcon(file.type || '')}
       <Space direction="vertical" size={0} style={{ marginLeft: 8, flex: 1 }}>
-        <Text strong>{file.name}</Text>
-        <Text type="secondary">
-          {formatFileSize(file.size || 0)} | {file.type || 'Unknown type'}
+        <Text strong>
+          {file.name} 
+          {typeof file.globalIndex === 'number' && (
+            <Text type="secondary"> (File #{file.globalIndex})</Text>
+          )}
         </Text>
+        <div style={{ width: '100%' }}>
+          {uploadProgress[file.uid] < 100 ? (
+            <Progress percent={uploadProgress[file.uid] || 0} size="small" />
+          ) : (
+            <Text type="secondary">
+              {formatFileSize(file.size || 0)} | {file.type || 'Unknown type'}
+            </Text>
+          )}
+        </div>
       </Space>
       <Space>
-        {actions.download && <Button type="link" size="small" onClick={actions.download}>Tải xuống</Button>}
         {actions.remove && <Button type="link" danger size="small" onClick={actions.remove}>Xóa</Button>}
       </Space>
     </div>
@@ -149,6 +196,8 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
       onCancel={onCancel}
       width={800}
       footer={null}
+      closable={!isUploading && !isSubmitting}
+      maskClosable={!isUploading && !isSubmitting}
     >
       <Form
         form={form}
@@ -160,7 +209,11 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
           label="Nội dung chính"
           rules={[{ required: true, message: 'Vui lòng nhập nội dung chính' }]}
         >
-          <Input.TextArea rows={4} placeholder="Nhập nội dung chính của báo cáo" />
+          <Input.TextArea 
+            rows={4} 
+            placeholder="Nhập nội dung chính của báo cáo" 
+            disabled={isUploading || isSubmitting}
+          />
         </Form.Item>
 
         <Form.List 
@@ -176,33 +229,30 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                   title={`Nội dung phụ ${index + 1}`}
                   extra={
                     fields.length > 1 && (
-                      <MinusCircleOutlined onClick={() => {
-                        remove(field.name);
-                        const newFileList = { ...fileList };
-                        const newOriginalFiles = { ...originalFiles };
-                        delete newFileList[index];
-                        delete newOriginalFiles[index];
-                        setFileList(newFileList);
-                        setOriginalFiles(newOriginalFiles);
-                      }} />
+                      <MinusCircleOutlined 
+                        onClick={() => {
+                          if (!isUploading && !isSubmitting) {
+                            remove(field.name);
+                            const newFileList = { ...fileList };
+                            delete newFileList[index];
+                            setFileList(newFileList);
+                          }
+                        }} 
+                        style={{ cursor: isUploading || isSubmitting ? 'not-allowed' : 'pointer' }}
+                      />
                     )
                   }
                 >
                   <Space direction="vertical" style={{ width: '100%' }}>
                     <Form.Item
                       {...field}
-                      name={[field.name, '_id']}
-                      hidden
-                    >
-                      <Input />
-                    </Form.Item>
-                    
-                    <Form.Item
-                      {...field}
                       name={[field.name, 'contentName']}
                       rules={[{ required: true, message: 'Vui lòng nhập tên nội dung' }]}
                     >
-                      <Input placeholder="Tên nội dung" />
+                      <Input 
+                        placeholder="Tên nội dung" 
+                        disabled={isUploading || isSubmitting}
+                      />
                     </Form.Item>
 
                     <Form.Item
@@ -212,14 +262,19 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                       getValueFromEvent={(e) => e.fileList}
                     >
                       <Upload
-                        multiple
-                        beforeUpload={() => false}
+                        {...uploadProps}
                         onChange={(info) => handleFileChange(index, info)}
                         fileList={fileList[index] || []}
                         listType="text"
                         itemRender={renderUploadItem}
+                        disabled={isUploading || isSubmitting}
                       >
-                        <Button icon={<UploadOutlined />}>Tải lên tệp đính kèm</Button>
+                        <Button 
+                          icon={<UploadOutlined />}
+                          disabled={isUploading || isSubmitting}
+                        >
+                          Tải lên tệp đính kèm
+                        </Button>
                       </Upload>
                     </Form.Item>
                   </Space>
@@ -228,9 +283,10 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
 
               <Button
                 type="dashed"
-                onClick={() => add()}
+                onClick={() => !isUploading && !isSubmitting && add()}
                 block
                 icon={<PlusOutlined />}
+                disabled={isUploading || isSubmitting}
               >
                 Thêm nội dung phụ
               </Button>
@@ -240,9 +296,19 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
 
         <Form.Item style={{ marginTop: 16, textAlign: 'right' }}>
           <Space>
-            <Button onClick={onCancel}>Hủy</Button>
-            <Button type="primary" htmlType="submit">
-              {initialValues ? 'Cập nhật' : 'Thêm mới'}
+            <Button 
+              onClick={onCancel} 
+              disabled={isUploading || isSubmitting}
+            >
+              Hủy
+            </Button>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={isSubmitting}
+              disabled={isUploading}
+            >
+              {isUploading ? 'Đang tải file...' : 'Thêm mới'}
             </Button>
           </Space>
         </Form.Item>

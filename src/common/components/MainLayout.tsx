@@ -21,7 +21,7 @@ import { useNavigate, Outlet } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout as logoutRedux } from '../../common/stores/auth/authSlice';
-import { selectAuthUser } from '../../common/stores/auth/authSelector';
+import { selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -31,6 +31,8 @@ const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const user = useSelector(selectAuthUser);
+  const userProfile = useSelector(selectUserProfile) || "";
+  
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -125,6 +127,7 @@ const MainLayout: React.FC = () => {
           >
             <Avatar icon={<UserOutlined />} style={{ cursor: 'pointer' }} />
           </Dropdown>
+          <span style={{ fontWeight: 500 }}>{typeof userProfile === 'object' && userProfile !== null ? userProfile.name : user?.email}</span>
           <Button
             icon={<LogoutOutlined />}
             type="primary"

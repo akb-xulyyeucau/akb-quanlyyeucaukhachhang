@@ -141,7 +141,7 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
           onCancel={() => setPreviewVisible(false)}
           width="80%"
           footer={null}
-          bodyStyle={{ height: '80vh', padding: 0 }}
+          style={{ height: '80vh', padding: 0 }}
         >
           <iframe
             src={API_UPLOADS_URL}

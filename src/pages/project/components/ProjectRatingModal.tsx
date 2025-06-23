@@ -1,5 +1,6 @@
-import { Modal, Form, Input, Rate, Typography, Row, Col, Divider } from 'antd';
+import { Modal, Form, Input, Rate, Typography, Row, Col, Divider, message } from 'antd';
 import React from 'react';
+import { SendOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -28,6 +29,7 @@ const ProjectRatingModal: React.FC<Props> = ({
       .validateFields()
       .then((values) => {
         onOk(values);
+        message.success('Cảm ơn quý khách đã tham gia đánh giá!');
         form.resetFields();
       })
       .catch(() => { });
@@ -42,6 +44,9 @@ const ProjectRatingModal: React.FC<Props> = ({
       okText="Gửi đánh giá"
       cancelText="Hủy"
       width={720}
+      okButtonProps={{
+        icon: <SendOutlined />,
+      }}
     >
       {/* THÔNG TIN DỰ ÁN */}
       <div
@@ -78,33 +83,11 @@ const ProjectRatingModal: React.FC<Props> = ({
 
       {/* FORM ĐÁNH GIÁ */}
       <Form form={form} layout="vertical">
-        {/* Các đánh giá thành phần */}
-        <Form.Item
-          name="quality"
-          label="1. Chất lượng sản phẩm và dịch vụ"
-
-        >
-          <div style={{ textAlign: 'center' }}>
-            <Rate />
-          </div>
-        </Form.Item>
-
-        <Form.Item
-          name="communication"
-          label="2. Trao đổi và hỗ trợ trong dự án"
-
-        >
-          <div style={{ textAlign: 'center' }}>
-            <Rate />
-          </div>
-        </Form.Item>
-
-
 
         {/* Đánh giá tổng thể */}
         <Form.Item
           name="satisfaction"
-          label="3. Đánh giá mức độ hài lòng tổng thể"
+          label="Đánh giá mức độ hài lòng tổng thể"
 
         >
           <div style={{ textAlign: 'center' }}>
@@ -136,10 +119,7 @@ const ProjectRatingModal: React.FC<Props> = ({
           />
         </Form.Item>
 
-        {/* Lời cảm ơn */}
-        <div style={{ textAlign: 'center', marginTop: 8, fontStyle: 'italic' }}>
-          Cảm ơn quý khách đã tham gia đánh giá!
-        </div>
+
       </Form>
     </Modal>
   );

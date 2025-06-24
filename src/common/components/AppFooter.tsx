@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Space, Typography, Divider } from 'antd';
-import { GithubOutlined, LinkedinOutlined, GlobalOutlined } from '@ant-design/icons';
+import { LinkedinOutlined, GlobalOutlined } from '@ant-design/icons';
 
 const { Footer } = Layout;
 const { Text, Link } = Typography;

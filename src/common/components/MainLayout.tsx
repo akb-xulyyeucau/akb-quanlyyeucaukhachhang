@@ -25,6 +25,7 @@ import { selectAuthUser , selectUserProfile } from '../../common/stores/auth/aut
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import AppFooter from './AppFooter';
 
 const MainLayout: React.FC = () => {
   const { t } = useTranslation('mainLayout');
@@ -225,6 +226,7 @@ const MainLayout: React.FC = () => {
           }}>
             <Outlet />
           </Content>
+          <AppFooter />
         </Layout>
       </Layout>
     </Layout>

@@ -10,6 +10,7 @@ import {
   FileOutlined
 } from '@ant-design/icons';
 import { downloadFile } from './document.service';
+import { Tooltip } from 'antd/lib';
 
 interface FileTextProps {
   originalName: string;
@@ -94,12 +95,6 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
     }
     setPreviewVisible(true);
   };
-
-  // Get the full URL for the file
-  // const getFileUrl = () => {
-  //   const baseUrl = import.meta.env.VITE_API_BASE_URL?.split('/api')[0];
-  //   return `${baseUrl}/uploads/${filePath}`;
-  // };
   const API_UPLOADS_URL = import.meta.env.VITE_API_UPLOAD_URL + `/${filePath}`;
 
   return (
@@ -108,19 +103,23 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
         {getFileIcon()}
         <Typography.Text>{originalName}</Typography.Text>
         <Space size="small">
-          <Button
+          <Tooltip title="Tải xuống">
+            <Button
             type="text"
             icon={<DownloadOutlined />}
             onClick={handleDownload}
             title="Download"
           />
-          <Button
+          </Tooltip>
+         <Tooltip title = {'Xem trước'}>
+           <Button
             type="text"
             icon={<EyeOutlined />}
             onClick={handlePreview}
             disabled={!isPreviewable(originalName)}
             title={isPreviewable(originalName) ? 'Preview' : 'Preview not available'}
           />
+         </Tooltip>
         </Space>
       </Space>
 
@@ -139,13 +138,14 @@ const FileText: React.FC<FileTextProps> = ({ originalName, filePath, fileType })
           title={originalName}
           open={previewVisible}
           onCancel={() => setPreviewVisible(false)}
-          width="80%"
+           width="100vw" 
+          // height={'100%'}
           footer={null}
-          style={{ height: '80vh', padding: 0 }}
+          style={{ top: 24, padding: 0 }}
         >
           <iframe
             src={API_UPLOADS_URL}
-            style={{ width: '100%', height: '100%', border: 'none' }}
+             style={{ width: '100%', height: '85vh', border: 'none' }}
             title={originalName}
           />
         </Modal>

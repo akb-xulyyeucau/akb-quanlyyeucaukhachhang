@@ -90,7 +90,7 @@ const ProjectRatingModal: React.FC<Props> = ({
           label="Đánh giá mức độ hài lòng tổng thể"
 
         >
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'left' }}>
             <Rate />
           </div>
 

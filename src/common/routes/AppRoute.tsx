@@ -12,6 +12,7 @@ import EmailConfig from '../../pages/system/EmailConfig';
 import UserProfile from '../../pages/user/UserProfile';
 import ProjectDetail from '../../pages/project/ProjectDetail';
 import RequestResponse from '../../pages/project/RequestResponse';
+import NotFound from '../components/NotFound';
 
 const AppRoute = () => {
   return (
@@ -44,7 +45,7 @@ const AppRoute = () => {
         <Route index element={<Home />} />
       </Route>
       {/* Redirect không tìm thấy */}
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

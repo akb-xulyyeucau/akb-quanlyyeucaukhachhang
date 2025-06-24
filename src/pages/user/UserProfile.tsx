@@ -27,7 +27,7 @@ const UserProfile = () => {
 
   const formatDateTime = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
-    return dayjs(dateString).format('DD/MM/YYYY HH:mm:ss');
+    return dayjs(dateString).format('DD/MM/YYYY');
   };
 
   return (

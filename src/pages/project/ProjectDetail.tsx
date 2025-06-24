@@ -2,8 +2,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import type { IProject, IDocument } from './interfaces/project.interface';
 import { useState, useEffect } from 'react';
 import { getProjectDetail , addDocumentToProject, endingProject} from './services/project.service';
-import { Card, Descriptions, Tag, Typography, Table, Space, Button, message, Modal } from 'antd';
-import { MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, CommentOutlined } from '@ant-design/icons';
+import { Card, Descriptions, Tag, Typography, Table, Space, Button, message, Modal, Input, Select } from 'antd';
+import { MailOutlined, PhoneOutlined, ArrowLeftOutlined, PlusOutlined, DeleteOutlined, EditOutlined, ExclamationCircleOutlined, CommentOutlined, SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { deleteDocument , updateTrashDocument} from './services/document.service';
 import ModalAddDocument from './components/ModalAddDocument';
@@ -12,6 +12,10 @@ import ReportTable from './components/ReportTable';
 import ModalEditDocument from './components/ModalEditDocument';
 import type { ColumnsType } from 'antd/es/table';
 import FileText from '../../common/components/FileText';
+import { useDebounce } from '../../common/hooks/useDebounce';
+import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
+import { useSelector } from 'react-redux';
+import AccessLimit from '../../common/components/AccessLimit';
 
 const { Title, Link } = Typography;
 
@@ -19,26 +23,73 @@ const ProjectDetail = () => {
   const { pid } = useParams();
   const [project, setProject] = useState<IProject>();
   const [loading, setLoading] = useState(false);
+  const [tableLoading, setTableLoading] = useState(false);
   const [openModalAdd, setOpenModalAdd] = useState(false);
   const navigate = useNavigate();
   const [selectedDocument, setSelectedDocument] = useState<IDocument | null>(null);
   const [openModalEdit, setOpenModalEdit] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [senderFilter, setSenderFilter] = useState<string>('all');
+  const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
+  const [error, setError] = useState(false);
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile);
+
+  const debouncedSearchText = useDebounce(searchText, 1000);
 
   const fetchProjectDetail = async () => {
-    setLoading(true);
-    try {
-      const res = await getProjectDetail(pid || '');
-      setProject(res.data);
-    } catch (error) {
-      console.error("Error fetching project details:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setError(false);
+  try {
+    const res = await getProjectDetail(pid || '');
+    setProject(res.data);
+  } catch (error) {
+    setError(true); // Nếu lỗi API, set error true
+    setProject(undefined);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchProjectDetail();
   }, [pid]);
+
+  useEffect(() => {
+    const filterDocuments = async () => {
+      setTableLoading(true);
+      // Thêm một slight delay để hiển thị loading state
+      await new Promise(resolve => setTimeout(resolve, 300));
+      try {
+        if (!project?.documentIds) {
+          setFilteredDocuments([]);
+          return;
+        }
+        let result = [...project.documentIds];
+        // Filter by document name
+        if (debouncedSearchText) {
+          result = result.filter(doc => 
+            doc.name.toLowerCase().includes(debouncedSearchText.toLowerCase())
+          );
+        }
+        // Filter by sender role
+        if (senderFilter !== 'all') {
+          result = result.filter(doc => {
+            if (senderFilter === 'guest') {
+              return doc.sender.role === 'guest';
+            } else if (senderFilter === 'pm') {
+              return ['pm', 'admin'].includes(doc.sender.role);
+            }
+            return true;
+          });
+        }
+        setFilteredDocuments(result);
+      } finally {
+        setTableLoading(false);
+      }
+    };
+    filterDocuments();
+  }, [project?.documentIds, debouncedSearchText, senderFilter]);
 
   const handleAddDocument = async (document: IDocument) => {
     try {
@@ -209,88 +260,128 @@ const ProjectDetail = () => {
     </Space>
   );
 
+  // Kiểm tra quyền truy cập sau khi đã load xong dữ liệu
+  const checkAccess = () => {
+  if (error) return false; // Nếu lỗi API, không cho truy cập
+  if (project) {
+    return !(user?.role === "guest" && profile?._id !== project?.customer?._id);
+  }
+  if(!project) return false
+  return true; // Cho phép truy cập trong khi đang loading
+};
+
   return (
     <div style={{ padding: '24px' }}>
       <Card loading={loading}>
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <Space style={{ justifyContent: 'space-between', width: '100%' }}>
-            <Title level={3}>Thông tin dự án {project?.name}</Title>
-            <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers-projects')}>
-              Quay lại
-            </Button>
-          </Space>
-          <Button type="primary" icon={<CommentOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
-              Xem đánh giá dự án
-          </Button>
-          <Descriptions bordered column={2}>
-          <Descriptions.Item label="Mã dự án"><Tag>{project?.alias}</Tag></Descriptions.Item>
-          <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
-
-          <Descriptions.Item label="Quản lý dự án" span={1}>
-            <Tag color='blue'>{project?.pm?.name}</Tag>
-            <br />
-            <ContactInfo 
-              email={project?.pm?.emailContact} 
-              phone={project?.pm?.phoneContact}
-            />
-          </Descriptions.Item>
-          <Descriptions.Item label="Khách hàng" span={1}>
-            <Tag color='green'>{project?.customer?.name}</Tag>
-            <br />
-            <ContactInfo
-              email={project?.customer?.emailContact}
-              phone={project?.customer?.phoneContact}
-            />
-          </Descriptions.Item>
-
-          <Descriptions.Item label="Trạng thái">
-            <Tag color={project?.status === 'Đang thực hiện' ? 'purple' : 'green'}>
-              {project?.status}
-            </Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày bắt đầu ">
-            {project?.day ? dayjs(project.day).format('DD/MM/YYYY') : 'N/A'}
-          </Descriptions.Item>
-        </Descriptions>
-
-          <div>
-            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '6px' }}>
-              <Title level={3}>Tài liệu dự án {project?.name}</Title>
-             
-            </Space>
-             <div style={{ display: 'flex', justifyContent: 'flex-end'  , marginBottom: '16px'}}>
-                <Button 
-                type="primary" 
-                icon={<PlusOutlined />} 
-                onClick={() => setOpenModalAdd(true)}
-              >
-                Thêm tài liệu
+        {!checkAccess() ? (
+          <AccessLimit />
+        ) : (
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <Space style={{ justifyContent: 'space-between', width: '100%' }}>
+              <Title level={3}>Thông tin dự án {project?.name}</Title>
+              <Button type="primary" icon={<ArrowLeftOutlined />} onClick={() => navigate('/customers-projects')}>
+                Quay lại
               </Button>
-              </div>
-            <Table
-              dataSource={project?.documentIds || []}
-              columns={documentColumns}
-              rowKey="_id"
-              pagination={false}
-            />
-          </div>
-          <div>
-            <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-                 <Title level={3}>Tiến dộ dự án {project?.name}</Title>
             </Space>
-            <PhaseProject 
-              projectId={pid || ''}
-              projectStatus= {project?.status || ''}
-              onEndingProject={showEndingPhaseConfirm} 
-            />
-          </div>
-          <div>
-            <Title level={3}>Danh sách báo cáo dự án {project?.name}</Title>
-            <ReportTable 
-              projectId={pid || ''}
-            />
-          </div>
-        </Space>
+            <Button type="primary" icon={<CommentOutlined />} onClick={() => navigate(`/request-response/${pid}`)}>
+                Xem đánh giá dự án
+            </Button>
+            <Descriptions bordered column={2}>
+            <Descriptions.Item label="Mã dự án"><Tag>{project?.alias}</Tag></Descriptions.Item>
+            <Descriptions.Item label="Tên dự án">{project?.name}</Descriptions.Item>
+
+            <Descriptions.Item label="Quản lý dự án" span={1}>
+              <Tag color='blue'>{project?.pm?.name}</Tag>
+              <br />
+              <ContactInfo 
+                email={project?.pm?.emailContact} 
+                phone={project?.pm?.phoneContact}
+              />
+            </Descriptions.Item>
+            <Descriptions.Item label="Khách hàng" span={1}>
+              <Tag color='green'>{project?.customer?.name}</Tag>
+              <br />
+              <ContactInfo
+                email={project?.customer?.emailContact}
+                phone={project?.customer?.phoneContact}
+              />
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Trạng thái">
+              <Tag color={project?.status === 'Đang thực hiện' ? 'purple' : 'green'}>
+                {project?.status}
+              </Tag>
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày bắt đầu ">
+              {project?.day ? dayjs(project.day).format('DD/MM/YYYY') : 'N/A'}
+            </Descriptions.Item>
+          </Descriptions>
+
+            <div>
+              <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                <Title level={3}>Tài liệu dự án {project?.name}</Title>
+              </Space>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '16px', 
+                gap: '16px' 
+              }}>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  <Input
+                    placeholder="Tìm kiếm theo tên tài liệu"
+                    prefix={<SearchOutlined />}
+                    style={{ width: 300 }}
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    allowClear
+                  />
+                  <Select
+                    style={{ width: 200 }}
+                    value={senderFilter}
+                    onChange={(value) => setSenderFilter(value)}
+                    options={[
+                      { value: 'all', label: 'Tất cả' },
+                      { value: 'guest', label: 'Khách hàng' },
+                      { value: 'pm', label: 'Quản lý dự án' }
+                    ]}
+                  />
+                </div>
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />} 
+                  onClick={() => setOpenModalAdd(true)}
+                >
+                  Thêm tài liệu
+                </Button>
+              </div>
+              <Table
+                dataSource={filteredDocuments}
+                columns={documentColumns}
+                rowKey="_id"
+                pagination={false}
+                loading={tableLoading}
+              />
+            </div>
+            <div>
+              <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+                   <Title level={3}>Tiến dộ dự án {project?.name}</Title>
+              </Space>
+              <PhaseProject 
+                projectId={pid || ''}
+                projectStatus= {project?.status || ''}
+                onEndingProject={showEndingPhaseConfirm} 
+              />
+            </div>
+            <div>
+              <Title level={3}>Danh sách báo cáo dự án {project?.name}</Title>
+              <ReportTable 
+                projectId={pid || ''}
+              />
+            </div>
+          </Space>
+        )}
       </Card>
 
       <ModalAddDocument

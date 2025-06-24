@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button, message, Steps, Empty, Space, Modal } from 'antd';
 import type { IPhase } from '../interfaces/project.interface';
 import {
@@ -9,19 +9,23 @@ import {
 import dayjs from 'dayjs';
 import PhaseFormModal from './PhaseFormModal';
 import { PlusOutlined, EditOutlined, StepForwardOutlined } from '@ant-design/icons';
+
 interface IPhaseProject {
   projectId: string,
   projectStatus?: string,
   onEndingProject: (projectId: string) => void
 }
 
-const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEndingProject }) => {
+const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEndingProject }) => {
   const [phase, setPhase] = useState<IPhase>();
   const [showPhaseForm, setShowPhaseForm] = useState(false);
   const [phaseFormMode, setPhaseFormMode] = useState<'create' | 'edit'>('create');
   const [loading, setLoading] = useState(false);
 
-  const fetchPhase = async () => {
+  // Sử dụng useCallback để tránh tạo lại hàm fetchPhase mỗi lần render
+  const fetchPhase = useCallback(async () => {
+    if (!projectId) return;
+    
     try {
       setLoading(true);
       const response = await getPhaseByProjectId(projectId);
@@ -33,11 +37,11 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEn
     } finally {
       setLoading(false);
     }
-  }
+  }, [projectId]);
 
   useEffect(() => {
     fetchPhase();
-  }, [projectId]);
+  }, [fetchPhase]);
 
   const steps = phase?.phases.sort((tmp1, tmp2) => tmp1.order - tmp2.order) || [];
   const items = steps.map((item) => ({
@@ -49,20 +53,22 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEn
   const handleEdit = () => {
     setPhaseFormMode('edit');
     setShowPhaseForm(true);
-  }
+  };
 
   const handleCreate = () => {
     setPhaseFormMode('create');
     setShowPhaseForm(true);
-  }
+  };
 
   const handleFormSubmit = async (values: any) => {
+    if (!projectId) return;
+
     try {
       setLoading(true);
       const phaseData = {
         ...values,
-        projectId, // Thêm projectId vào data khi tạo mới
-        currentPhase: phase?.currentPhase || 0 // Giữ nguyên currentPhase khi edit hoặc set 0 khi tạo mới
+        projectId,
+        currentPhase: phase?.currentPhase || 0
       };
 
       if (phaseFormMode === 'create') {
@@ -73,9 +79,8 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEn
         message.success('Cập nhật giai đoạn thành công');
       }
 
-      // Refresh data
       await fetchPhase();
-      setShowPhaseForm(false); // Đóng modal sau khi hoàn thành
+      setShowPhaseForm(false);
     } catch (error: any) {
       message.error(error.message || 'Có lỗi xảy ra khi xử lý giai đoạn');
     } finally {
@@ -100,18 +105,20 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus , onEn
       setLoading(false);
     }
   };
-  const showNextPhaseConfirm = () =>{
-     Modal.confirm({
-      title : 'Chuyển giai đoạn tiếp theo',
-      icon : <StepForwardOutlined />,
-      content : "Bạn có chăc chắn muốn chuyển giai đoạn mới, hành động không thể hoàn thác!",
-      okText : 'Xác nhận',
-      cancelText : 'Hủy',
+
+  const showNextPhaseConfirm = () => {
+    Modal.confirm({
+      title: 'Chuyển giai đoạn tiếp theo',
+      icon: <StepForwardOutlined />,
+      content: "Bạn có chắc chắn muốn chuyển giai đoạn mới, hành động không thể hoàn tác!",
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
       onOk() {
         handleNextPhase();
       }
-    })
-  }
+    });
+  };
+
   return (
     <>
       {phase ?

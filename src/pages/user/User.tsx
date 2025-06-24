@@ -8,8 +8,9 @@ import { useDebounce } from "../../common/hooks/useDebounce";
 import ModalUserDetail from "./components/ModalUserDetail";
 import { deleteUser, createUser, getUsersPaging, deleteProfile } from "./services/user.service";
 import { useTranslation } from 'react-i18next';
-// import { useSelector } from 'react-redux';
-// import { selectAuthUser } from '../../common/stores/auth/authSelector';
+import {   selectAuthUser } from '../../common/stores/auth/authSelector';
+import { useSelector } from 'react-redux';
+import AccessLimit from "../../common/components/AccessLimit";
 
 const { Option } = Select;
 
@@ -34,7 +35,9 @@ const User = () => {
   const [openView, setOpenView] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-
+  const user = useSelector(selectAuthUser);
+  // const profile = useSelector(selectUserProfile);
+  if(user?.role==='guest' || user?.role==='pm') return(<><AccessLimit/></>);
   useEffect(() => {
     fetchUsers();
   }, [page, limit, debouncedSearch, debouncedRole, debouncedSort, debouncedIsActive]);

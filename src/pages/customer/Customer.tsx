@@ -7,6 +7,9 @@ import { useDebounce } from '../../common/hooks/useDebounce';
 import { DeleteOutlined , EyeOutlined } from '@ant-design/icons';
 import ModalProfileForm from '../user/components/ModalProfileForm';
 import { useTranslation } from 'react-i18next';
+import {   selectAuthUser } from '../../common/stores/auth/authSelector';
+import { useSelector } from 'react-redux';
+import AccessLimit from '../../common/components/AccessLimit';
 
 const { Option } = Select;
 
@@ -24,6 +27,8 @@ const Customer = () => {
   const [editingCustomer, setEditingCustomer] = useState<ICustomer | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const debouncedSearch = useDebounce(search, 400);
+  const user = useSelector(selectAuthUser);
+  if(user?.role === 'guest') return(<><AccessLimit/></>)  
 
   const fetchCustomers = async () => {
     setLoading(true);

@@ -41,7 +41,7 @@ const RequestResponse = () => {
     'Giai đoạn 4',
     'Giai đoạn 5',
   ];
-  const progressColors = ['#1890ff', '#1890ff', '#1890ff', '#1890ff', '#d9d9d9'];
+  const progressColors = ['#1890ff', '#d9d9d9', '#1890ff', '#1890ff', '#d9d9d9'];
 
   const progressData = {
     labels: progressLabels,
@@ -66,7 +66,7 @@ const RequestResponse = () => {
       },
       {
         label: 'Báo cáo phía khách hàng',
-        data: [1, 2, 1, 2, 2, 3, 2, 3, 3, 4],
+        data: [1, 2, 1, 2, 2, 3, 16, 3, 3, 4],
         fill: false,
         borderColor: '#52c41a',
         tension: 0.3,

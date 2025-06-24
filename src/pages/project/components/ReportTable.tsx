@@ -1,44 +1,59 @@
-import React , {useEffect , useState}from 'react';
-import { Button, Modal, Space, Table, Tag, message } from 'antd';
+import { useEffect, useState, useMemo } from 'react';
+import { Button, Modal, Space, Table, Tag, message, Input, Select } from 'antd';
 import type { TableProps } from 'antd';
-import {getReportByProjectId, createReport , deleteReport} from '../services/report.service';
+import { getReportByProjectId, createReport, deleteReport } from '../services/report.service';
 import dayjs from 'dayjs';
-import { DeleteOutlined, EyeOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import ReportFormModal from './ReportFormModal';
 import ReportDetailModal from './ReportDetailModal';
 import type { IReport } from '../interfaces/project.interface';
+import { useDebounce } from '../../../common/hooks/useDebounce';
 
-interface ReportTableProps{
+interface ReportTableProps {
   projectId: string;
 }
 
 const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
-  const [report , setReport] = useState<IReport[]>([]);
+  const [report, setReport] = useState<IReport[]>([]);
   const [page] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<IReport | null>(null);
-  const limit = 10; // page size for pagination
+  const [loading, setLoading] = useState(false);
+  
+  // UI states
+  const [search, setSearch] = useState('');
+  const [role, setRole] = useState('');
+  
+  // Sử dụng useMemo để tránh tạo object mới mỗi lần render
+  const searchParams = useMemo(() => ({
+    search,
+    role
+  }), [search, role]);
 
-  const fetchReport  = async () => {
+  const debouncedParams = useDebounce(searchParams, 500);
+
+  const fetchReport = async () => {
     try {
-      const response = await getReportByProjectId(projectId);
+      setLoading(true);
+      const response = await getReportByProjectId(projectId, {
+        search: debouncedParams.search,
+        isCustomer: debouncedParams.role
+      });
       if (response?.data) {
         setReport(response.data);
-        console.log('report', response.data);
       }
     } catch (error) {
       console.error('Error fetching report:', error);
+      message.error('Không thể tải danh sách báo cáo');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchReport();
-  }, [projectId]);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
+  }, [projectId, debouncedParams.search, debouncedParams.role]);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -162,7 +177,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       title: 'STT',
       dataIndex: "stt",
       key: "stt",
-      render: (_: any, __: any, index: number) => (page - 1) * limit + index + 1,
+      render: (_: any, __: any, index: number) => (page - 1) * 10 + index + 1,
       width: 70,
       align: "center",
     },
@@ -170,14 +185,9 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       title: 'Báo cáo',
       dataIndex: 'mainContent',
       key: 'mainContent',
-      width: 200, // Thêm width
+      width: 200,
       render: (_:any , record:IReport) => {
-        let color = 'default';
-        if(record.sender.role === 'guest' ){
-          color = 'green';
-        }else {
-          color = 'blue';
-        }
+        let color = record.sender.role === 'guest' ? 'green' : 'blue';
         return (
           <Tag color={color}>
             {record.mainContent}
@@ -189,7 +199,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       title: 'Số nội dung',
       dataIndex: 'subContentCount',
       key: 'subContentCount',
-      width: 120, // Thêm width
+      width: 120,
       render: (count) => (
         <Tag color="warning">
           {count}
@@ -201,7 +211,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       title: 'Người tạo',
       dataIndex: 'sender',
       key: 'sender',
-      width: 180, // Thêm width
+      width: 180,
       render: (sender) => {
         let color = 'default';
         if(sender.role === 'guest' ){
@@ -221,7 +231,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 130, // Thêm width
+      width: 130,
       render: (text) => <Tag color='purple'>{ dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY')}</Tag>,
       align: "center",
     },
@@ -241,18 +251,47 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
 
   return (
     <div>
-       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-      <Button type='primary' icon={<PlusOutlined />} onClick={handleOpenModal}>
-        Thêm báo cáo
-      </Button>
-    </div>
-     <Table<IReport>
+      <div style={{ 
+        marginBottom: 16, 
+        display: 'flex', 
+        justifyContent: 'space-between',
+        alignItems: 'center' 
+      }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <Input
+            placeholder="Tìm kiếm báo cáo..."
+            prefix={<SearchOutlined />}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: 200 }}
+            allowClear
+          />
+          <Select
+            style={{ width: 140 }}
+            value={role}
+            onChange={setRole}
+            placeholder="Chọn loại"
+            // allowClear
+            options={[
+              { value: '', label: 'Tất cả báo cáo' },
+              { value: 'true', label: 'Khách hàng' },
+              { value: 'false', label: 'Quản lý dự án' }
+            ]}
+          />
+        </div>
+        <Button type='primary' icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+          Thêm báo cáo
+        </Button>
+      </div>
+
+      <Table<IReport>
         columns={columns}
         dataSource={report}
         pagination={false}
         rowKey="_id"
         style={{ marginTop: 16 }}
-        scroll={{ x: 'max-content' }} // Thêm dòng này nếu cần
+        scroll={{ x: 'max-content' }}
+        loading={loading}
       />
       <ReportFormModal
         open={isModalOpen}
@@ -266,7 +305,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
         report={selectedReport}
       />
     </div>
-  )
+  );
 }
 
 export default ReportTable;

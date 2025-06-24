@@ -1,9 +1,9 @@
 import api from '../../../common/configs/apis/axios.config';
 // import type { IReport, IPayloadReport } from '../interfaces/project.interface';
 
-export const getReportByProjectId = async (projectId: string) => {
+export const getReportByProjectId = async (projectId: string , {search = "" , isCustomer = ""}) => {
     try {
-        const response = await api.get(`/report/project/${projectId}`);
+        const response = await api.get(`/report/project/${projectId}?search=${search}&isCustomer=${isCustomer}`);
         return response.data;
     } catch (error: any) {
         console.error('Error fetching report by project ID:', error);

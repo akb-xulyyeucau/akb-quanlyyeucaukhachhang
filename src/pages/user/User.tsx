@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { Table, Button, Space, message, Row, Col, Input, Select, Tooltip, Tag, Modal } from "antd";
-import { UserAddOutlined, FilterOutlined, SearchOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import { UserAddOutlined, FilterOutlined, SearchOutlined, DeleteOutlined, EyeOutlined, LineChartOutlined, PieChartOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import ModalAddUser from "./components/ModalAddUser";
 import dayjs from "dayjs";
 import { useDebounce } from "../../common/hooks/useDebounce";
 import ModalUserDetail from "./components/ModalUserDetail";
-import { deleteUser, createUser, getUsersPaging, deleteProfile } from "./services/user.service";
+import { deleteUser, createUser, getUsersPaging, deleteProfile , userStatistic} from "./services/user.service";
 import { useTranslation } from 'react-i18next';
-import {   selectAuthUser } from '../../common/stores/auth/authSelector';
+import {   selectAuthUser  } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 import AccessLimit from "../../common/components/AccessLimit";
+import StatisticCard from '../../common/components/StatisticCard';
+import type { IUserStatistic } from "./interfaces/user.interface";
 
 const { Option } = Select;
 
@@ -35,11 +37,13 @@ const User = () => {
   const [openView, setOpenView] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [statistic , setUserStatistic] = useState<IUserStatistic>();
   const user = useSelector(selectAuthUser);
   // const profile = useSelector(selectUserProfile);
   if(user?.role==='guest' || user?.role==='pm') return(<><AccessLimit/></>);
   useEffect(() => {
     fetchUsers();
+    fetchUserStatistic();
   }, [page, limit, debouncedSearch, debouncedRole, debouncedSort, debouncedIsActive]);
 
   const fetchUsers = async () => {
@@ -68,7 +72,14 @@ const User = () => {
       setLoading(false);
     }
   };
-
+  const fetchUserStatistic = async () => {
+    try {
+      const res = await userStatistic();
+      setUserStatistic(res.data);
+    } catch (error : any) {
+      throw new Error(error.message)
+    }
+  }
   const getRoleDisplay = (role: string) => {
     if (i18n.language === 'vi') {
       switch (role) {
@@ -255,7 +266,47 @@ const User = () => {
 
   return (
     <div>
+        <div
+          style={{
+              marginBottom: 16,
+              display: 'flex',
+              gap: 16,
+              flexWrap: 'wrap',
+              justifyContent: 'flex-start',
+              width: '100%',  
+            }}
+        >
+          <StatisticCard
+            icon={<LineChartOutlined />}
+            title="Tổng số tài khoản"
+            number={statistic?.totalUsers||0}
+            color="#1890FF"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng số tài khoản kích hoạt"
+            number={statistic?.totalActive || 0}
+            percent={statistic?.percentActive}
+            color="#52C41A"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng số tài khoản quản lý dự án"
+            number={statistic?.totalPM || 0}
+            percent={statistic?.percentPM}
+            color="#FAAD14"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng số tài khoản khách hàng"
+            number={statistic?.totalCustomer||0}
+            percent={statistic?.percentCustomer}
+            color="#13C2C2"
+          />
+        </div>
+
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+       
         <Col>
           <Button
             type="primary"

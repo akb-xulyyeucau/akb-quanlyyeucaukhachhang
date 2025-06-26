@@ -6,7 +6,6 @@ import {
   Row,
   Typography,
   Statistic,
-  Rate,
   Button,
   Space,
   Tag,
@@ -17,10 +16,14 @@ import { Line } from 'react-chartjs-2';
 import { Pie } from 'react-chartjs-2';
 import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined, FileSearchOutlined, StarOutlined } from '@ant-design/icons';
 import { Chart, registerables } from 'chart.js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
 // import { color } from 'chart.js/helpers';
-
+import {getFeedbackInProject} from './services/feedback.service';
+import {projectStatistic} from './services/project.service';
+import type {IFeedback , IProjectStatistic} from './interfaces/project.interface';
+import dayjs from 'dayjs';
+import RatingProject from '../../common/components/RatingProject';
 
 
 
@@ -31,49 +34,78 @@ const RequestResponse = () => {
   const { pId } = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [feedback , setFeedback] = useState<IFeedback[]>([]);
+  const [statisticData , setStatisticData] = useState<IProjectStatistic>();
+  const fetchFeedback = async () => {
+    try {
+      const res = await getFeedbackInProject(pId || '');
+      console.log(res.data)
+      console.log("id ---" , pId);
+      setFeedback(res.data);
+    } catch (error : any) {
+      throw new Error(error.message);
+    }
+  }
 
-  const projectName = 'Nền Tảng Quản Lý Nhân Sự UWU';
+  const fetchProjectStatistic = async () => {
+    try {
+      const res = await  projectStatistic(pId || '');
+      setStatisticData(res.data);
+      console.log("data---" , res.data);
+    } catch (error : any) {
+      throw new Error(error.message);
+    }
+  }
+  useEffect(() => {
+    fetchFeedback();
+    fetchProjectStatistic();
+  } , [])
 
-  const progressLabels = [
-    'Giai đoạn 1',
-    'Giai đoạn 2',
-    'Giai đoạn 3',
-    'Giai đoạn 4',
-    'Giai đoạn 5',
-  ];
-  const progressColors = ['#1890ff', '#d9d9d9', '#1890ff', '#1890ff', '#d9d9d9'];
+const totalPhases = statisticData?.pieChart?.phaseNum || 0;
+const currentPhase = statisticData?.pieChart?.currentPhase || 0;
 
-  const progressData = {
-    labels: progressLabels,
-    datasets: [
-      {
-        data: [1, 1, 1, 1, 1],
-        backgroundColor: progressColors,
-        borderWidth: 1,
-      },
-    ],
-  };
+// Tạo label cho từng giai đoạn
+const progressLabels = Array.from({ length: totalPhases }, (_, i) => `Giai đoạn ${i + 1}`);
+
+// Tạo màu: giai đoạn đã hoàn thành là xanh, chưa hoàn thành là xám
+const progressColors = Array.from({ length: totalPhases }, (_, i) =>
+  i < currentPhase ? '#1890ff' : '#d9d9d9'
+);
+
+// Dữ liệu: giai đoạn đã hoàn thành là 1, chưa hoàn thành là 1 (để Pie chart chia đều)
+const progressData = {
+  labels: progressLabels,
+  datasets: [
+    {
+      data: Array(totalPhases).fill(1),
+      backgroundColor: progressColors,
+      borderWidth: 1,
+    },
+  ],
+};
 
   const lineData = {
-    labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4', 'Tuần 5', 'Tuần 6', 'Tuần 7', 'Tuần 8', 'Tuần 9', 'Tuần 10'],
+    labels: statisticData?.chart.weekLabels,
     datasets: [
       {
         label: 'Báo cáo phía công ty',
-        data: [2, 3, 2, 4, 3, 5, 4, 6, 5, 7],
-        fill: false,
+        data: statisticData?.chart.pmReportByWeek,
+        fill: true,
         borderColor: '#1890ff',
         tension: 0.3,
       },
       {
         label: 'Báo cáo phía khách hàng',
-        data: [1, 2, 1, 2, 2, 3, 16, 3, 3, 4],
-        fill: false,
+        data: statisticData?.chart.customerReportByWeek,
+        fill: true,
         borderColor: '#52c41a',
         tension: 0.3,
       },
     ],
   };
-
+  const handleAddFeedBack = (value : any) => {
+    console.log("valuee------" , value);
+  }
   return (
 
     <div style={{ padding: '14px', maxWidth: 950, margin: '0 auto' }}>
@@ -118,23 +150,23 @@ const RequestResponse = () => {
       <Card style={{ marginBottom: 15 }}>
         {/* Tiêu đề dự án */}
         <Title level={5} style={{ marginBottom: 12, fontSize: 20 }}>
-          Dự án: <span style={{ color: '#1890ff' }}>{projectName}</span>
+          Dự án: <span style={{ color: '#1890ff' }}>{statisticData?.projectName}</span>
         </Title>
 
         {/* Grid thông tin khách hàng và thời gian */}
         <Row gutter={24}>
           <Col span={12} style={{ marginBottom: 7 }}>
-            <Text strong>Khách hàng:</Text> Hệ thống giáo dục SteamX
+            <Text strong>Khách hàng:</Text> {statisticData?.customer?.name || '---'}
           </Col>
 
           <Col span={12} style={{ marginBottom: 7 }}>
-            <Text strong>Thời gian bắt đầu:</Text> 01/06/2025
+            <Text strong>Thời gian bắt đầu:</Text> {dayjs(statisticData?.startDate).format('DD/MM/YYYY')}
           </Col>
           <Col span={12} style={{ marginBottom: 7 }}>
-            <Text strong>Quản lý dự án:</Text> Duy minh
+            <Text strong>Quản lý dự án:</Text> {statisticData?.pm?.name || '---'}
           </Col>
           <Col span={12}>
-            <Text strong>Thời gian kết thúc (dự kiến):</Text> 30/07/2025
+            <Text strong>Thời gian kết thúc (dự kiến):</Text>  {dayjs(statisticData?.estimateDate).format('DD/MM/YYYY')}
           </Col>
         </Row>
       </Card>
@@ -159,7 +191,7 @@ const RequestResponse = () => {
               />
             </div>
             <div style={{ textAlign: 'center', fontWeight: 'bold', marginTop: 8 }}>
-              Đã hoàn thành: 4/5 giai đoạn
+              Đã hoàn thành: {`${statisticData?.pieChart.currentPhase}/${statisticData?.pieChart.phaseNum}`}
             </div>
           </Card>
         </Col>
@@ -170,7 +202,7 @@ const RequestResponse = () => {
               <Col span={8}>
                 <Statistic
                   title="Báo cáo phía công ty"
-                  value={28}
+                  value={statisticData?.pmReportCount}
                   prefix={<FileTextOutlined />}
                   valueStyle={{ color: '#1890ff' }}
                 />
@@ -178,15 +210,15 @@ const RequestResponse = () => {
               <Col span={8}>
                 <Statistic
                   title="Báo cáo phía khách hàng"
-                  value={37}
+                  value={statisticData?.customerReportCount}
                   prefix={<FileTextOutlined />}
                   valueStyle={{ color: '#52c41a' }}
                 />
               </Col>
               <Col span={8}>
                 <Statistic
-                  title="Số giờ thực hiện"
-                  value={1.572}
+                  title="Số ngày thực hiện"
+                  value={statisticData?.daysInProgress}
                   prefix={<ClockCircleOutlined />}
                   valueStyle={{ color: '#1890ff' }}
                 />
@@ -213,12 +245,22 @@ const RequestResponse = () => {
       </Row>
 
       {/* ĐÁNH GIÁ TỪ KHÁCH HÀNG */}
-      <Card
-        title="🗣️ Đánh giá từ khách hàng"
+     <Card
+  title="🗣️ Đánh giá từ khách hàng"
+  style={{
+    backgroundColor: '#f6ffed',
+    border: '1px solid #b7eb8f',
+    borderRadius: 8,
+  }}
+>
+  {feedback && feedback.length > 0 ? (
+    feedback.map((fb, idx) => (
+      <div
+        key={fb._id}
         style={{
-          backgroundColor: '#f6ffed', // nền xanh lá nhạt
-          border: '1px solid #b7eb8f',
-          borderRadius: 8,
+          marginBottom: 24,
+          borderBottom: idx !== feedback.length - 1 ? '1px solid #e0e0e0' : 'none',
+          paddingBottom: 16,
         }}
       >
         {/* Hàng 1: Avatar + Tên khách hàng / Đánh giá sao */}
@@ -228,46 +270,50 @@ const RequestResponse = () => {
               <Avatar size={32} icon={<UserOutlined />} />
               <div>
                 <Text strong>Khách hàng:</Text>
-                <div>Hệ thống giáo dục SteamX</div>
+                <div>{fb.customerId?.name}</div>
               </div>
             </div>
           </Col>
           <Col span={12}>
             <Text strong>Đánh giá:</Text>
             <div>
-              <Rate disabled defaultValue={5} />
+              <RatingProject value={Number(fb.rating)} />            
             </div>
           </Col>
         </Row>
-
         {/* Hàng 2: Nhận xét */}
         <Row style={{ marginBottom: 12 }}>
           <Col span={24}>
             <Text strong>Nhận xét:</Text>
             <div style={{ marginTop: 4 }}>
-              Nhóm phát triển hỗ trợ tốt, phản hồi nhanh.
-              Giao diện rõ ràng nhưng cần cải thiện phần báo cáo xuất file.
+              {fb.comment || <span style={{ color: '#aaa' }}>Chưa có nhận xét</span>}
             </div>
           </Col>
         </Row>
-
         {/* Hàng 3: Góp ý thêm */}
         <Row>
           <Col span={24}>
             <Text strong>Góp ý thêm:</Text>
             <div style={{ marginTop: 4 }}>
-              Nhóm cần bổ sung chức năng xuất báo cáo định dạng PDF, cải thiện tốc độ phản hồi khi gửi yêu cầu.
+              {fb.suggest ? fb.suggest : <span style={{ color: '#aaa' }}>Không có</span>}
             </div>
           </Col>
         </Row>
-      </Card>
+      </div>
+    ))
+  ) : (
+    <div style={{ textAlign: 'center', color: '#aaa', fontStyle: 'italic', padding: 32 }}>
+      Khách hàng chưa đánh giá
+    </div>
+  )}
+</Card>
 
       {/* MODAL ĐÁNH GIÁ */}
       <ProjectRatingModal
         open={isModalOpen}
         onOk={(values) => {
-          console.log('Đánh giá gửi:', values);
-          setIsModalOpen(false);
+          handleAddFeedBack(values)
+           setIsModalOpen(false)
         }}
         onCancel={() => setIsModalOpen(false)}
       />

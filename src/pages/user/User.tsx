@@ -8,7 +8,7 @@ import { useDebounce } from "../../common/hooks/useDebounce";
 import ModalUserDetail from "./components/ModalUserDetail";
 import { deleteUser, createUser, getUsersPaging, deleteProfile , userStatistic} from "./services/user.service";
 import { useTranslation } from 'react-i18next';
-import {   selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
+import {   selectAuthUser  } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 import AccessLimit from "../../common/components/AccessLimit";
 import StatisticCard from '../../common/components/StatisticCard';

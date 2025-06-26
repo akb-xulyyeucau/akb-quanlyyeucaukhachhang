@@ -11,6 +11,7 @@ interface ModalAddUserProps {
   isError?: boolean;
   errorMessage?: string;
   onResetError: () => void;
+  onRefreshStatistic : () => void;
 }
 
 const ModalAddUser = ({ open, onOk, onCancel, isError, errorMessage, onResetError }: ModalAddUserProps) => {
@@ -25,6 +26,9 @@ const ModalAddUser = ({ open, onOk, onCancel, isError, errorMessage, onResetErro
       //   form.resetFields(); // Reset form only on success
       // }
       form.resetFields(); // Reset form after successful submission
+      if(onRefreshStatistic){
+        onRefreshStatistic()
+      }
     } catch (err) {
       // Validation failed, do nothing (Ant Design will show validation errors)
     }
@@ -140,3 +144,7 @@ const ModalAddUser = ({ open, onOk, onCancel, isError, errorMessage, onResetErro
 };
 
 export default ModalAddUser;
+
+function onRefreshStatistic() {
+  throw new Error("Function not implemented.");
+}

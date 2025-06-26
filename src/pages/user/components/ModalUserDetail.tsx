@@ -21,7 +21,7 @@ const getRoleTag = (role: string, t: any) => {
   }
 };
 
-const ModalUserDetail = ({ open, user, onCancel, onRefreshData }: any) => {
+const ModalUserDetail = ({ open, user, onCancel, onRefreshData , onRefreshStatistic }: any) => {
   const { t } = useTranslation('user');
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -64,6 +64,7 @@ const ModalUserDetail = ({ open, user, onCancel, onRefreshData }: any) => {
         const updateRes = await updateProfile(user.role, profileData._id, dataToSend);
         if (updateRes.success) {
           message.success(updateRes.message);
+          onRefreshStatistic?.();
         }
       } else {
         const createRes = await createProfile(user.role, {
@@ -76,10 +77,10 @@ const ModalUserDetail = ({ open, user, onCancel, onRefreshData }: any) => {
           if (activeRes.success) {
             message.success(createRes.message);
             onRefreshData?.();
+            onRefreshStatistic?.();
           }
         }
       }
-
       setOpenProfileModal(false);
 
       try {

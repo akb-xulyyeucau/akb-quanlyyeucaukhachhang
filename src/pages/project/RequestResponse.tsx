@@ -311,6 +311,9 @@ const progressData = {
       {/* MODAL ĐÁNH GIÁ */}
       <ProjectRatingModal
         open={isModalOpen}
+        customerName= {statisticData?.customer.name}
+        projectName= {statisticData?.projectName}
+
         onOk={(values) => {
           handleAddFeedBack(values)
            setIsModalOpen(false)

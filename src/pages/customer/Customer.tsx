@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Table, Input, Button, Select, Space, message, Modal, Tooltip  , Tag} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { ICustomer } from './interface/customer.interface';
-import { getCustomerPanition , updateCustomerById , deleteCustomerById , updateUserActive} from './services/customer.service';
+import type { ICustomer, ICustomerStatisticResponse } from './interface/customer.interface';
+import { getCustomerPanition , updateCustomerById , deleteCustomerById , updateUserActive, customerStatistc} from './services/customer.service';
 import { useDebounce } from '../../common/hooks/useDebounce';
-import { DeleteOutlined , EyeOutlined } from '@ant-design/icons';
+import { DeleteOutlined , EyeOutlined, LineChartOutlined, PieChartOutlined } from '@ant-design/icons';
 import ModalProfileForm from '../user/components/ModalProfileForm';
 import { useTranslation } from 'react-i18next';
 import {   selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 import AccessLimit from '../../common/components/AccessLimit';
+import StatisticCard from '../../common/components/StatisticCard';
 
 const { Option } = Select;
 
@@ -26,6 +27,7 @@ const Customer = () => {
   const [openProfileModal, setOpenProfileModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<ICustomer | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [statistic , setStaitistic] = useState<ICustomerStatisticResponse>();
   const debouncedSearch = useDebounce(search, 400);
   const user = useSelector(selectAuthUser);
   if(user?.role === 'guest') return(<><AccessLimit/></>)  
@@ -49,8 +51,19 @@ const Customer = () => {
     }
   };
 
+  const fetchCustomerStatistic = async () => {
+    try {
+      const res = await customerStatistc();
+      setStaitistic(res.data);
+      console.log(res.data);
+    } catch (error) {
+      
+    }
+  }
+
   useEffect(() => {
     fetchCustomers();
+    fetchCustomerStatistic();
   }, [page, limit, debouncedSearch, sort, sortBy]);
    
   const handleEdit = (record: ICustomer) => {
@@ -70,6 +83,7 @@ const Customer = () => {
       setOpenProfileModal(false);
       setEditingCustomer(null);
       fetchCustomers();
+      fetchCustomerStatistic();
     } catch (err: any) {
       message.error(t('updateCustomer.updateEror'));
     } finally {
@@ -90,6 +104,7 @@ const handleDelete = (record: ICustomer) => {
           await updateUserActive(record.userId, false);
           message.success( t('handleDelete.success_message'));
           fetchCustomers();
+          fetchCustomerStatistic();
         } catch (err: any) {
           message.error( t('handleDelete.error_message'));
         }
@@ -182,17 +197,70 @@ const handleDelete = (record: ICustomer) => {
 
   return (
     <div>
+       <div
+          style={{
+              marginBottom: 16,
+              display: 'flex',
+              gap: 16,
+              flexWrap: 'wrap',
+              justifyContent: 'flex-start',
+              width: '100%',  
+            }}
+        >
+          <StatisticCard
+            icon={<LineChartOutlined />}
+            title="Tổng số khách hàng"
+            number={statistic?.totalCustomer || 0}
+            percent={100}
+            color="#1890FF"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng số khách hàng có dự án"
+            number={statistic?.totalCustomerInProject || 0}
+            percent={statistic?.percentProjectWithCustomer}
+            color="#52C41A"
+          />
+          {statistic?.customersWithProjects.map((item, index) => (
+            <Tooltip
+              key={item.customerName}
+              placement="bottom"
+              title={
+                item.projects && item.projects.length > 0 ? (
+                  <ul style={{ margin: 0, padding: '0 16px', listStyle: 'disc'}}>
+                    <div>Danh sách dự án của {item.customerName}</div>
+                    {item.projects.map((proj: { name: string }, idx: number) => (
+                      <li key={idx}>{proj.name}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span>Không có dự án</span>
+                )
+              }
+            >
+              <div>
+                <StatisticCard
+                  icon={<PieChartOutlined />}
+                  title={`Tổng số dự án của ${item.customerName}`}
+                  number={item.projectCount}
+                  percent={item.percentProject}
+                  color= {index % 2 === 0 ? "#FAAD14" : "#13C2C2"}
+                />
+              </div>
+            </Tooltip>
+          ))}
+        </div>
       <Space style={{ marginBottom: 16 }}>
         <Input
-  placeholder={t('customer_page.search_placeholder')}
-  value={search}
-  onChange={(e) => {
-    setSearch(e.target.value);
-    setPage(1);
-  }}
-  allowClear
-  style={{ width: 200 }}
-/>
+          placeholder={t('customer_page.search_placeholder')}
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          allowClear
+          style={{ width: 200 }}
+        />
         <Select value={sortBy} onChange={v => setSortBy(v)} style={{ width: 150 }}>
           <Option value="alias">{t('customer_page.sort_by_alias')}
           </Option>

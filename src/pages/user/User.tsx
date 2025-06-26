@@ -214,6 +214,7 @@ const User = () => {
       if (userRes.success) {
         message.success(userRes.message);
         fetchUsers();
+        fetchUserStatistic();
       } else {
         message.error(userRes.message);
       }
@@ -237,6 +238,7 @@ const User = () => {
       // Success case
       message.success(res.message);
       fetchUsers();
+      fetchUserStatistic();
       setOpen(false); // Close modal
       setIsError(false); // Clear error state
       setErrorMessage(''); // Clear error message
@@ -280,6 +282,7 @@ const User = () => {
             icon={<LineChartOutlined />}
             title="Tổng số tài khoản"
             number={statistic?.totalUsers||0}
+            percent={100}
             color="#1890FF"
           />
           <StatisticCard
@@ -393,12 +396,16 @@ const User = () => {
         isError={isError}
         errorMessage={errorMessage}
         onResetError={handleResetError}
+        onRefreshStatistic={fetchUserStatistic} // Thêm dòng này
+
       />
       <ModalUserDetail
         open={openView}
         user={viewUser}
         onCancel={handleCloseModal}
         onRefreshData={fetchUsers}
+        onRefreshStatistic={fetchUserStatistic} // Thêm dòng này
+
       />
     </div>
   );

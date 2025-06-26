@@ -1,6 +1,7 @@
-import { Modal, Form, Input, Rate, Typography, Row, Col, Divider, message } from 'antd';
-import React from 'react';
+import { Modal, Form, Input, Typography, Row, Col, Divider } from 'antd';
+import React, { useState } from 'react';
 import { SendOutlined } from '@ant-design/icons';
+import RatingProject from '../../../common/components/RatingProject';
 
 const { Text } = Typography;
 
@@ -8,7 +9,6 @@ interface Props {
   open: boolean;
   onOk: (values: any) => void;
   onCancel: () => void;
-
   projectName?: string;
   customerName?: string;
   time?: string;
@@ -18,22 +18,40 @@ const ProjectRatingModal: React.FC<Props> = ({
   open,
   onOk,
   onCancel,
-  projectName = 'Nền tảng Quản lý ABC',
-  customerName = 'Hệ thống giáo dục SteamX',
-  time = '01/06/2025 - 30/07/2025',
+  projectName,
+  customerName,
+  time,
 }) => {
   const [form] = Form.useForm();
+  const [rating, setRating] = useState(0); // Bắt đầu với 0 (chưa chọn)
 
   const handleSubmit = () => {
     form
       .validateFields()
       .then((values) => {
+        console.log('Form values before submit:', values);
         onOk(values);
-        message.success('Cảm ơn quý khách đã tham gia đánh giá!');
-        form.resetFields();
+        resetForm();
       })
-      .catch(() => { });
-      console.log("value ======" ,  form.getFieldValue)
+      .catch((error) => {
+        console.log('Form validation failed:', error);
+      });
+  };
+
+  const handleCancel = () => {
+    resetForm();
+    onCancel();
+  };
+
+  const resetForm = () => {
+    form.resetFields();
+    setRating(0); // Reset rating về 0 (chưa chọn)
+  };
+
+  const handleRatingChange = (value: number) => {
+    console.log('Rating changed to:', value); // Debug log
+    setRating(value);
+    form.setFieldsValue({ rating: value });
   };
 
   return (
@@ -41,13 +59,15 @@ const ProjectRatingModal: React.FC<Props> = ({
       title="Đánh giá dự án"
       open={open}
       onOk={handleSubmit}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       okText="Gửi đánh giá"
       cancelText="Hủy"
       width={720}
       okButtonProps={{
         icon: <SendOutlined />,
       }}
+
+      afterClose={resetForm}
     >
       {/* THÔNG TIN DỰ ÁN */}
       <div
@@ -83,18 +103,32 @@ const ProjectRatingModal: React.FC<Props> = ({
       </div>
 
       {/* FORM ĐÁNH GIÁ */}
-      <Form form={form} layout="vertical">
-
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ rating: 0 }} //  Bắt đầu với 0 sao
+      >
         {/* Đánh giá tổng thể */}
         <Form.Item
           name="rating"
           label="Đánh giá mức độ hài lòng tổng thể"
-
+          rules={[
+            { required: true, message: 'Vui lòng chọn mức độ hài lòng!' },
+            {
+              validator: (_, value) => {
+                if (!value || value === 0) {
+                  return Promise.reject(new Error('Vui lòng chọn số sao đánh giá!'));
+                }
+                return Promise.resolve();
+              },
+            },
+          ]}
         >
-          <div style={{ textAlign: 'left' }}>
-            <Rate />
-          </div>
-
+          <RatingProject
+            value={rating}
+            onChange={handleRatingChange}
+          // Cho phép người dùng thay đổi đánh giá
+          />
         </Form.Item>
 
         <Form.Item
@@ -112,15 +146,13 @@ const ProjectRatingModal: React.FC<Props> = ({
         {/* Ý kiến đóng góp */}
         <Form.Item
           name="suggest"
-          label="💬 4. Ý kiến đóng góp / phản hồi thêm"
+          label="Ý kiến đóng góp / phản hồi thêm"
         >
           <Input.TextArea
             rows={4}
             placeholder="Viết ý kiến của bạn (không bắt buộc)"
           />
         </Form.Item>
-
-
       </Form>
     </Modal>
   );

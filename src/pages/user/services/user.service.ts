@@ -80,11 +80,10 @@ export const updateProfile = async (role : string , profileId : string , profile
             return response.data;
         }else{
             const response = await api.put(`/pm/${profileId}` , profileData );
-            response.data
+            return response.data;
         }
     } catch (error : any) {
         throw new Error(error.response?.data?.message || "Lỗi không xác định")      
-
     }
 }
 

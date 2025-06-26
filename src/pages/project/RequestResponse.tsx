@@ -9,7 +9,8 @@ import {
   Button,
   Space,
   Tag,
-  Avatar
+  Avatar,
+  message
 
 } from 'antd';
 import { Line } from 'react-chartjs-2';
@@ -19,13 +20,13 @@ import { Chart, registerables } from 'chart.js';
 import { useEffect, useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
 // import { color } from 'chart.js/helpers';
-import {getFeedbackInProject} from './services/feedback.service';
-import {projectStatistic} from './services/project.service';
-import type {IFeedback , IProjectStatistic} from './interfaces/project.interface';
+import { addFeedback, getFeedbackInProject } from './services/feedback.service';
+import { projectStatistic } from './services/project.service';
+import type { IFeedback, IProjectStatistic } from './interfaces/project.interface';
 import dayjs from 'dayjs';
 import RatingProject from '../../common/components/RatingProject';
-
-
+import {  selectUserProfile } from '../../common/stores/auth/authSelector';
+import { useSelector } from 'react-redux';
 
 Chart.register(...registerables);
 const { Title, Text } = Typography;
@@ -34,55 +35,58 @@ const RequestResponse = () => {
   const { pId } = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [feedback , setFeedback] = useState<IFeedback[]>([]);
-  const [statisticData , setStatisticData] = useState<IProjectStatistic>();
+  const [feedback, setFeedback] = useState<IFeedback[]>([]);
+  const [statisticData, setStatisticData] = useState<IProjectStatistic>();
+  const profile = useSelector(selectUserProfile);
+  const cId = profile?._id || '';
+
   const fetchFeedback = async () => {
     try {
       const res = await getFeedbackInProject(pId || '');
       console.log(res.data)
-      console.log("id ---" , pId);
+      console.log("id ---", pId);
       setFeedback(res.data);
-    } catch (error : any) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
 
   const fetchProjectStatistic = async () => {
     try {
-      const res = await  projectStatistic(pId || '');
+      const res = await projectStatistic(pId || '');
       setStatisticData(res.data);
-      console.log("data---" , res.data);
-    } catch (error : any) {
+      console.log("data---", res.data);
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
   useEffect(() => {
     fetchFeedback();
     fetchProjectStatistic();
-  } , [])
+  }, [])
 
-const totalPhases = statisticData?.pieChart?.phaseNum || 0;
-const currentPhase = statisticData?.pieChart?.currentPhase || 0;
+  const totalPhases = statisticData?.pieChart?.phaseNum || 0;
+  const currentPhase = statisticData?.pieChart?.currentPhase || 0;
 
-// Tạo label cho từng giai đoạn
-const progressLabels = Array.from({ length: totalPhases }, (_, i) => `Giai đoạn ${i + 1}`);
+  // Tạo label cho từng giai đoạn
+  const progressLabels = Array.from({ length: totalPhases }, (_, i) => `Giai đoạn ${i + 1}`);
 
-// Tạo màu: giai đoạn đã hoàn thành là xanh, chưa hoàn thành là xám
-const progressColors = Array.from({ length: totalPhases }, (_, i) =>
-  i < currentPhase ? '#1890ff' : '#d9d9d9'
-);
+  // Tạo màu: giai đoạn đã hoàn thành là xanh, chưa hoàn thành là xám
+  const progressColors = Array.from({ length: totalPhases }, (_, i) =>
+    i < currentPhase ? '#1890ff' : '#d9d9d9'
+  );
 
-// Dữ liệu: giai đoạn đã hoàn thành là 1, chưa hoàn thành là 1 (để Pie chart chia đều)
-const progressData = {
-  labels: progressLabels,
-  datasets: [
-    {
-      data: Array(totalPhases).fill(1),
-      backgroundColor: progressColors,
-      borderWidth: 1,
-    },
-  ],
-};
+  // Dữ liệu: giai đoạn đã hoàn thành là 1, chưa hoàn thành là 1 (để Pie chart chia đều)
+  const progressData = {
+    labels: progressLabels,
+    datasets: [
+      {
+        data: Array(totalPhases).fill(1),
+        backgroundColor: progressColors,
+        borderWidth: 1,
+      },
+    ],
+  };
 
   const lineData = {
     labels: statisticData?.chart.weekLabels,
@@ -103,8 +107,26 @@ const progressData = {
       },
     ],
   };
-  const handleAddFeedBack = (value : any) => {
-    console.log("valuee------" , value);
+
+  const handleAddFeedBack = async (value: any) => {
+    console.log("Dữ liệu gửi đi:", value);
+    try {
+      const dataToSend = {
+        projectId: pId || '',
+        customerId: cId,
+        rating: Number(value.rating),
+        comment: value.comment,
+        suggest: value.suggest,
+
+      };
+      await addFeedback(dataToSend);
+      message.success('Cảm ơn quý khách đã tham gia đánh giá!');
+      await fetchFeedback(); // reload lại danh sách feedback
+    } catch (err) {
+      message.error('Gửi đánh giá thất bại!');
+      console.error(err);
+    }
+    console.log("valuee------", value);
   }
   return (
 
@@ -245,77 +267,81 @@ const progressData = {
       </Row>
 
       {/* ĐÁNH GIÁ TỪ KHÁCH HÀNG */}
-     <Card
-  title="🗣️ Đánh giá từ khách hàng"
-  style={{
-    backgroundColor: '#f6ffed',
-    border: '1px solid #b7eb8f',
-    borderRadius: 8,
-  }}
->
-  {feedback && feedback.length > 0 ? (
-    feedback.map((fb, idx) => (
-      <div
-        key={fb._id}
+      <Card
+        title="🗣️ Đánh giá từ khách hàng"
         style={{
-          marginBottom: 24,
-          borderBottom: idx !== feedback.length - 1 ? '1px solid #e0e0e0' : 'none',
-          paddingBottom: 16,
+          backgroundColor: '#f6ffed',
+          border: '1px solid #b7eb8f',
+          borderRadius: 8,
         }}
       >
-        {/* Hàng 1: Avatar + Tên khách hàng / Đánh giá sao */}
-        <Row gutter={24} style={{ marginBottom: 12 }} align="middle">
-          <Col span={12}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar size={32} icon={<UserOutlined />} />
-              <div>
-                <Text strong>Khách hàng:</Text>
-                <div>{fb.customerId?.name}</div>
-              </div>
+        {feedback && feedback.length > 0 ? (
+          feedback.map((fb, idx) => (
+            <div
+              key={fb._id}
+              style={{
+                marginBottom: 24,
+                borderBottom: idx !== feedback.length - 1 ? '1px solid #e0e0e0' : 'none',
+                paddingBottom: 16,
+              }}
+            >
+              {/* Hàng 1: Avatar + Tên khách hàng / Đánh giá sao */}
+              <Row gutter={24} style={{ marginBottom: 12 }} align="middle">
+                <Col span={12}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Avatar size={32} icon={<UserOutlined />} />
+                    <div>
+                      <Text strong>Khách hàng:</Text>
+                      <div>{fb.customerId?.name}</div>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <Text strong>Đánh giá:</Text>
+                  <div>
+                    <RatingProject value={Number(fb.rating)} disabled={true} />
+                  </div>
+                </Col>
+              </Row>
+              {/* Hàng 2: Nhận xét */}
+              <Row style={{ marginBottom: 12 }}>
+                <Col span={24}>
+                  <Text strong>Nhận xét:</Text>
+                  <div style={{ marginTop: 4 }}>
+                    {fb.comment || <span style={{ color: '#aaa' }}>Chưa có nhận xét</span>}
+                  </div>
+                </Col>
+              </Row>
+              {/* Hàng 3: Góp ý thêm */}
+              <Row>
+                <Col span={24}>
+                  <Text strong>Góp ý thêm:</Text>
+                  <div style={{ marginTop: 4 }}>
+                    {fb.suggest ? fb.suggest : <span style={{ color: '#aaa' }}>Không có</span>}
+                  </div>
+                </Col>
+              </Row>
             </div>
-          </Col>
-          <Col span={12}>
-            <Text strong>Đánh giá:</Text>
-            <div>
-              <RatingProject value={Number(fb.rating)} />            
-            </div>
-          </Col>
-        </Row>
-        {/* Hàng 2: Nhận xét */}
-        <Row style={{ marginBottom: 12 }}>
-          <Col span={24}>
-            <Text strong>Nhận xét:</Text>
-            <div style={{ marginTop: 4 }}>
-              {fb.comment || <span style={{ color: '#aaa' }}>Chưa có nhận xét</span>}
-            </div>
-          </Col>
-        </Row>
-        {/* Hàng 3: Góp ý thêm */}
-        <Row>
-          <Col span={24}>
-            <Text strong>Góp ý thêm:</Text>
-            <div style={{ marginTop: 4 }}>
-              {fb.suggest ? fb.suggest : <span style={{ color: '#aaa' }}>Không có</span>}
-            </div>
-          </Col>
-        </Row>
-      </div>
-    ))
-  ) : (
-    <div style={{ textAlign: 'center', color: '#aaa', fontStyle: 'italic', padding: 32 }}>
-      Khách hàng chưa đánh giá
-    </div>
-  )}
-</Card>
+          ))
+        ) : (
+          <div style={{ textAlign: 'center', color: '#aaa', fontStyle: 'italic', padding: 32 }}>
+            Khách hàng chưa đánh giá
+          </div>
+        )}
+      </Card>
 
       {/* MODAL ĐÁNH GIÁ */}
       <ProjectRatingModal
         open={isModalOpen}
+        customerName= {statisticData?.customer.name}
+        projectName= {statisticData?.projectName}
+
         onOk={(values) => {
           handleAddFeedBack(values)
-           setIsModalOpen(false)
+          setIsModalOpen(false)
         }}
         onCancel={() => setIsModalOpen(false)}
+        time={`${dayjs(statisticData?.startDate).format('DD/MM/YYYY')} - ${dayjs(Date.now()).format('DD/MM/YYYY')}`}
       />
     </div >
 

@@ -36,3 +36,12 @@ export const updateCustomerById = async (cId : string , customerData : any) => {
         throw new Error(error.response?.data?.message || 'Lỗi không xác định');
     }
 }
+
+export const customerStatistc = async () => {
+    try {
+        const response = await api.get(`/customer/statistic`);
+        return response.data;
+    } catch (error : any){
+        throw new Error(error.response?.data?.message);
+    }
+}

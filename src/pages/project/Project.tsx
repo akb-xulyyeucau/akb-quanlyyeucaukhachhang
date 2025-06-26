@@ -1,13 +1,22 @@
-import { useState, useEffect } from 'react';
-import { Button, Dropdown, Table, Tooltip , Tag} from 'antd';
+import { useState, useEffect, useCallback } from 'react';
+import { Button, Dropdown, Table, Tooltip, Tag, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
-import { getAllProject , getProjectByCustomerId} from './services/project.service';
-import { EditOutlined, DeleteOutlined, EllipsisOutlined} from '@ant-design/icons';
+import { getAllProject, getProjectByCustomerId } from './services/project.service';
+import { EditOutlined, EllipsisOutlined, AreaChartOutlined, FilterOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
+import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/authSelector';
+import ModalFilter from './components/ModalFilter';
+import type { Dayjs } from 'dayjs';
+
+interface FilterValues {
+  searchTerm: string;
+  isDone?: boolean;
+  timeFilterType: 'month' | 'quarter';
+  selectedDate: Dayjs | null;
+}
 
 const CustomerProject = () => {
   const navigate = useNavigate();
@@ -15,38 +24,139 @@ const CustomerProject = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false); // Thêm dòng này
+  const [loading, setLoading] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<Partial<FilterValues>>({});
 
   const user = useSelector(selectAuthUser);
-  const profile = useSelector(selectUserProfile); 
-  const fetchProjectData = async () => {
-    setLoading(true); // Bắt đầu loading
+  const profile = useSelector(selectUserProfile);
+
+  const fetchProjectData = useCallback(async (filters: Partial<FilterValues> = {}) => {
+    setLoading(true);
     try {
-      if (user?.role === "guest" && profile?._id) {
-        const response = await getProjectByCustomerId(profile?._id);
-        setProjects(response.data || []);
-        setTotal(response.pagination?.total || response.data?.length || 0);
-      } else {
-        const response = await getAllProject();
-        setProjects(response.data || []);
-        setTotal(response.pagination?.total || response.data?.length || 0);
+      const queryParams = new URLSearchParams();
+      queryParams.append('page', page.toString());
+      queryParams.append('limit', limit.toString());
+      
+      if (filters.searchTerm) {
+        queryParams.append('searchTerm', filters.searchTerm);
       }
+      if (filters.isDone !== undefined) {
+        queryParams.append('isDone', filters.isDone.toString());
+      }
+      
+      if (filters.selectedDate) {
+        const timeFilter = {
+          type: filters.timeFilterType,
+          year: filters.selectedDate.year(),
+          value: filters.timeFilterType === 'month' 
+            ? filters.selectedDate.month() + 1
+            : Math.floor(filters.selectedDate.month() / 3) + 1
+        };
+        queryParams.append('timeFilter', JSON.stringify(timeFilter));
+      }
+
+      const response = user?.role === "guest" && profile?._id
+        ? await getProjectByCustomerId(profile._id, queryParams.toString())
+        : await getAllProject(queryParams.toString());
+
+      setProjects(response.data || []);
+      setTotal(response.pagination?.totalItems || response.data?.length || 0);
     } finally {
-      setLoading(false); // Kết thúc loading
+      setLoading(false);
     }
-  };
+  }, [page, limit, user?.role, profile?._id]);
 
   useEffect(() => {
-    fetchProjectData();
-  }, [page, limit]);
+    fetchProjectData(activeFilters);
+  }, [fetchProjectData, page, limit]);
+
+  const handleFilter = (values: FilterValues) => {
+    setActiveFilters(values);
+    setPage(1);
+    setFilterModalVisible(false);
+    fetchProjectData(values);
+  };
+
+  const removeFilter = (key: keyof FilterValues) => {
+    const newFilters = { ...activeFilters };
+    delete newFilters[key];
+    setActiveFilters(newFilters);
+    setPage(1);
+    fetchProjectData(newFilters);
+  };
+
+  const renderFilterChips = () => {
+    const chips = [];
+
+    if (activeFilters.searchTerm) {
+      chips.push(
+        <Tag 
+          key="searchTerm" 
+          closable 
+          onClose={() => removeFilter('searchTerm')}
+          style={{ marginRight: 8 }}
+        >
+          Tên: {activeFilters.searchTerm}
+        </Tag>
+      );
+    }
+
+    if (activeFilters.isDone !== undefined) {
+      chips.push(
+        <Tag 
+          key="isDone" 
+          closable 
+          onClose={() => removeFilter('isDone')}
+          style={{ marginRight: 8 }}
+        >
+          Trạng thái: {activeFilters.isDone ? 'Đã hoàn thành' : 'Đang thực hiện'}
+        </Tag>
+      );
+    }
+
+    if (activeFilters.selectedDate) {
+      const format = activeFilters.timeFilterType === 'month' ? 'MM/YYYY' : '[Quý] Q/YYYY';
+      chips.push(
+        <Tag 
+          key="timeFilter" 
+          closable 
+          onClose={() => {
+            removeFilter('selectedDate');
+            removeFilter('timeFilterType');
+          }}
+          style={{ marginRight: 8 }}
+        >
+          Thời gian: {activeFilters.selectedDate.format(format)}
+        </Tag>
+      );
+    }
+
+    return chips.length > 0 ? (
+      <Space style={{ marginBottom: 16 }}>
+        {chips}
+        {chips.length > 0 && (
+          <Button 
+            type="link" 
+            size="small" 
+            onClick={() => {
+              setActiveFilters({});
+              setPage(1);
+              fetchProjectData({});
+            }}
+          >
+            Xóa tất cả
+          </Button>
+        )}
+      </Space>
+    ) : null;
+  };
 
   const handleViewDetail = (record: IProject) => {
-    console.log("chi tiết : ", record);
     navigate(`/project/${record._id}`);
   }
 
   const handleViewLog = (record: IProject) => {
-    console.log("Lịch sử ", record)
     navigate(`/request-response/${record._id}`);
   }
 
@@ -134,7 +244,7 @@ const CustomerProject = () => {
             key: 'log',
             label: (
               <span>
-                <DeleteOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />
+                <AreaChartOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />
                 Yêu cầu và phản hồi
               </span>
             ),
@@ -162,6 +272,27 @@ const CustomerProject = () => {
 
   return (
     <div>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <Button
+            type="primary"
+            icon={<FilterOutlined />}
+            onClick={() => setFilterModalVisible(true)}
+          >
+            Bộ lọc
+          </Button>
+        </div>
+        {renderFilterChips()}
+      </div>
+
+      <ModalFilter
+        visible={filterModalVisible}
+        onCancel={() => setFilterModalVisible(false)}
+        onFilter={handleFilter}
+        initialValues={activeFilters}
+        loading={loading}
+      />
+
       <Table
         rowKey="_id"
         columns={columns}
@@ -180,7 +311,6 @@ const CustomerProject = () => {
         }}
         scroll={{ x: true }}
       />
-      
     </div>
   );
 };

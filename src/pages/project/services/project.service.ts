@@ -1,11 +1,12 @@
 import api from '../../../common/configs/apis/axios.config';
 import type { IProject } from '../interfaces/project.interface';
 
-export const getAllProject = async () => {
+export const getAllProject = async (queryParams?: string) => {
     try {
-        const res = await api.get('/project');
-        return res.data;
-    } catch (error : any) {
+        const url = queryParams ? `/project?${queryParams}` : '/project';
+        const response = await api.get(url);
+        return response.data;
+    } catch (error: any) {
         return error.message;
     }
 }
@@ -91,11 +92,12 @@ export const getProjectDetail = async (projectId : string) => {
     }
 }
 
-export const getProjectByCustomerId  = async (cId : string) => {
+export const getProjectByCustomerId = async (cId: string, queryParams?: string) => {
     try {
-        const res = await api.get(`/project/customer/${cId}`);
-        return res.data;
-    } catch (error : any) {
+        const url = queryParams ? `/project/customer/${cId}?${queryParams}` : `/project/customer/${cId}`;
+        const response = await api.get(url);
+        return response.data;
+    } catch (error: any) {
         return error.message;
     }
 }

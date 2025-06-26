@@ -106,6 +106,39 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
     }
   };
 
+  const handleEndingProject = async () => {
+    if (!phase?._id || !steps.length) return;
+
+    try {
+      setLoading(true);
+      // Cập nhật currentPhase thành phase cuối cùng
+      await updatePhaseById(phase._id, {
+        ...phase,
+        currentPhase: steps.length 
+      });
+      await fetchPhase();
+      // Gọi callback để kết thúc dự án
+      onEndingProject(projectId);
+    } catch (error: any) {
+      message.error(error.message || 'Không thể cập nhật giai đoạn cuối cùng');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const showEndingPhaseConfirm = (_projectId: string) => {
+    Modal.confirm({
+      title: 'Xác nhận kết thúc dự án',
+      icon: <StepForwardOutlined />,
+      content: "Bạn có chắc chắn muốn kết thúc dự án này? Hành động này sẽ cập nhật trạng thái dự án thành 'Đã hoàn thành'",
+      okText: 'Xác nhận',
+      cancelText: 'Hủy',
+      onOk() {
+        handleEndingProject();
+      }
+    });
+  };
+
   const showNextPhaseConfirm = () => {
     Modal.confirm({
       title: 'Chuyển giai đoạn tiếp theo',
@@ -134,7 +167,12 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
             Chỉnh sửa giai đoạn
           </Button>
           {phase.currentPhase === steps.length - 1 && (
-              <Button type="primary" onClick={() => onEndingProject(projectId)} disabled={projectStatus === 'Đã hoàn thành'}>
+              <Button 
+                type="primary" 
+                onClick={() => showEndingPhaseConfirm(projectId)} 
+                disabled={projectStatus === 'Đã hoàn thành'}
+                loading={loading}
+              >
                 Hoàn thành
               </Button>
             )}

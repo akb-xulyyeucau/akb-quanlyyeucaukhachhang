@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Rate, Typography, Row, Col, Divider, message } from 'antd';
+import { Modal, Form, Input, Typography, Row, Col, Divider } from 'antd';
 import React, { useState } from 'react';
 import { SendOutlined } from '@ant-design/icons';
 import RatingProject from '../../../common/components/RatingProject';

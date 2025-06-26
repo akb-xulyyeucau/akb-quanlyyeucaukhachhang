@@ -1,5 +1,4 @@
 import api from '../../../common/configs/apis/axios.config';
-import type { IFeedback } from '../interfaces/project.interface';
 
 export const getFeedbackInProject = async (projectId: string) => {
     try {

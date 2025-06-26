@@ -25,7 +25,7 @@ import { projectStatistic } from './services/project.service';
 import type { IFeedback, IProjectStatistic } from './interfaces/project.interface';
 import dayjs from 'dayjs';
 import RatingProject from '../../common/components/RatingProject';
-import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/authSelector';
+import {  selectUserProfile } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 
 Chart.register(...registerables);
@@ -341,9 +341,7 @@ const RequestResponse = () => {
           setIsModalOpen(false)
         }}
         onCancel={() => setIsModalOpen(false)}
-        projectName={statisticData?.projectName || ''}
-        customerName={statisticData?.customer?.name || ''}
-        time={`${dayjs(statisticData?.startDate).format('DD/MM/YYYY')} - ${dayjs(statisticData?.estimateDate).format('DD/MM/YYYY')}`}
+        time={`${dayjs(statisticData?.startDate).format('DD/MM/YYYY')} - ${dayjs(Date.now()).format('DD/MM/YYYY')}`}
       />
     </div >
 

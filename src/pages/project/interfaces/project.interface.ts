@@ -101,3 +101,45 @@ export interface IPayloadReport {
     day : Date | string,
     subContent : Array<ISubContent>,
 }
+
+export interface IFeedback {
+  _id: string;
+  customerId?: {
+    name?: string;
+    [key: string]: any;
+  };
+  rating?: number;
+  comment?: string;
+  suggest?: string;
+  [key: string]: any;
+};
+
+export interface IProjectStatistic {
+  projectName: string;
+  startDate: Date | string;
+  estimateDate: Date | string;
+  pm: {
+    _id: string;
+    alias: string;
+    name: string;
+    emailContact: string;
+  };
+  customer: {
+    _id: string;
+    alias: string;
+    name: string;
+    emailContact: string;
+  };
+  daysInProgress: number;
+  pmReportCount: number;
+  customerReportCount: number;
+  pieChart: {
+    currentPhase: number;
+    phaseNum: number;
+  };
+  chart: {
+    weekLabels: string[];
+    pmReportByWeek: number[];
+    customerReportByWeek: number[];
+  };
+}

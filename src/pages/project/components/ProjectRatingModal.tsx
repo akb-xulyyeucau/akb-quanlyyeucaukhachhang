@@ -33,6 +33,7 @@ const ProjectRatingModal: React.FC<Props> = ({
         form.resetFields();
       })
       .catch(() => { });
+      console.log("value ======" ,  form.getFieldValue)
   };
 
   return (
@@ -86,7 +87,7 @@ const ProjectRatingModal: React.FC<Props> = ({
 
         {/* Đánh giá tổng thể */}
         <Form.Item
-          name="satisfaction"
+          name="rating"
           label="Đánh giá mức độ hài lòng tổng thể"
 
         >
@@ -97,7 +98,7 @@ const ProjectRatingModal: React.FC<Props> = ({
         </Form.Item>
 
         <Form.Item
-          name="satisfactionComment"
+          name="comment"
           label="Nhận xét về tổng thể dự án"
         >
           <Input.TextArea
@@ -110,7 +111,7 @@ const ProjectRatingModal: React.FC<Props> = ({
 
         {/* Ý kiến đóng góp */}
         <Form.Item
-          name="feedback"
+          name="suggest"
           label="💬 4. Ý kiến đóng góp / phản hồi thêm"
         >
           <Input.TextArea

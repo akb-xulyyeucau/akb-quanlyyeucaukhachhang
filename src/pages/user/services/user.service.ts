@@ -134,3 +134,12 @@ export const updateUserActive = async (userId: string, isActive: boolean) => {
 //          throw new Error(error.response?.data?.message || "Lỗi khi cập nhật trạng thái người dùng");
 //     }
 // }
+
+export const userStatistic = async () => {
+    try {
+        const response = await api.get(`/user/statistic`);
+        return response.data;
+    } catch (error : any) {
+        throw new Error(error.response?.data?.message)
+    }
+}

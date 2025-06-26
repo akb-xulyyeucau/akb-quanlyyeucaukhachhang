@@ -25,11 +25,6 @@ const UserProfile = () => {
     }
   };
 
-  const formatDateTime = (dateString: string | undefined) => {
-    if (!dateString) return 'N/A';
-    return dayjs(dateString).format('DD/MM/YYYY');
-  };
-
   return (
     <div style={{ padding: '24px' }}>
       <Card>
@@ -64,12 +59,12 @@ const UserProfile = () => {
                   {user?.isActive === true ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
                 </Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="Ngày tạo">
+              {/* <Descriptions.Item label="Ngày tạo">
                 {formatDateTime(user?.createdAt)}
               </Descriptions.Item>
               <Descriptions.Item label="Ngày cập nhật">
                 {formatDateTime(user?.updatedAt)}
-              </Descriptions.Item>
+              </Descriptions.Item> */}
             </Descriptions>
           </Col>
 

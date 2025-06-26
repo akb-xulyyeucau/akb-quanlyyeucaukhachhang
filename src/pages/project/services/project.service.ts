@@ -127,4 +127,12 @@ export const endingProject = async (projectId : string) =>{
     }
 }
 
+export const projectStatistic = async (projectId : string) => {
+    try {
+        const res = await api.get(`/project/statistic/${projectId}`);
+        return res.data;
+    } catch (error : any) {
+        return error.message;
+    }
+}
 

@@ -12,7 +12,8 @@ import jaCustomer from '../../locales/ja/customer.json';
 import viCustomer from '../../locales/vi/customer.json';
 import jaProjectRequest from '../../locales/ja/projectRequest.json';
 import viProjectRequest from '../../locales/vi/projectRequest.json';
-
+import viProject from '../../locales/vi/project.json';
+import jaProject from '../../locales/ja/project.json';
 
 
 const savedLanguage = localStorage.getItem('language') || 'vi';
@@ -23,26 +24,28 @@ i18n
     resources: {
       vi: {
         common: viCommon,
-        login : viLogin,
-        mainLayout : viMainlayout,
-        user : viUser,
-        customer : viCustomer,
+        login: viLogin,
+        mainLayout: viMainlayout,
+        user: viUser,
+        customer: viCustomer,
         projectRequest: viProjectRequest,
+        project: viProject,
         // login: viLogin,
       },
       ja: {
         common: jaCommon,
-        login : jaLogin,
-        mainLayout : jaMainLayout,
-        user : jaUser,
-        customer : jaCustomer,
+        login: jaLogin,
+        mainLayout: jaMainLayout,
+        user: jaUser,
+        customer: jaCustomer,
         projectRequest: jaProjectRequest,
+        project: jaProject,
         // login: jaLogin,
       },
     },
     lng: savedLanguage,
     fallbackLng: 'vi',
-    ns: ['common', 'login' , 'mainLayout' , 'user','customer', 'projectRequest'], // Định nghĩa các namespace
+    ns: ['common', 'login', 'mainLayout', 'user', 'customer', 'projectRequest', 'project'], // Định nghĩa các namespace
     defaultNS: 'common', // Namespace mặc định
     interpolation: {
       escapeValue: false,

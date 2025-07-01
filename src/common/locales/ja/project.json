@@ -1,0 +1,30 @@
+{
+    "projectPage": {
+        "no": "番号",
+        "projectCode": "コード",
+        "projectName": "プロジェクト名",
+        "projectManager": "プロジェクトマネージャー",
+        "customer": "顧客名",
+        "status": "ステータス",
+        "startDate": "開始日",
+        "action": "アクション",
+        "projectDetail": "プロジェクト詳細",
+        "requestResponse": "リクエストとレスポンス",
+        "completed": "完了",
+        "inProgress": "進行中",
+        "name": "名前",
+        "time": "時間",
+        "clearAll": "すべてクリア",
+        "filter": "フィルター"
+    },
+    "ModalFilter": {
+        "enterProjectName": "プロジェクト名を入力",
+        "selectStatus": "ステータスを選択",
+        "timeFilterType": "時間タイプ",
+        "placeholderMonth": "月を選択",
+        "placeholderQuarter": "四半期を選択",
+        "byMonth": "月別",
+        "byQuarter": "四半期別",
+        "reset": "リセット"
+    }
+}

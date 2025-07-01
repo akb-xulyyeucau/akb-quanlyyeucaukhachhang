@@ -1,0 +1,30 @@
+{
+    "projectPage": {
+        "no": "STT",
+        "projectCode": "Mã dự án",
+        "projectName": "Tên dự án",
+        "projectManager": "Quản lý dự án",
+        "customer": "Khách hàng",
+        "status": "Trạng thái",
+        "startDate": "Ngày bắt đầu",
+        "action": "Chức năng",
+        "projectDetail": "Chi tiết dự án",
+        "requestResponse": "Yêu cầu và phản hồi",
+        "completed": "Đã hoàn thành",
+        "inProgress": "Đang thực hiện",
+        "name": "Tên",
+        "time": "Thời gian",
+        "clearAll": "Xóa tất cả",
+        "filter": "Bộ lọc"
+    },
+    "ModalFilter": {
+        "enterProjectName": "Nhập tên dự án",
+        "selectStatus": "Chọn trạng thái",
+        "timeFilterType": "Kiểu lọc thời gian",
+        "byMonth": "Theo tháng",
+        "byQuarter": "Theo quý",
+        "placeholderMonth": "Chọn tháng",
+        "placeholderQuarter": "Chọn quý",
+        "reset": "Đặt lại"
+    }
+}

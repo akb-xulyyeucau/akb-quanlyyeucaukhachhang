@@ -3,6 +3,7 @@ import { Modal, Typography, Card, Space, Tag, List } from 'antd';
 import type { IReport, IFile } from '../interfaces/project.interface';
 import dayjs from 'dayjs';
 import FileText from '../../../common/components/FileText';
+import { useTranslation } from 'react-i18next';
 
 const { Text, Title } = Typography;
 
@@ -17,6 +18,8 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   onCancel,
   report
 }) => {
+  const { t } = useTranslation('projectDetail');
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -31,7 +34,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
     <Modal
       open={open}
       onCancel={onCancel}
-      title="Chi tiết báo cáo"
+      title={t('ReportDetailModal.title')}
       width={800}
       footer={null}
     >
@@ -40,25 +43,25 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
         <Card size="small">
           <Space direction="vertical" style={{ width: '100%' }}>
             <Space>
-              <Text strong>Mã dự án:</Text>
+              <Text strong>{t('ReportDetailModal.projectCode')}:</Text>
               <Tag>{report.projectId.alias}</Tag>
             </Space>
             <Space>
-              <Text strong>Tên dự án:</Text>
+              <Text strong>{t('ReportDetailModal.projectName')}:</Text>
               <Text>{report.projectId.name}</Text>
             </Space>
             <Space>
-              <Text strong>Nội dung chính:</Text>
+              <Text strong>{t('ReportDetailModal.mainContent')}:</Text>
               <Text>{report.mainContent}</Text>
             </Space>
             <Space>
-              <Text strong>Người tạo:</Text>
+              <Text strong>{t('ReportDetailModal.creator')}:</Text>
               <Tag color={report.sender.role === 'guest' ? 'green' : 'blue'}>
                 {report.sender.email}
               </Tag>
             </Space>
             <Space>
-              <Text strong>Ngày tạo:</Text>
+              <Text strong>{t('ReportDetailModal.createdDate')}:</Text>
               <Text>{dayjs(report.createdAt).format('DD/MM/YYYY')}</Text>
             </Space>
           </Space>
@@ -66,7 +69,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
 
         {/* Subcontent List */}
         <div>
-          <Title level={5}>Nội dung chi tiết</Title>
+          <Title level={5}>{t('ReportDetailModal.detailContent')}</Title>
           <List
             dataSource={report.subContent}
             renderItem={(item, index) => (
@@ -80,7 +83,7 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
                   renderItem={(file: IFile) => (
                     <List.Item>
                       <Space>
-                        <FileText 
+                        <FileText
                           originalName={file.originalName}
                           filePath={file.path}
                         />
@@ -98,4 +101,4 @@ const ReportDetailModal: React.FC<ReportDetailModalProps> = ({
   );
 };
 
-export default ReportDetailModal; 
+export default ReportDetailModal;

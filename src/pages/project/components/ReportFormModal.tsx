@@ -3,6 +3,7 @@ import { Modal, Form, Input, Button, Upload, Space, Card, Typography, message, P
 import { PlusOutlined, MinusCircleOutlined, UploadOutlined, FilePdfOutlined, FileOutlined } from '@ant-design/icons';
 import type { UploadFile, RcFile } from 'antd/es/upload/interface';
 import type { ItemRender } from 'antd/es/upload/interface';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -32,6 +33,8 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
   onSubmit,
   title
 }) => {
+  const { t } = useTranslation('projectDetail');
+
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<FileListType>({});
   const [uploadProgress, setUploadProgress] = useState<FileProgress>({});
@@ -72,14 +75,14 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
 
   const handleFileChange = (index: number, info: any) => {
     console.log('File change event:', info);
-    
+
     // Simulate upload progress for new files
     info.fileList.forEach((file: UploadFile) => {
       if (file.originFileObj && !uploadProgress[file.uid]) {
         simulateProgress(file.uid);
       }
     });
-    
+
     // Map the files to maintain both new and existing files
     const updatedFiles = info.fileList.map((file: UploadFile): FileWithGlobalIndex => ({
       ...file,
@@ -134,7 +137,7 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
     beforeUpload: (file: File) => {
       const isLt50M = file.size / 1024 / 1024 < 50;
       if (!isLt50M) {
-        message.error('File phải nhỏ hơn 50MB!');
+        message.error(t('ReportFormModal.fileSizeError'));
         return Upload.LIST_IGNORE;
       }
       console.log('File passed validation:', file);
@@ -168,9 +171,9 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
       {getFileIcon(file.type || '')}
       <Space direction="vertical" size={0} style={{ marginLeft: 8, flex: 1 }}>
         <Text strong>
-          {file.name} 
+          {file.name}
           {typeof file.globalIndex === 'number' && (
-            <Text type="secondary"> (File #{file.globalIndex})</Text>
+            <Text type="secondary"> ({t('ReportFormModal.fileNumber', { number: file.globalIndex })})</Text>
           )}
         </Text>
         <div style={{ width: '100%' }}>
@@ -178,13 +181,13 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
             <Progress percent={uploadProgress[file.uid] || 0} size="small" />
           ) : (
             <Text type="secondary">
-              {formatFileSize(file.size || 0)} | {file.type || 'Unknown type'}
+              {formatFileSize(file.size || 0)} | {file.type || t('ReportFormModal.unknownType')}
             </Text>
           )}
         </div>
       </Space>
       <Space>
-        {actions.remove && <Button type="link" danger size="small" onClick={actions.remove}>Xóa</Button>}
+        {actions.remove && <Button type="link" danger size="small" onClick={actions.remove}>{t('ReportFormModal.delete')}</Button>}
       </Space>
     </div>
   );
@@ -206,17 +209,17 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
       >
         <Form.Item
           name="mainContent"
-          label="Nội dung chính"
-          rules={[{ required: true, message: 'Vui lòng nhập nội dung chính' }]}
+          label={t('ReportFormModal.mainContent')}
+          rules={[{ required: true, message: t('ReportFormModal.mainContentRequired') }]}
         >
-          <Input.TextArea 
-            rows={4} 
-            placeholder="Nhập nội dung chính của báo cáo" 
+          <Input.TextArea
+            rows={4}
+            placeholder={t('ReportFormModal.mainContentPlaceholder')}
             disabled={isUploading || isSubmitting}
           />
         </Form.Item>
 
-        <Form.List 
+        <Form.List
           name="subContent"
           initialValue={[{}]}
         >
@@ -226,10 +229,10 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                 <Card
                   key={field.key}
                   size="small"
-                  title={`Nội dung phụ ${index + 1}`}
+                  title={t('ReportFormModal.subContentTitle', { number: index + 1 })}
                   extra={
                     fields.length > 1 && (
-                      <MinusCircleOutlined 
+                      <MinusCircleOutlined
                         onClick={() => {
                           if (!isUploading && !isSubmitting) {
                             remove(field.name);
@@ -237,7 +240,7 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                             delete newFileList[index];
                             setFileList(newFileList);
                           }
-                        }} 
+                        }}
                         style={{ cursor: isUploading || isSubmitting ? 'not-allowed' : 'pointer' }}
                       />
                     )
@@ -247,10 +250,10 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                     <Form.Item
                       {...field}
                       name={[field.name, 'contentName']}
-                      rules={[{ required: true, message: 'Vui lòng nhập tên nội dung' }]}
+                      rules={[{ required: true, message: t('ReportFormModal.contentNameRequired') }]}
                     >
-                      <Input 
-                        placeholder="Tên nội dung" 
+                      <Input
+                        placeholder={t('ReportFormModal.contentNamePlaceholder')}
                         disabled={isUploading || isSubmitting}
                       />
                     </Form.Item>
@@ -269,11 +272,11 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                         itemRender={renderUploadItem}
                         disabled={isUploading || isSubmitting}
                       >
-                        <Button 
+                        <Button
                           icon={<UploadOutlined />}
                           disabled={isUploading || isSubmitting}
                         >
-                          Tải lên tệp đính kèm
+                          {t('ReportFormModal.uploadAttachment')}
                         </Button>
                       </Upload>
                     </Form.Item>
@@ -288,7 +291,7 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
                 icon={<PlusOutlined />}
                 disabled={isUploading || isSubmitting}
               >
-                Thêm nội dung phụ
+                {t('ReportFormModal.addSubContent')}
               </Button>
             </div>
           )}
@@ -296,19 +299,19 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
 
         <Form.Item style={{ marginTop: 16, textAlign: 'right' }}>
           <Space>
-            <Button 
-              onClick={onCancel} 
+            <Button
+              onClick={onCancel}
               disabled={isUploading || isSubmitting}
             >
-              Hủy
+              {t('ReportFormModal.cancel')}
             </Button>
-            <Button 
-              type="primary" 
-              htmlType="submit" 
+            <Button
+              type="primary"
+              htmlType="submit"
               loading={isSubmitting}
               disabled={isUploading}
             >
-              {isUploading ? 'Đang tải file...' : 'Thêm mới'}
+              {isUploading ? t('ReportFormModal.uploadingFiles') : t('ReportFormModal.addNew')}
             </Button>
           </Space>
         </Form.Item>

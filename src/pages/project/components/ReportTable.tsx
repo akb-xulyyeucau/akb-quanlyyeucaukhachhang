@@ -8,23 +8,25 @@ import ReportFormModal from './ReportFormModal';
 import ReportDetailModal from './ReportDetailModal';
 import type { IReport } from '../interfaces/project.interface';
 import { useDebounce } from '../../../common/hooks/useDebounce';
+import { useTranslation } from 'react-i18next';
 
 interface ReportTableProps {
   projectId: string;
 }
 
 const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
+  const { t } = useTranslation('projectDetail');
   const [report, setReport] = useState<IReport[]>([]);
   const [page] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<IReport | null>(null);
   const [loading, setLoading] = useState(false);
-  
+
   // UI states
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('');
-  
+
   // Sử dụng useMemo để tránh tạo object mới mỗi lần render
   const searchParams = useMemo(() => ({
     search,
@@ -45,7 +47,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       }
     } catch (error) {
       console.error('Error fetching report:', error);
-      message.error('Không thể tải danh sách báo cáo');
+      message.error(t('ReportTable.messages.fetchError'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
     try {
       console.log('Starting submit with values:', values);
       const formData = new FormData();
-      
+
       // Add basic report data
       formData.append('projectId', projectId);
       formData.append('mainContent', values.mainContent);
@@ -95,7 +97,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       const subContentData = values.subContent.map((content: any, subContentIndex: number) => {
         const contentFiles = content.files || [];
         const fileIndices: number[] = [];
-        
+
         contentFiles.forEach((file: any) => {
           const fileObj = file.originFileObj || file;
           if (fileObj && typeof fileObj === 'object' && 'type' in fileObj) {
@@ -142,31 +144,31 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       }
 
       await createReport(formData);
-      message.success('Tạo báo cáo thành công');
-      
+      message.success(t('ReportTable.messages.createSuccess'));
+
       handleCloseModal();
       fetchReport(); // Refresh the table data
     } catch (error) {
       console.error('Error submitting report:', error);
-      message.error('Có lỗi xảy ra khi lưu báo cáo');
+      message.error(t('ReportTable.messages.createError'));
     }
   };
 
   const handleDelete = (record: any) => {
     Modal.confirm({
-      title: 'Xác nhận xóa báo cáo',
-      content: `Bạn có muốn xóa báo cáo "${record.mainContent}" không?`,
-      okText: 'Xóa',
+      title: t('ReportTable.deleteModal.title'),
+      content: t('ReportTable.deleteModal.content', { reportName: record.mainContent }),
+      okText: t('ReportTable.deleteModal.okText'),
       okType: 'danger',
-      cancelText: 'Hủy',
+      cancelText: t('ReportTable.deleteModal.cancelText'),
       onOk: async () => {
         try {
           await deleteReport(record._id);
-          message.success('Xóa báo cáo thành công');
+          message.success(t('ReportTable.messages.deleteSuccess'));
           fetchReport();
         } catch (error) {
           console.error('Error deleting report:', error);
-          message.error('Có lỗi xảy ra khi xóa báo cáo');
+          message.error(t('ReportTable.messages.deleteError'));
         }
       }
     });
@@ -174,7 +176,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
 
   const columns: TableProps<IReport>['columns'] = [
     {
-      title: 'STT',
+      title: t('ReportTable.columns.stt'),
       dataIndex: "stt",
       key: "stt",
       render: (_: any, __: any, index: number) => (page - 1) * 10 + index + 1,
@@ -182,11 +184,11 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       align: "center",
     },
     {
-      title: 'Báo cáo',
+      title: t('ReportTable.columns.report'),
       dataIndex: 'mainContent',
       key: 'mainContent',
       width: 200,
-      render: (_:any , record:IReport) => {
+      render: (_: any, record: IReport) => {
         let color = record.sender.role === 'guest' ? 'green' : 'blue';
         return (
           <Tag color={color}>
@@ -196,7 +198,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       }
     },
     {
-      title: 'Số nội dung',
+      title: t('ReportTable.columns.contentCount'),
       dataIndex: 'subContentCount',
       key: 'subContentCount',
       width: 120,
@@ -208,19 +210,19 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       align: "center",
     },
     {
-      title: 'Người tạo',
+      title: t('ReportTable.columns.creator'),
       dataIndex: 'sender',
       key: 'sender',
       width: 180,
       render: (sender) => {
         let color = 'default';
-        if(sender.role === 'guest' ){
+        if (sender.role === 'guest') {
           color = 'green';
         }
-        else{
+        else {
           color = 'blue';
         }
-        return(
+        return (
           <Tag color={color}>
             {sender.email}
           </Tag>
@@ -228,22 +230,26 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
       }
     },
     {
-      title: 'Ngày tạo',
+      title: t('ReportTable.columns.createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 130,
-      render: (text) => <Tag color='purple'>{ dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY')}</Tag>,
+      render: (text) => <Tag color='purple'>{dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY')}</Tag>,
       align: "center",
     },
     {
-      title: 'Hành động',
+      title: t('ReportTable.columns.actions'),
       key: 'action',
       align: "center",
-      width: 150, 
+      width: 150,
       render: (_, record: IReport) => (
         <Space size="middle">
-          <Button type="primary" size='small' icon={<EyeOutlined />} onClick={() => handleOpenDetailModal(record)}>Chi tiết</Button>
-          <Button type="default" size='small' icon={<DeleteOutlined />} danger onClick={() => handleDelete(record)}>Xóa</Button>
+          <Button type="primary" size='small' icon={<EyeOutlined />} onClick={() => handleOpenDetailModal(record)}>
+            {t('ReportTable.actions.viewDetail')}
+          </Button>
+          <Button type="default" size='small' icon={<DeleteOutlined />} danger onClick={() => handleDelete(record)}>
+            {t('ReportTable.actions.delete')}
+          </Button>
         </Space>
       ),
     },
@@ -251,15 +257,15 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
 
   return (
     <div>
-      <div style={{ 
-        marginBottom: 16, 
-        display: 'flex', 
+      <div style={{
+        marginBottom: 16,
+        display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center' 
+        alignItems: 'center'
       }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <Input
-            placeholder="Tìm kiếm báo cáo..."
+            placeholder={t('ReportTable.searchPlaceholder')}
             prefix={<SearchOutlined />}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -270,17 +276,17 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
             style={{ width: 140 }}
             value={role}
             onChange={setRole}
-            placeholder="Chọn loại"
+            placeholder={t('ReportTable.selectTypePlaceholder')}
             // allowClear
             options={[
-              { value: '', label: 'Tất cả báo cáo' },
-              { value: 'true', label: 'Khách hàng' },
-              { value: 'false', label: 'Quản lý dự án' }
+              { value: '', label: t('ReportTable.filterOptions.all') },
+              { value: 'true', label: t('ReportTable.filterOptions.customer') },
+              { value: 'false', label: t('ReportTable.filterOptions.projectManager') }
             ]}
           />
         </div>
         <Button type='primary' icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-          Thêm báo cáo
+          {t('ReportTable.addReportButton')}
         </Button>
       </div>
 
@@ -297,7 +303,7 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
         open={isModalOpen}
         onCancel={handleCloseModal}
         onSubmit={handleSubmit}
-        title='Thêm báo cáo'
+        title={t('ReportTable.addReportModalTitle')}
       />
       <ReportDetailModal
         open={isDetailModalOpen}

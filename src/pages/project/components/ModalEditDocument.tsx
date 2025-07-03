@@ -5,6 +5,7 @@ import type { UploadFile } from 'antd/es/upload/interface';
 import type { IDocument } from '../interfaces/project.interface';
 import dayjs from 'dayjs';
 import { updateDocument } from '../services/document.service';
+import { useTranslation } from 'react-i18next'; // Thêm import useTranslation
 
 interface ModalEditDocumentProps {
   open: boolean;
@@ -23,6 +24,7 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
   document,
   onSuccess
 }) => {
+  const { t } = useTranslation('projectDetail');
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<ExtendedUploadFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,12 +57,12 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
-      
+
       // Tạo FormData để gửi file
       const formData = new FormData();
       formData.append('name', values.name);
       formData.append('day', values.day.toISOString());
-      
+
       // Xử lý files
       // 1. Lọc ra các file cũ còn được giữ lại (chưa bị xóa)
       const remainingOldFiles = fileList
@@ -74,7 +76,7 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
 
       // 2. Thêm thông tin file cũ vào formData
       formData.append('existingFiles', JSON.stringify(remainingOldFiles));
-      
+
       // 3. Thêm các file mới
       const newFiles = fileList.filter(file => file.originFileObj);
       newFiles.forEach(file => {
@@ -91,12 +93,12 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
       // Gọi API update
       if (document?._id) {
         await updateDocument(document._id, formData);
-        message.success('Cập nhật tài liệu thành công');
+        message.success(t('ModalEditDocument.updateSuccess'));
         onSuccess();
         onClose();
       }
     } catch (error: any) {
-      message.error(error.message || 'Có lỗi xảy ra khi cập nhật tài liệu');
+      message.error(error.message || t('ModalEditDocument.updateError'));
     } finally {
       setLoading(false);
     }
@@ -105,7 +107,7 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
   const handleBeforeUpload = (file: File) => {
     const isLt10M = file.size / 1024 / 1024 < 10;
     if (!isLt10M) {
-      message.error('File phải nhỏ hơn 10MB!');
+      message.error(t('ModalEditDocument.fileSizeError'));
       return Upload.LIST_IGNORE;
     }
     return false; // Prevent auto upload
@@ -113,12 +115,12 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
 
   return (
     <Modal
-      title="Chỉnh sửa tài liệu"
+      title={t('ModalEditDocument.modalTitle')}
       open={open}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          Đóng
+          {t('ModalEditDocument.closeButton')}
         </Button>,
         <Button
           key="submit"
@@ -126,7 +128,7 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
           loading={loading}
           onClick={handleSubmit}
         >
-          Chỉnh sửa
+          {t('ModalEditDocument.editButton')}
         </Button>
       ]}
       width={600}
@@ -137,21 +139,21 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
       >
         <Form.Item
           name="name"
-          label="Tên tài liệu"
-          rules={[{ required: true, message: 'Vui lòng nhập tên tài liệu!' }]}
+          label={t('ModalEditDocument.documentNameLabel')}
+          rules={[{ required: true, message: t('ModalEditDocument.documentNameRequired') }]}
         >
-          <Input placeholder="Nhập tên tài liệu" />
+          <Input placeholder={t('ModalEditDocument.documentNamePlaceholder')} />
         </Form.Item>
 
         <Form.Item
           name="day"
-          label="Ngày"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
+          label={t('ModalEditDocument.dateLabel')}
+          rules={[{ required: true, message: t('ModalEditDocument.dateRequired') }]}
         >
           <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
         </Form.Item>
 
-        <Form.Item label="Tệp đính kèm">
+        <Form.Item label={t('ModalEditDocument.attachmentsLabel')}>
           <Upload
             beforeUpload={handleBeforeUpload}
             fileList={fileList}
@@ -161,8 +163,8 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
               // Xác nhận trước khi xóa file
               if (!file.originFileObj) { // Nếu là file cũ
                 Modal.confirm({
-                  title: 'Xác nhận xóa file',
-                  content: `Bạn có chắc chắn muốn xóa file "${file.name}"?`,
+                  title: t('ModalEditDocument.confirmDeleteTitle'),
+                  content: t('ModalEditDocument.confirmDeleteContent', { fileName: file.name }),
                   onOk() {
                     setFileList(prev => prev.filter(f => f.uid !== file.uid));
                   }
@@ -172,15 +174,15 @@ const ModalEditDocument: React.FC<ModalEditDocumentProps> = ({
               return true; // Cho phép xóa file mới ngay lập tức
             }}
           >
-            <Button icon={<UploadOutlined />}>Chọn file</Button>
+            <Button icon={<UploadOutlined />}>{t('ModalEditDocument.selectFileButton')}</Button>
           </Upload>
         </Form.Item>
 
-        <Form.Item label="Thông tin người gửi">
-          <Input 
-            value={document?.sender?.email} 
-            disabled 
-            addonBefore="Email"
+        <Form.Item label={t('ModalEditDocument.senderInfoLabel')}>
+          <Input
+            value={document?.sender?.email}
+            disabled
+            addonBefore="Email" // Giữ nguyên vì đây là label cố định cho addonBefore
           />
         </Form.Item>
       </Form>

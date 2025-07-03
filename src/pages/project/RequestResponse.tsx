@@ -21,17 +21,19 @@ import { useEffect, useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
 // import { color } from 'chart.js/helpers';
 import { addFeedback, getFeedbackInProject } from './services/feedback.service';
-import { projectStatistic } from './services/project.service';
+import { projectStatisticById } from './services/project.service';
 import type { IFeedback, IProjectStatistic } from './interfaces/project.interface';
 import dayjs from 'dayjs';
 import RatingProject from '../../common/components/RatingProject';
-import {  selectUserProfile } from '../../common/stores/auth/authSelector';
+import { selectUserProfile } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next'; // Đã có sẵn
 
 Chart.register(...registerables);
 const { Title, Text } = Typography;
 
 const RequestResponse = () => {
+  const { t } = useTranslation('projectResponse'); // Sử dụng namespace 'projectResponse'
   const { pId } = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,7 +55,7 @@ const RequestResponse = () => {
 
   const fetchProjectStatistic = async () => {
     try {
-      const res = await projectStatistic(pId || '');
+      const res = await projectStatisticById(pId || '');
       setStatisticData(res.data);
       console.log("data---", res.data);
     } catch (error: any) {
@@ -69,7 +71,7 @@ const RequestResponse = () => {
   const currentPhase = statisticData?.pieChart?.currentPhase || 0;
 
   // Tạo label cho từng giai đoạn
-  const progressLabels = Array.from({ length: totalPhases }, (_, i) => `Giai đoạn ${i + 1}`);
+  const progressLabels = Array.from({ length: totalPhases }, (_, i) => `${t('projectProgress.labelPrefix')} ${i + 1}`);
 
   // Tạo màu: giai đoạn đã hoàn thành là xanh, chưa hoàn thành là xám
   const progressColors = Array.from({ length: totalPhases }, (_, i) =>
@@ -92,14 +94,14 @@ const RequestResponse = () => {
     labels: statisticData?.chart.weekLabels,
     datasets: [
       {
-        label: 'Báo cáo phía công ty',
+        label: t('projectStatistics.chartCompanyReportLabel'),
         data: statisticData?.chart.pmReportByWeek,
         fill: true,
         borderColor: '#1890ff',
         tension: 0.3,
       },
       {
-        label: 'Báo cáo phía khách hàng',
+        label: t('projectStatistics.chartCustomerReportLabel'),
         data: statisticData?.chart.customerReportByWeek,
         fill: true,
         borderColor: '#52c41a',
@@ -120,10 +122,10 @@ const RequestResponse = () => {
 
       };
       await addFeedback(dataToSend);
-      message.success('Cảm ơn quý khách đã tham gia đánh giá!');
+      message.success(t('messages.feedbackSuccess'));
       await fetchFeedback(); // reload lại danh sách feedback
     } catch (err) {
-      message.error('Gửi đánh giá thất bại!');
+      message.error(t('messages.feedbackFailed'));
       console.error(err);
     }
     console.log("valuee------", value);
@@ -139,13 +141,13 @@ const RequestResponse = () => {
               icon={<ArrowLeftOutlined />}
               onClick={() => navigate(`/customers-projects`)}
             >
-              Quay lại danh sách
+              {t('common.backToList')}
             </Button>
             <Button
               icon={<FileSearchOutlined />}
               onClick={() => navigate(`/project/${pId}`)}
             >
-              Xem chi tiết dự án
+              {t('common.viewProjectDetail')}
             </Button>
           </Space>
         </Col>
@@ -155,7 +157,7 @@ const RequestResponse = () => {
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
         <Col>
           <Title level={4} style={{ margin: 0 }}>
-            Đánh giá tổng quan dự án
+            {t('projectOverview.title')}
           </Title>
         </Col>
         <Col>
@@ -163,7 +165,7 @@ const RequestResponse = () => {
           <Button type="primary"
             icon={<StarOutlined />}
             onClick={() => setIsModalOpen(true)}>
-            Đánh giá dự án
+            {t('projectOverview.rateButton')}
           </Button>
         </Col>
       </Row>
@@ -172,23 +174,23 @@ const RequestResponse = () => {
       <Card style={{ marginBottom: 15 }}>
         {/* Tiêu đề dự án */}
         <Title level={5} style={{ marginBottom: 12, fontSize: 20 }}>
-          Dự án: <span style={{ color: '#1890ff' }}>{statisticData?.projectName}</span>
+          {t('common.projectPrefix')}: <span style={{ color: '#1890ff' }}>{statisticData?.projectName}</span>
         </Title>
 
         {/* Grid thông tin khách hàng và thời gian */}
         <Row gutter={24}>
           <Col span={12} style={{ marginBottom: 7 }}>
-            <Text strong>Khách hàng:</Text> {statisticData?.customer?.name || '---'}
+            <Text strong>{t('common.customerLabel')}:</Text> {statisticData?.customer?.name || '---'}
           </Col>
 
           <Col span={12} style={{ marginBottom: 7 }}>
-            <Text strong>Thời gian bắt đầu:</Text> {dayjs(statisticData?.startDate).format('DD/MM/YYYY')}
+            <Text strong>{t('common.startDateLabel')}:</Text> {dayjs(statisticData?.startDate).format('DD/MM/YYYY')}
           </Col>
           <Col span={12} style={{ marginBottom: 7 }}>
-            <Text strong>Quản lý dự án:</Text> {statisticData?.pm?.name || '---'}
+            <Text strong>{t('common.projectManagerLabel')}:</Text> {statisticData?.pm?.name || '---'}
           </Col>
           <Col span={12}>
-            <Text strong>Thời gian kết thúc (dự kiến):</Text>  {dayjs(statisticData?.estimateDate).format('DD/MM/YYYY')}
+            <Text strong>{t('common.estimatedEndDateLabel')}:</Text>  {dayjs(statisticData?.estimateDate).format('DD/MM/YYYY')}
           </Col>
         </Row>
       </Card>
@@ -198,10 +200,10 @@ const RequestResponse = () => {
       {/* BIỂU ĐỒ & THỐNG KÊ */}
       <Row gutter={24} style={{ marginBottom: 24 }}>
         <Col span={8}>
-          <Card title="Tiến độ dự án" size="small">
+          <Card title={t('projectProgress.title')} size="small">
             <div style={{ textAlign: 'center', marginBottom: 12 }}>
-              <Tag color="#1890ff">Đã hoàn thành</Tag>
-              <Tag color="#d9d9d9">Chưa hoàn thành</Tag>
+              <Tag color="#1890ff">{t('common.completedTag')}</Tag>
+              <Tag color="#d9d9d9">{t('common.notCompletedTag')}</Tag>
             </div>
             <div style={{ height: '200px' }}>
               <Pie
@@ -213,7 +215,7 @@ const RequestResponse = () => {
               />
             </div>
             <div style={{ textAlign: 'center', fontWeight: 'bold', marginTop: 8 }}>
-              Đã hoàn thành: {`${statisticData?.pieChart.currentPhase}/${statisticData?.pieChart.phaseNum}`}
+              {t('projectProgress.completedPhases')}: {`${statisticData?.pieChart.currentPhase}/${statisticData?.pieChart.phaseNum}`}
             </div>
           </Card>
         </Col>
@@ -223,7 +225,7 @@ const RequestResponse = () => {
             <Row gutter={16}>
               <Col span={8}>
                 <Statistic
-                  title="Báo cáo phía công ty"
+                  title={t('projectStatistics.companyReportTitle')}
                   value={statisticData?.pmReportCount}
                   prefix={<FileTextOutlined />}
                   valueStyle={{ color: '#1890ff' }}
@@ -231,7 +233,7 @@ const RequestResponse = () => {
               </Col>
               <Col span={8}>
                 <Statistic
-                  title="Báo cáo phía khách hàng"
+                  title={t('projectStatistics.customerReportTitle')}
                   value={statisticData?.customerReportCount}
                   prefix={<FileTextOutlined />}
                   valueStyle={{ color: '#52c41a' }}
@@ -239,7 +241,7 @@ const RequestResponse = () => {
               </Col>
               <Col span={8}>
                 <Statistic
-                  title="Số ngày thực hiện"
+                  title={t('projectStatistics.daysInProgressTitle')}
                   value={statisticData?.daysInProgress}
                   prefix={<ClockCircleOutlined />}
                   valueStyle={{ color: '#1890ff' }}
@@ -250,7 +252,7 @@ const RequestResponse = () => {
             <div style={{ marginTop: 20 }}>
               <Title level={5}>
                 <LineChartOutlined style={{ marginRight: 8 }} />
-                Báo cáo theo thời gian
+                {t('projectStatistics.reportByTimeTitle')}
               </Title>
               <div style={{ height: '200px' }}>
                 <Line
@@ -268,7 +270,7 @@ const RequestResponse = () => {
 
       {/* ĐÁNH GIÁ TỪ KHÁCH HÀNG */}
       <Card
-        title="🗣️ Đánh giá từ khách hàng"
+        title={t('customerFeedback.sectionTitle')}
         style={{
           backgroundColor: '#f6ffed',
           border: '1px solid #b7eb8f',
@@ -291,13 +293,13 @@ const RequestResponse = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Avatar size={32} icon={<UserOutlined />} />
                     <div>
-                      <Text strong>Khách hàng:</Text>
+                      <Text strong>{t('customerFeedback.customerLabel')}:</Text>
                       <div>{fb.customerId?.name}</div>
                     </div>
                   </div>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Đánh giá:</Text>
+                  <Text strong>{t('customerFeedback.ratingLabel')}:</Text>
                   <div>
                     <RatingProject value={Number(fb.rating)} disabled={true} />
                   </div>
@@ -306,18 +308,18 @@ const RequestResponse = () => {
               {/* Hàng 2: Nhận xét */}
               <Row style={{ marginBottom: 12 }}>
                 <Col span={24}>
-                  <Text strong>Nhận xét:</Text>
+                  <Text strong>{t('customerFeedback.commentLabel')}:</Text>
                   <div style={{ marginTop: 4 }}>
-                    {fb.comment || <span style={{ color: '#aaa' }}>Chưa có nhận xét</span>}
+                    {fb.comment || <span style={{ color: '#aaa' }}>{t('common.noCommentText')}</span>}
                   </div>
                 </Col>
               </Row>
               {/* Hàng 3: Góp ý thêm */}
               <Row>
                 <Col span={24}>
-                  <Text strong>Góp ý thêm:</Text>
+                  <Text strong>{t('customerFeedback.suggestLabel')}:</Text>
                   <div style={{ marginTop: 4 }}>
-                    {fb.suggest ? fb.suggest : <span style={{ color: '#aaa' }}>Không có</span>}
+                    {fb.suggest ? fb.suggest : <span style={{ color: '#aaa' }}>{t('common.noSuggestText')}</span>}
                   </div>
                 </Col>
               </Row>
@@ -325,7 +327,7 @@ const RequestResponse = () => {
           ))
         ) : (
           <div style={{ textAlign: 'center', color: '#aaa', fontStyle: 'italic', padding: 32 }}>
-            Khách hàng chưa đánh giá
+            {t('customerFeedback.noFeedbackYet')}
           </div>
         )}
       </Card>
@@ -333,8 +335,8 @@ const RequestResponse = () => {
       {/* MODAL ĐÁNH GIÁ */}
       <ProjectRatingModal
         open={isModalOpen}
-        customerName= {statisticData?.customer.name}
-        projectName= {statisticData?.projectName}
+        customerName={statisticData?.customer.name}
+        projectName={statisticData?.projectName}
 
         onOk={(values) => {
           handleAddFeedBack(values)

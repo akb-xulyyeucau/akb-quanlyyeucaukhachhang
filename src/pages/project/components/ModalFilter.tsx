@@ -3,6 +3,7 @@ import { Modal, Form, Input, Select, DatePicker, Button, Row, Col, Space } from 
 import { FilterOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import locale from 'antd/es/date-picker/locale/vi_VN';
 import type { Dayjs } from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -36,15 +37,14 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
   loading = false
 }) => {
   const [form] = Form.useForm();
+  const { t } = useTranslation('project');
 
-  // Reset form when modal opens
   useEffect(() => {
     if (visible) {
       form.setFieldsValue({ ...defaultFilterValues, ...initialValues });
     }
   }, [visible, form, initialValues]);
 
-  // Reset selectedDate when timeFilterType changes
   useEffect(() => {
     const timeFilterType = form.getFieldValue('timeFilterType');
     if (timeFilterType) {
@@ -55,26 +55,6 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
   const handleFilter = async () => {
     try {
       const values = await form.validateFields();
-      
-      // Build query string for logging
-      const queryParams = new URLSearchParams();
-      if (values.searchTerm) queryParams.append('searchTerm', values.searchTerm);
-      if (values.isDone !== undefined) queryParams.append('isDone', values.isDone.toString());
-      queryParams.append('page', '1');
-      queryParams.append('limit', '10');
-      
-      if (values.selectedDate) {
-        const timeFilter = {
-          type: values.timeFilterType,
-          year: values.selectedDate.year(),
-          value: values.timeFilterType === 'month' 
-            ? values.selectedDate.month() + 1 
-            : Math.floor(values.selectedDate.month() / 3) + 1
-        };
-        queryParams.append('timeFilter', JSON.stringify(timeFilter));
-      }
-
-      console.log('Filter Query:', `?${queryParams.toString()}`);
       onFilter(values);
     } catch (error) {
       console.error('Validate Failed:', error);
@@ -82,9 +62,7 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
   };
 
   const handleReset = () => {
-    // Reset all fields to default values
     form.resetFields();
-    // Set timeFilterType to 'month' after reset
     form.setFieldsValue({
       timeFilterType: 'month',
       searchTerm: '',
@@ -93,17 +71,16 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
     });
   };
 
-  // Handle timeFilterType change
   const handleTimeFilterTypeChange = (value: 'month' | 'quarter') => {
-    form.setFieldsValue({ 
+    form.setFieldsValue({
       timeFilterType: value,
-      selectedDate: null 
+      selectedDate: null
     });
   };
 
   return (
     <Modal
-      title="Bộ lọc dự án"
+      title={t('projectPage.filter')}
       open={visible}
       onCancel={() => {
         form.resetFields();
@@ -126,10 +103,10 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
           <Col span={12}>
             <Form.Item
               name="searchTerm"
-              label="Tên dự án"
+              label={t('projectPage.projectName')}
             >
               <Input
-                placeholder="Nhập tên dự án"
+                placeholder={t('ModalFilter.enterProjectName')}
                 allowClear
               />
             </Form.Item>
@@ -137,14 +114,14 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
           <Col span={12}>
             <Form.Item
               name="isDone"
-              label="Trạng thái"
+              label={t('projectPage.status')}
             >
               <Select
-                placeholder="Chọn trạng thái"
+                placeholder={t('ModalFilter.selectStatus')}
                 allowClear
               >
-                <Option value={true}>Đã hoàn thành</Option>
-                <Option value={false}>Đang thực hiện</Option>
+                <Option value={true}>{t('projectPage.completed')}</Option>
+                <Option value={false}>{t('projectPage.inProgress')}</Option>
               </Select>
             </Form.Item>
           </Col>
@@ -153,32 +130,35 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
           <Col span={12}>
             <Form.Item
               name="timeFilterType"
-              label="Kiểu lọc thời gian"
+              label={t('ModalFilter.timeFilterType')}
             >
               <Select onChange={handleTimeFilterTypeChange}>
-                <Option value="month">Theo tháng</Option>
-                <Option value="quarter">Theo quý</Option>
+                <Option value="month">{t('ModalFilter.byMonth')}</Option>
+                <Option value="quarter">{t('ModalFilter.byQuarter')}</Option>
               </Select>
             </Form.Item>
           </Col>
           <Col span={12}>
             <Form.Item
               noStyle
-              shouldUpdate={(prevValues, currentValues) => 
-                prevValues.timeFilterType !== currentValues.timeFilterType
-              }
+              shouldUpdate={(prev, current) => prev.timeFilterType !== current.timeFilterType}
             >
               {({ getFieldValue }) => (
                 <Form.Item
                   name="selectedDate"
-                  label="Thời gian"
+                  label={t('projectPage.time')}
                 >
                   <DatePicker
                     picker={getFieldValue('timeFilterType')}
-                    format={getFieldValue('timeFilterType') === 'month' ? 'MM/YYYY' : '[Quý] Q/YYYY'}
+                    format={getFieldValue('timeFilterType') === 'month' ? 'MM/YYYY' : '[Q]Q/YYYY'}
                     locale={locale}
                     style={{ width: '100%' }}
                     allowClear
+                    placeholder={
+                      getFieldValue('timeFilterType') === 'month'
+                        ? t('ModalFilter.placeholderMonth')
+                        : t('ModalFilter.placeholderQuarter')
+                    }
                   />
                 </Form.Item>
               )}
@@ -194,13 +174,13 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
                 loading={loading}
                 icon={<FilterOutlined />}
               >
-                Lọc
+                {t('projectPage.filter')}
               </Button>
-              <Button 
+              <Button
                 onClick={handleReset}
                 icon={<CloseCircleOutlined />}
               >
-                Đặt lại
+                {t('ModalFilter.reset')}
               </Button>
             </Space>
           </Col>
@@ -210,4 +190,4 @@ const ModalFilter: React.FC<ModalFilterProps> = ({
   );
 };
 
-export default ModalFilter; 
+export default ModalFilter;

@@ -6,6 +6,8 @@ import type { IDocument } from '../interfaces/project.interface';
 import { useSelector } from 'react-redux';
 import { selectAuthUser } from '../../../common/stores/auth/authSelector';
 import { uploadDocument } from '../services/document.service';
+import { useTranslation } from 'react-i18next';
+
 
 interface ModalAddDocumentProps {
   open: boolean;
@@ -18,7 +20,7 @@ const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
 const getTempDocumentIds = (): string[] => {
   const ids = localStorage.getItem(TEMP_DOCUMENT_IDS_KEY);
   return ids ? JSON.parse(ids) : [];
-};
+};  
 
 const addTempDocumentId = (id: string) => {
   const ids = getTempDocumentIds();
@@ -38,7 +40,7 @@ const removeTempDocumentId = (id: string) => {
 const getSafeFileName = (file: File | UploadFile): string => {
   // Lấy tên file gốc
   const originalName = file instanceof File ? file.name : file.originFileObj?.name || file.name;
-  
+
   // Chuyển đổi tên file thành chuỗi UTF-8 an toàn
   const encoder = new TextEncoder();
   const decoder = new TextDecoder('utf-8');
@@ -47,13 +49,14 @@ const getSafeFileName = (file: File | UploadFile): string => {
 };
 
 const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUpload }) => {
+  const { t } = useTranslation('projectDetail');
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const user = useSelector(selectAuthUser);
-//   const isAuthenticated = useSelector(selectIsAuthenticated);
-  
+  //   const isAuthenticated = useSelector(selectIsAuthenticated);
+
   const simulateProgress = (fileName: string) => {
     let progress = 0;
     const interval = setInterval(() => {
@@ -76,7 +79,7 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
     try {
       setLoading(true);
       const values = await form.validateFields();
-      
+
       const files = fileList.map(file => {
         if (file.originFileObj) {
           const safeName = getSafeFileName(file);
@@ -88,7 +91,7 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
         }
         return null;
       }).filter(Boolean) as File[];
-      
+
       files.forEach(file => {
         simulateProgress(file.name);
       });
@@ -106,7 +109,7 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
       };
 
       const response = await uploadDocument(documentData);
-      
+
       if (response.success && response.data._id) {
         documentId = response.data._id;
         addTempDocumentId(documentId);
@@ -127,11 +130,11 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
         removeTempDocumentId(documentId);
         handleCleanup();
       } else {
-        message.error(response.message || 'Có lỗi xảy ra khi tải lên tài liệu');
+        message.error(response.message || t('ModalAddDocument.message.uploadFailed'));
       }
     } catch (error: any) {
       console.error('Error in document upload process:', error);
-      message.error(error.message || 'Có lỗi xảy ra trong quá trình xử lý');
+      message.error(error.message || t('ModalAddDocument.message.uploadFailed'));
       if (documentId) {
         removeTempDocumentId(documentId);
       }
@@ -153,37 +156,37 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
 
   return (
     <Modal
-      title="Thêm tài liệu"
+      title={t('ModalAddDocument.title')}
       open={open}
       onOk={handleOk}
       onCancel={handleCancel}
-      okText="Tải lên"
-      cancelText="Đóng"
+      okText={t('ModalAddDocument.okText')}
+      cancelText={t('ModalAddDocument.cancelText')}
       confirmLoading={loading}
-      okButtonProps={{ 
+      okButtonProps={{
         icon: <UploadOutlined />,
-        disabled: fileList.length === 0 
+        disabled: fileList.length === 0
       }}
-      cancelButtonProps={{ 
-        icon: <CloseOutlined /> 
+      cancelButtonProps={{
+        icon: <CloseOutlined />
       }}
     >
       <Form form={form} layout="vertical">
         <Form.Item
           name="name"
-          label="Tên tài liệu"
-          rules={[{ required: true, message: 'Vui lòng nhập tên tài liệu!' }]}
+          label={t('ModalAddDocument.name')}
+          rules={[{ required: true, message: t('ModalAddDocument.nameRequired') }]}
         >
-          <Input placeholder="Nhập tên tài liệu" />
+          <Input placeholder={t('ModalAddDocument.namePlaceholder')} />
         </Form.Item>
         <Form.Item
           name="day"
-          label="Ngày"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
+          label={t('ModalAddDocument.days')}
+          rules={[{ required: true, message: t('ModalAddDocument.daysRequired') }]}
         >
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
-        <Form.Item label="Tệp đính kèm" required>
+        <Form.Item label={t('ModalAddDocument.attachments')} required>
           <Upload
             multiple
             fileList={fileList}
@@ -193,16 +196,16 @@ const ModalAddDocument: React.FC<ModalAddDocumentProps> = ({ open, onClose, onUp
               <div style={{ marginBottom: 8 }}>
                 {originNode}
                 {uploadProgress[file.name] !== undefined && (
-                  <Progress 
-                    percent={uploadProgress[file.name]} 
-                    size="small" 
+                  <Progress
+                    percent={uploadProgress[file.name]}
+                    size="small"
                     status={uploadProgress[file.name] === 100 ? "success" : "active"}
                   />
                 )}
               </div>
             )}
           >
-            <Button icon={<PlusOutlined />}>Chọn tệp</Button>
+            <Button icon={<PlusOutlined />}> {t('ModalAddDocument.chooseFile')} </Button>
           </Upload>
         </Form.Item>
       </Form>

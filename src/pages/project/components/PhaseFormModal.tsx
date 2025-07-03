@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { IPhase } from '../interfaces/project.interface';
+import { useTranslation } from 'react-i18next';
 // import { createPhase, updatePhaseById } from '../services/phase.service';
 
 interface Props {
@@ -23,6 +24,7 @@ interface Props {
 
 const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseData }) => {
   const [form] = Form.useForm();
+  const { t } = useTranslation('projectDetail');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 1; // Số giai đoạn hiển thị trên mỗi trang
 
@@ -70,7 +72,7 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
       onSubmit(transformedValues);
       onClose();
     } catch (error: any) {
-      message.error(error.message || 'Có lỗi xảy ra');
+      message.error(error.message || t('PhaseFormModal.message.isError'));
     }
   };
 
@@ -93,7 +95,7 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
   return (
     <Modal
       open={open}
-      title={mode === 'create' ? 'Tạo giai đoạn' : 'Chỉnh sửa giai đoạn'}
+      title={mode === 'create' ? t('PhaseFormModal.createPhase') : t('PhaseFormModal.editPhase')}
       onCancel={onClose}
       footer={null}
       destroyOnClose
@@ -103,15 +105,15 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
       <Form form={form} layout="vertical" onFinish={handleSubmit} autoComplete="off">
         <Card>
           <Form.Item
-            label="Tên nhóm giai đoạn"
+            label={t('PhaseFormModal.phaseGroupName')}
             name="name"
-            rules={[{ required: true, message: 'Không được để trống' }]}
+            rules={[{ required: true, message: t('PhaseFormModal.phaseGroupNameRequiered') }]}
           >
-            <Input placeholder="Nhập tên nhóm giai đoạn" />
+            <Input placeholder={t('PhaseFormModal.phaseGroupNamePlaceholder')} />
           </Form.Item>
         </Card>
 
-        <Divider orientation="left">Chi tiết các giai đoạn</Divider>
+        <Divider orientation="left">{t('PhaseFormModal.phasesDetail')}</Divider>
 
         <Form.List name="phases">
           {(fields, { add, remove }) => {
@@ -147,24 +149,24 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
             return (
               <>
                 {currentFields.map(({ key, name, ...restField }, index) => (
-                  <Card 
-                    key={key} 
+                  <Card
+                    key={key}
                     style={{ marginBottom: 16 }}
-                    title={`Giai đoạn #${start + index + 1}`}
+                    title={`${t('PhaseFormModal.phaseTitle')} #${start + index + 1}`}
                     extra={
                       <Popconfirm
-                        title="Xác nhận xóa"
-                        description="Bạn có chắc chắn muốn xóa giai đoạn này?"
+                        title={t('PhaseFormModal.deletePhaseTitle')}
+                        description={t('PhaseFormModal.deletePhaseComfirm')}
                         onConfirm={() => handleRemove(name)}
-                        okText="Xóa"
-                        cancelText="Hủy"
+                        okText={t('PhaseFormModal.okText')}
+                        cancelText={t('PhaseFormModal.cancelText')}
                       >
                         <Button
                           icon={<DeleteOutlined />}
                           danger
                           type="link"
                         >
-                          Xoá giai đoạn
+                          {t('PhaseFormModal.deletePhase')}
                         </Button>
                       </Popconfirm>
                     }
@@ -172,22 +174,22 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
                       <Form.Item
                         {...restField}
-                        label="Tên giai đoạn"
+                        label={t('PhaseFormModal.phaseFields.name')}
                         name={[name, 'name']}
-                        rules={[{ required: true, message: 'Không được để trống' }]}
+                        rules={[{ required: true, message: t('PhaseFormModal.phaseFields.fieldRequired') }]}
                       >
-                        <Input placeholder="Nhập tên giai đoạn" />
+                        <Input placeholder={t('PhaseFormModal.phaseFields.namePlaceholder')} />
                       </Form.Item>
 
                       <div style={{ display: 'flex', gap: 16 }}>
                         <Form.Item
                           {...restField}
-                          label="Thứ tự (order)"
+                          label={`${t('PhaseFormModal.phaseFields.order')} (order)`}
                           style={{ flex: 1 }}
                         >
-                          <Input 
-                            value={start + index + 1} 
-                            disabled 
+                          <Input
+                            value={start + index + 1}
+                            disabled
                             style={{ backgroundColor: '#f5f5f5' }}
                           />
                           <Form.Item
@@ -201,10 +203,10 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
 
                         <Form.Item
                           {...restField}
-                          label="Ngày bắt đầu"
+                          label={t('PhaseFormModal.phaseFields.startDate')}
                           name={[name, 'day']}
                           style={{ flex: 1 }}
-                          rules={[{ required: true, message: 'Không được để trống' }]}
+                          rules={[{ required: true, message: t('PhaseFormModal.phaseFields.fieldRequired') }]}
                         >
                           <DatePicker style={{ width: '100%' }} />
                         </Form.Item>
@@ -212,10 +214,10 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
 
                       <Form.Item
                         {...restField}
-                        label="Mô tả"
+                        label={t('PhaseFormModal.phaseFields.description')}
                         name={[name, 'description']}
                       >
-                        <Input.TextArea placeholder="Nhập mô tả (nếu có)" rows={3} />
+                        <Input.TextArea placeholder={t('PhaseFormModal.phaseFields.descriptionPlaceholder')} rows={3} />
                       </Form.Item>
                     </Space>
                   </Card>
@@ -225,7 +227,7 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
 
                 <Form.Item style={{ marginTop: 16 }}>
                   <Button type="dashed" onClick={handleAdd} block icon={<PlusOutlined />}>
-                    Thêm giai đoạn
+                    {t('PhaseFormModal.addPhase')}
                   </Button>
                 </Form.Item>
               </>
@@ -235,10 +237,10 @@ const PhaseFormModal: React.FC<Props> = ({ mode, open, onClose, onSubmit, phaseD
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
           <Button icon={<CloseOutlined />} onClick={onClose}>
-            Hủy
+            {t('PhaseFormModal.cancelText')}
           </Button>
           <Button type="primary" icon={<SaveOutlined />} htmlType="submit">
-            {mode === 'create' ? 'Tạo mới' : 'Lưu thay đổi'}
+            {mode === 'create' ? t('PhaseFormModal.addNew') : t('PhaseFormModal.saveChange')}
           </Button>
         </div>
       </Form>

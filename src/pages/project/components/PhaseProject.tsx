@@ -9,6 +9,7 @@ import {
 import dayjs from 'dayjs';
 import PhaseFormModal from './PhaseFormModal';
 import { PlusOutlined, EditOutlined, StepForwardOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 interface IPhaseProject {
   projectId: string,
@@ -17,6 +18,7 @@ interface IPhaseProject {
 }
 
 const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEndingProject }) => {
+  const { t } = useTranslation('projectDetail');
   const [phase, setPhase] = useState<IPhase>();
   const [showPhaseForm, setShowPhaseForm] = useState(false);
   const [phaseFormMode, setPhaseFormMode] = useState<'create' | 'edit'>('create');
@@ -25,7 +27,7 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
   // Sử dụng useCallback để tránh tạo lại hàm fetchPhase mỗi lần render
   const fetchPhase = useCallback(async () => {
     if (!projectId) return;
-    
+
     try {
       setLoading(true);
       const response = await getPhaseByProjectId(projectId);
@@ -33,7 +35,7 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
         setPhase(response.data);
       }
     } catch (error: any) {
-      message.error(error.message || 'Không thể tải dữ liệu giai đoạn');
+      message.error(error.message || t('PhaseProject.message.uploadFailed'));
     } finally {
       setLoading(false);
     }
@@ -73,16 +75,16 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
 
       if (phaseFormMode === 'create') {
         await createPhase(phaseData);
-        message.success('Tạo giai đoạn thành công');
+        message.success(t('PhaseProject.message.createSuccess'));
       } else if (phaseFormMode === 'edit' && phase?._id) {
         await updatePhaseById(phase._id, phaseData);
-        message.success('Cập nhật giai đoạn thành công');
+        message.success(t('PhaseProject.message.updateSuccess'));
       }
 
       await fetchPhase();
       setShowPhaseForm(false);
     } catch (error: any) {
-      message.error(error.message || 'Có lỗi xảy ra khi xử lý giai đoạn');
+      message.error(error.message || t('PhaseProject.message.handleFailed'));
     } finally {
       setLoading(false);
     }
@@ -98,9 +100,9 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
         currentPhase: phase.currentPhase + 1
       });
       await fetchPhase();
-      message.success('Đã chuyển sang giai đoạn tiếp theo');
+      message.success(t('PhaseProject.message.nextPhaseSwitchSuccess'));
     } catch (error: any) {
-      message.error(error.message || 'Không thể chuyển giai đoạn');
+      message.error(error.message || t('PhaseProject.message.nextPhaseSwitchFailed'));
     } finally {
       setLoading(false);
     }
@@ -114,13 +116,13 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
       // Cập nhật currentPhase thành phase cuối cùng
       await updatePhaseById(phase._id, {
         ...phase,
-        currentPhase: steps.length 
+        currentPhase: steps.length
       });
       await fetchPhase();
       // Gọi callback để kết thúc dự án
       onEndingProject(projectId);
     } catch (error: any) {
-      message.error(error.message || 'Không thể cập nhật giai đoạn cuối cùng');
+      message.error(error.message || t('PhaseProject.message.finalPhaseUpdateFailed'));
     } finally {
       setLoading(false);
     }
@@ -128,11 +130,11 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
 
   const showEndingPhaseConfirm = (_projectId: string) => {
     Modal.confirm({
-      title: 'Xác nhận kết thúc dự án',
+      title: t('PhaseProject.endProjectConfirmTitle'),
       icon: <StepForwardOutlined />,
-      content: "Bạn có chắc chắn muốn kết thúc dự án này? Hành động này sẽ cập nhật trạng thái dự án thành 'Đã hoàn thành'",
-      okText: 'Xác nhận',
-      cancelText: 'Hủy',
+      content: t('PhaseProject.endProjectConfirmContent'),
+      okText: t('PhaseProject.OkText'),
+      cancelText: t('PhaseProject.CancelText'),
       onOk() {
         handleEndingProject();
       }
@@ -141,11 +143,11 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
 
   const showNextPhaseConfirm = () => {
     Modal.confirm({
-      title: 'Chuyển giai đoạn tiếp theo',
+      title: t('PhaseProject.nextPhaseSwitchTitle'),
       icon: <StepForwardOutlined />,
-      content: "Bạn có chắc chắn muốn chuyển giai đoạn mới, hành động không thể hoàn tác!",
-      okText: 'Xác nhận',
-      cancelText: 'Hủy',
+      content: t('PhaseProject.nextPhaseSwitchContent'),
+      okText: t('PhaseProject.OkText'),
+      cancelText: t('PhaseProject.CancelText'),
       onOk() {
         handleNextPhase();
       }
@@ -156,37 +158,37 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
     <>
       {phase ?
         <>
-        <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            onClick={handleEdit}
-            loading={loading}
-            disabled = {projectStatus === 'Đã hoàn thành' ? true : false}
-          >
-            Chỉnh sửa giai đoạn
-          </Button>
-          {phase.currentPhase === steps.length - 1 && (
-              <Button 
-                type="primary" 
-                onClick={() => showEndingPhaseConfirm(projectId)} 
+          <Space style={{ justifyContent: 'space-between', width: '100%', marginBottom: '16px' }}>
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              onClick={handleEdit}
+              loading={loading}
+              disabled={projectStatus === t('PhaseProject.isDone') ? true : false}
+            >
+              {t('PhaseProject.editPhase')}
+            </Button>
+            {phase.currentPhase === steps.length - 1 && (
+              <Button
+                type="primary"
+                onClick={() => showEndingPhaseConfirm(projectId)}
                 disabled={projectStatus === 'Đã hoàn thành'}
                 loading={loading}
               >
-                Hoàn thành
+                {t('PhaseProject.endProject')}
               </Button>
             )}
-        </Space>
+          </Space>
           <div style={{ paddingTop: 24 }}>
             <Steps current={phase.currentPhase} items={items} />
           </div>
           <div style={{ marginTop: 24 }}>
             {phase.currentPhase < steps.length - 1 && (
-              <Button type="primary" onClick={showNextPhaseConfirm} loading={loading} icon = {<StepForwardOutlined/>}>
-                Giai đoạn tiếp theo
+              <Button type="primary" onClick={showNextPhaseConfirm} loading={loading} icon={<StepForwardOutlined />}>
+                {t('PhaseProject.nextPhase')}
               </Button>
             )}
-            
+
             {/* {phase.currentPhase > 0 && (
               <Button style={{ margin: '0 8px' }} onClick={handlePreviousPhase} loading={loading}>
                 Quay lại
@@ -202,7 +204,7 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
             onClick={handleCreate}
             loading={loading}
           >
-            Thêm tiến độ
+            {t('PhaseProject.addProgress')}
           </Button>
           <Empty />
         </>

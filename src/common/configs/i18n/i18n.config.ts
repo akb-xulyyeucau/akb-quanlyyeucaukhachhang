@@ -12,8 +12,12 @@ import jaCustomer from '../../locales/ja/customer.json';
 import viCustomer from '../../locales/vi/customer.json';
 import jaProjectRequest from '../../locales/ja/projectRequest.json';
 import viProjectRequest from '../../locales/vi/projectRequest.json';
-
-
+import viProject from '../../locales/vi/project.json';
+import jaProject from '../../locales/ja/project.json';
+import viProjectDetail from '../../locales/vi/projectDetail.json';
+import jaProjectDetail from '../../locales/ja/projectDetail.json';
+import viProjectResponse from '../../locales/vi/projectResponse.json';
+import jaProjectResponse from '../../locales/ja/projectResponse.json';
 
 const savedLanguage = localStorage.getItem('language') || 'vi';
 
@@ -23,26 +27,32 @@ i18n
     resources: {
       vi: {
         common: viCommon,
-        login : viLogin,
-        mainLayout : viMainlayout,
-        user : viUser,
-        customer : viCustomer,
+        login: viLogin,
+        mainLayout: viMainlayout,
+        user: viUser,
+        customer: viCustomer,
         projectRequest: viProjectRequest,
+        project: viProject,
+        projectDetail: viProjectDetail,
+        projectResponse: viProjectResponse,
         // login: viLogin,
       },
       ja: {
         common: jaCommon,
-        login : jaLogin,
-        mainLayout : jaMainLayout,
-        user : jaUser,
-        customer : jaCustomer,
+        login: jaLogin,
+        mainLayout: jaMainLayout,
+        user: jaUser,
+        customer: jaCustomer,
         projectRequest: jaProjectRequest,
+        project: jaProject,
+        projectDetail: jaProjectDetail,
+        projectResponse: jaProjectResponse,
         // login: jaLogin,
       },
     },
     lng: savedLanguage,
     fallbackLng: 'vi',
-    ns: ['common', 'login' , 'mainLayout' , 'user','customer', 'projectRequest'], // Định nghĩa các namespace
+    ns: ['common', 'login', 'mainLayout', 'user', 'customer', 'projectRequest', 'project', 'projectDetail', 'projectResponse'], // Định nghĩa các namespace
     defaultNS: 'common', // Namespace mặc định
     interpolation: {
       escapeValue: false,

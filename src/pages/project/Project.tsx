@@ -2,14 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button, Dropdown, Table, Tooltip, Tag, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
-import { getAllProject, getProjectByCustomerId } from './services/project.service';
-import { EditOutlined, EllipsisOutlined, AreaChartOutlined, FilterOutlined } from '@ant-design/icons';
+import { getAllProject, getProjectByCustomerId, projectStatistic } from './services/project.service';
+import { EditOutlined, EllipsisOutlined, AreaChartOutlined, FilterOutlined, LineChartOutlined, PieChartOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/authSelector';
 import ModalFilter from './components/ModalFilter';
 import type { Dayjs } from 'dayjs';
+import { useTranslation } from 'react-i18next';
+import StatisticCard from '../../common/components/StatisticCard';
 
 interface FilterValues {
   searchTerm: string;
@@ -19,6 +21,7 @@ interface FilterValues {
 }
 
 const CustomerProject = () => {
+  const { t } = useTranslation('project');
   const navigate = useNavigate();
   const [projects, setProjects] = useState<IProject[]>([]);
   const [page, setPage] = useState(1);
@@ -27,6 +30,7 @@ const CustomerProject = () => {
   const [loading, setLoading] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Partial<FilterValues>>({});
+  const [statisticData , setStatisticData] = useState<any>();
 
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile);
@@ -37,19 +41,19 @@ const CustomerProject = () => {
       const queryParams = new URLSearchParams();
       queryParams.append('page', page.toString());
       queryParams.append('limit', limit.toString());
-      
+
       if (filters.searchTerm) {
         queryParams.append('searchTerm', filters.searchTerm);
       }
       if (filters.isDone !== undefined) {
         queryParams.append('isDone', filters.isDone.toString());
       }
-      
+
       if (filters.selectedDate) {
         const timeFilter = {
           type: filters.timeFilterType,
           year: filters.selectedDate.year(),
-          value: filters.timeFilterType === 'month' 
+          value: filters.timeFilterType === 'month'
             ? filters.selectedDate.month() + 1
             : Math.floor(filters.selectedDate.month() / 3) + 1
         };
@@ -66,9 +70,19 @@ const CustomerProject = () => {
       setLoading(false);
     }
   }, [page, limit, user?.role, profile?._id]);
-
+  const fetchProjectStatistic = async () => {
+    setLoading(true);
+    try {
+      const response = await projectStatistic();
+      setStatisticData(response.data)
+      console.log("thống kế -----" , response.data);
+    } catch (error : any) {
+      throw new Error(error.message);
+    }
+  }
   useEffect(() => {
     fetchProjectData(activeFilters);
+    fetchProjectStatistic();
   }, [fetchProjectData, page, limit]);
 
   const handleFilter = (values: FilterValues) => {
@@ -91,26 +105,16 @@ const CustomerProject = () => {
 
     if (activeFilters.searchTerm) {
       chips.push(
-        <Tag 
-          key="searchTerm" 
-          closable 
-          onClose={() => removeFilter('searchTerm')}
-          style={{ marginRight: 8 }}
-        >
-          Tên: {activeFilters.searchTerm}
+        <Tag key="searchTerm" closable onClose={() => removeFilter('searchTerm')} style={{ marginRight: 8 }}>
+          {t('projectPage.name')}: {activeFilters.searchTerm}
         </Tag>
       );
     }
 
     if (activeFilters.isDone !== undefined) {
       chips.push(
-        <Tag 
-          key="isDone" 
-          closable 
-          onClose={() => removeFilter('isDone')}
-          style={{ marginRight: 8 }}
-        >
-          Trạng thái: {activeFilters.isDone ? 'Đã hoàn thành' : 'Đang thực hiện'}
+        <Tag key="isDone" closable onClose={() => removeFilter('isDone')} style={{ marginRight: 8 }}>
+          {t('projectPage.status')}: {activeFilters.isDone ? t('projectPage.completed') : t('projectPage.inProgress')}
         </Tag>
       );
     }
@@ -118,16 +122,16 @@ const CustomerProject = () => {
     if (activeFilters.selectedDate) {
       const format = activeFilters.timeFilterType === 'month' ? 'MM/YYYY' : '[Quý] Q/YYYY';
       chips.push(
-        <Tag 
-          key="timeFilter" 
-          closable 
+        <Tag
+          key="timeFilter"
+          closable
           onClose={() => {
             removeFilter('selectedDate');
             removeFilter('timeFilterType');
           }}
           style={{ marginRight: 8 }}
         >
-          Thời gian: {activeFilters.selectedDate.format(format)}
+          {t('projectPage.time')}: {activeFilters.selectedDate.format(format)}
         </Tag>
       );
     }
@@ -136,16 +140,12 @@ const CustomerProject = () => {
       <Space style={{ marginBottom: 16 }}>
         {chips}
         {chips.length > 0 && (
-          <Button 
-            type="link" 
-            size="small" 
-            onClick={() => {
-              setActiveFilters({});
-              setPage(1);
-              fetchProjectData({});
-            }}
-          >
-            Xóa tất cả
+          <Button type="link" size="small" onClick={() => {
+            setActiveFilters({});
+            setPage(1);
+            fetchProjectData({});
+          }}>
+            {t('projectPage.clearAll')}
           </Button>
         )}
       </Space>
@@ -154,15 +154,15 @@ const CustomerProject = () => {
 
   const handleViewDetail = (record: IProject) => {
     navigate(`/project/${record._id}`);
-  }
+  };
 
   const handleViewLog = (record: IProject) => {
     navigate(`/request-response/${record._id}`);
-  }
+  };
 
   const columns: ColumnsType<IProject> = [
     {
-      title: "STT",
+      title: t('projectPage.no'),
       dataIndex: 'stt',
       key: 'stt',
       render: (_: any, __: IProject, index: number) => (page - 1) * limit + index + 1,
@@ -170,21 +170,21 @@ const CustomerProject = () => {
       width: 60,
     },
     {
-      title: "Mã dự án",
+      title: t('projectPage.projectCode'),
       dataIndex: 'alias',
       key: 'alias',
       align: 'center',
       render: (text: string) => <Tag><Tooltip title={text}>{text}</Tooltip></Tag>,
     },
     {
-      title: "Tên dự án",
+      title: t('projectPage.projectName'),
       dataIndex: 'name',
       key: 'name',
       align: 'center',
       render: (text: string) => <Tag><Tooltip title={text}>{text}</Tooltip></Tag>,
     },
     {
-      title: 'Quản lý dự án',
+      title: t('projectPage.projectManager'),
       dataIndex: ['pm', 'name'],
       key: 'pm.name',
       align: 'center',
@@ -193,7 +193,7 @@ const CustomerProject = () => {
       ),
     },
     {
-      title: "Khách hàng",
+      title: t('projectPage.customer'),
       dataIndex: ['customer', 'name'],
       key: 'customer.name',
       align: 'center',
@@ -202,22 +202,19 @@ const CustomerProject = () => {
       ),
     },
     {
-      title: 'Trạng thái',
+      title: t('projectPage.status'),
       dataIndex: 'status',
       key: 'status',
       align: 'center',
       render: (text: string) => {
         let color = '';
-        if (text === 'Đang thực hiện') {
-          color = 'purple';
-        } else if (text === 'Đã hoàn thành') {
-          color = 'green';
-        }
+        if (text === t('projectPage.inProgress')) color = 'purple';
+        else if (text === t('projectPage.completed')) color = 'green';
         return <Tag color={color}><Tooltip title={text}>{text}</Tooltip></Tag>;
       },
     },
     {
-      title: 'Ngày bắt đầu',
+      title: t('projectPage.startDate'),
       dataIndex: 'day',
       key: 'day',
       align: 'center',
@@ -225,7 +222,7 @@ const CustomerProject = () => {
         text ? dayjs(new Date(text).toLocaleDateString()).format('DD/MM/YYYY') : '',
     },
     {
-      title: 'Chức năng',
+      title: t('projectPage.action'),
       key: 'action',
       align: 'center',
       width: 110,
@@ -236,7 +233,7 @@ const CustomerProject = () => {
             label: (
               <span>
                 <EditOutlined style={{ color: '#faad14', marginRight: 6 }} />
-                Chi tiết dự án
+                {t('projectPage.projectDetail')}
               </span>
             ),
           },
@@ -245,24 +242,17 @@ const CustomerProject = () => {
             label: (
               <span>
                 <AreaChartOutlined style={{ color: '#ff4d4f', marginRight: 6 }} />
-                Yêu cầu và phản hồi
+                {t('projectPage.requestResponse')}
               </span>
             ),
           },
         ];
         const handleMenuClick = ({ key }: { key: string }) => {
-          if (key === 'detail') {
-            handleViewDetail(record);
-          } else if (key === 'log') {
-            handleViewLog(record);
-          }
+          if (key === 'detail') handleViewDetail(record);
+          else if (key === 'log') handleViewLog(record);
         };
         return (
-          <Dropdown
-            menu={{ items, onClick: handleMenuClick }}
-            trigger={['click']}
-            placement="bottomLeft"
-          >
+          <Dropdown menu={{ items, onClick: handleMenuClick }} trigger={['click']} placement="bottomLeft">
             <Button icon={<EllipsisOutlined />} />
           </Dropdown>
         );
@@ -272,14 +262,42 @@ const CustomerProject = () => {
 
   return (
     <div>
+       <div
+          style={{
+              marginBottom: 16,
+              display: 'flex',
+              gap: 16,
+              flexWrap: 'wrap',
+              justifyContent: 'flex-start',
+              width: '100%',  
+            }}
+        >
+          <StatisticCard
+            icon={<LineChartOutlined />}
+            title="Tổng số dự án đang yêu cầu và đã kích hoạt"
+            number={statisticData?.totalProject || 0}
+            percent={100}
+            color="#1890FF"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng số dự án được kích hoạt"
+            number={statisticData?.totalActiveProject || 0}
+            percent={statisticData?.percentActive}
+            color="#52C41A"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng yêu cầu dự án chưa duyệt"
+            number={statisticData?.totalInActiveProject || 0}
+            percent={statisticData?.percentInActive}
+            color="#FAAD14"
+          />
+        </div>
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <Button
-            type="primary"
-            icon={<FilterOutlined />}
-            onClick={() => setFilterModalVisible(true)}
-          >
-            Bộ lọc
+          <Button type="primary" icon={<FilterOutlined />} onClick={() => setFilterModalVisible(true)}>
+            {t('projectPage.filter')}
           </Button>
         </div>
         {renderFilterChips()}

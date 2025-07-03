@@ -1,5 +1,3 @@
-// install recharts , react-calendar
-import React from "react";
 import {
   Card,
   Col,

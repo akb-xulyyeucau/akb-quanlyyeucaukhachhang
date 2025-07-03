@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button, Dropdown, Table, Tooltip, Tag, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { IProject } from './interfaces/project.interface';
-import { getAllProject, getProjectByCustomerId } from './services/project.service';
-import { EditOutlined, EllipsisOutlined, AreaChartOutlined, FilterOutlined } from '@ant-design/icons';
+import { getAllProject, getProjectByCustomerId, projectStatistic } from './services/project.service';
+import { EditOutlined, EllipsisOutlined, AreaChartOutlined, FilterOutlined, LineChartOutlined, PieChartOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -11,6 +11,7 @@ import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/auth
 import ModalFilter from './components/ModalFilter';
 import type { Dayjs } from 'dayjs';
 import { useTranslation } from 'react-i18next';
+import StatisticCard from '../../common/components/StatisticCard';
 
 interface FilterValues {
   searchTerm: string;
@@ -29,6 +30,7 @@ const CustomerProject = () => {
   const [loading, setLoading] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [activeFilters, setActiveFilters] = useState<Partial<FilterValues>>({});
+  const [statisticData , setStatisticData] = useState<any>();
 
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile);
@@ -68,9 +70,19 @@ const CustomerProject = () => {
       setLoading(false);
     }
   }, [page, limit, user?.role, profile?._id]);
-
+  const fetchProjectStatistic = async () => {
+    setLoading(true);
+    try {
+      const response = await projectStatistic();
+      setStatisticData(response.data)
+      console.log("thống kế -----" , response.data);
+    } catch (error : any) {
+      throw new Error(error.message);
+    }
+  }
   useEffect(() => {
     fetchProjectData(activeFilters);
+    fetchProjectStatistic();
   }, [fetchProjectData, page, limit]);
 
   const handleFilter = (values: FilterValues) => {
@@ -250,6 +262,38 @@ const CustomerProject = () => {
 
   return (
     <div>
+       <div
+          style={{
+              marginBottom: 16,
+              display: 'flex',
+              gap: 16,
+              flexWrap: 'wrap',
+              justifyContent: 'flex-start',
+              width: '100%',  
+            }}
+        >
+          <StatisticCard
+            icon={<LineChartOutlined />}
+            title="Tổng số dự án đang yêu cầu và đã kích hoạt"
+            number={statisticData?.totalProject || 0}
+            percent={100}
+            color="#1890FF"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng số dự án được kích hoạt"
+            number={statisticData?.totalActiveProject || 0}
+            percent={statisticData?.percentActive}
+            color="#52C41A"
+          />
+          <StatisticCard
+            icon={<PieChartOutlined />}
+            title="Tổng yêu cầu dự án chưa duyệt"
+            number={statisticData?.totalInActiveProject || 0}
+            percent={statisticData?.percentInActive}
+            color="#FAAD14"
+          />
+        </div>
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <Button type="primary" icon={<FilterOutlined />} onClick={() => setFilterModalVisible(true)}>

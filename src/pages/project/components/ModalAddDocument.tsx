@@ -18,7 +18,7 @@ const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
 const getTempDocumentIds = (): string[] => {
   const ids = localStorage.getItem(TEMP_DOCUMENT_IDS_KEY);
   return ids ? JSON.parse(ids) : [];
-};
+};  
 
 const addTempDocumentId = (id: string) => {
   const ids = getTempDocumentIds();

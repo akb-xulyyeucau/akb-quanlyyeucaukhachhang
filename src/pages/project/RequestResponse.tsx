@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
 // import { color } from 'chart.js/helpers';
 import { addFeedback, getFeedbackInProject } from './services/feedback.service';
-import { projectStatistic } from './services/project.service';
+import { projectStatisticById } from './services/project.service';
 import type { IFeedback, IProjectStatistic } from './interfaces/project.interface';
 import dayjs from 'dayjs';
 import RatingProject from '../../common/components/RatingProject';
@@ -53,7 +53,7 @@ const RequestResponse = () => {
 
   const fetchProjectStatistic = async () => {
     try {
-      const res = await projectStatistic(pId || '');
+      const res = await projectStatisticById(pId || '');
       setStatisticData(res.data);
       console.log("data---", res.data);
     } catch (error: any) {

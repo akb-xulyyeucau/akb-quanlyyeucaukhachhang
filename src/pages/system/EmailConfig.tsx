@@ -2,7 +2,8 @@ import { SaveOutlined } from '@ant-design/icons';
 import { Card, Form, Input, Select, Switch, Button, message, Spin } from 'antd';
 import { useState, useEffect } from 'react';
 import { createEmailConfig, getEmailConfig, updateEmailConfig } from './services/mail.service';
-
+import {   selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
+import { useSelector } from 'react-redux';
 interface MailConfig {
   _id: string;
   serviceName: string;
@@ -21,7 +22,8 @@ const EmailConfig = () => {
   const [encryptionMethod, setEncryptionMethod] = useState('SSL');
   const [loading, setLoading] = useState(true);
   const [mailConfig, setMailConfig] = useState<MailConfig | null>(null);
-
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile);
   useEffect(() => {
     fetchMailConfig();
   }, []);
@@ -128,10 +130,9 @@ const EmailConfig = () => {
           initialValues={{
             emailService: 'Gmail',
             encryptionMethod: 'SSL',
-            emailAddress: '',
-            senderName: '',
+            emailAddress: profile?.emailContact || '',
+            senderName: profile?.name || '',
             host: 'smtp.gmail.com',
-            // port: '587',
             secure: true
           }}
         >

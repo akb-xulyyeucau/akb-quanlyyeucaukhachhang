@@ -12,7 +12,7 @@ import FileText from '../../../common/components/FileText';
 interface ModalApproveProjectProps {
   isOpen: boolean;
   onClose: () => void;
-  onApprove: (projectId: string) => void;
+  onApprove: (projectId: string, projectData: any) => void;
   projectId: string;
 }
 
@@ -51,9 +51,11 @@ const ModalApproveProject: React.FC<ModalApproveProjectProps> = ({
   }, [projectId, isOpen]);
 
   const handleApprove = async () => {
+    if (!projectData) return;
+    
     setApproving(true);
     try {
-      await onApprove(projectData._id);
+      await onApprove(projectData._id, projectData);
       onClose();
     } catch (error) {
       console.error('Lỗi khi duyệt dự án:', error);

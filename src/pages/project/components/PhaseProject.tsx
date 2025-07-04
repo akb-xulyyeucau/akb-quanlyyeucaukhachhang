@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button, message, Steps, Empty, Space, Modal } from 'antd';
-import type { IPhase } from '../interfaces/project.interface';
+import type { IPhase, IProject } from '../interfaces/project.interface';
 import {
   getPhaseByProjectId,
   createPhase,
@@ -10,20 +10,25 @@ import dayjs from 'dayjs';
 import PhaseFormModal from './PhaseFormModal';
 import { PlusOutlined, EditOutlined, StepForwardOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import { sendEmail } from '../services/mail.service';
+import { useSelector } from 'react-redux';
+import { selectUserProfile, selectAuthUser } from '../../../common/stores/auth/authSelector';
 
 interface IPhaseProject {
-  projectId: string,
-  projectStatus?: string,
-  onEndingProject: (projectId: string) => void
+  projectId: string;
+  project?: IProject;
+  projectStatus?: string;
+  onEndingProject: (projectId: string) => void;
 }
 
-const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEndingProject }) => {
+const PhaseProject: React.FC<IPhaseProject> = ({ projectId, project, projectStatus, onEndingProject }) => {
   const { t } = useTranslation('projectDetail');
   const [phase, setPhase] = useState<IPhase>();
   const [showPhaseForm, setShowPhaseForm] = useState(false);
   const [phaseFormMode, setPhaseFormMode] = useState<'create' | 'edit'>('create');
   const [loading, setLoading] = useState(false);
-
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile);
   // Sử dụng useCallback để tránh tạo lại hàm fetchPhase mỗi lần render
   const fetchPhase = useCallback(async () => {
     if (!projectId) return;
@@ -91,7 +96,7 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
   };
 
   const handleNextPhase = async () => {
-    if (!phase?._id) return;
+    if (!phase?._id || !project) return;
 
     try {
       setLoading(true);
@@ -101,6 +106,32 @@ const PhaseProject: React.FC<IPhaseProject> = ({ projectId, projectStatus, onEnd
       });
       await fetchPhase();
       message.success(t('PhaseProject.message.nextPhaseSwitchSuccess'));
+      
+      if(user?.role === "admin" || user?.role === "pm"){
+        await sendEmail({
+          to: project.customer?.emailContact,
+          subject: `Dự án ${project.name} đã chuyển sang giai đoạn mới bởi ${profile?.name || user?.email}`,
+          templateName: "nextPhaseInProject.template",
+          data: {
+            username: project.customer?.name,
+            projectName: project.name,
+            senderName: profile?.name || user?.email,
+            link: `${import.meta.env.VITE_HOST}/project/${projectId}`
+          }
+        });
+      } else {
+        await sendEmail({
+          to: project.pm?.emailContact,
+          subject: `Dự án ${project.name} đã chuyển sang giai đoạn mới bởi ${profile?.name || user?.email}`,
+          templateName: "nextPhaseInProject.template",
+          data: {
+            username: project.customer?.name,
+            projectName: project.name,
+            senderName: profile?.name || user?.email,
+            link: `${import.meta.env.VITE_HOST}/project/${projectId}`
+          }
+        });
+      }
     } catch (error: any) {
       message.error(error.message || t('PhaseProject.message.nextPhaseSwitchFailed'));
     } finally {

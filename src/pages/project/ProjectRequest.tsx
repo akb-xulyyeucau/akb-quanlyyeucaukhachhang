@@ -11,6 +11,7 @@ import ModalApproveProject from './components/ModalApproveProject';
 import { useSelector } from 'react-redux';
 import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useTranslation } from 'react-i18next';
+import { sendEmail } from './services/mail.service';
 
 const TEMP_DOCUMENT_IDS_KEY = 'temp_document_ids';
 
@@ -119,13 +120,31 @@ const CustomerProject = () => {
     }
   };
 
-  const handleApproveProject = async (projectId: string) => {
+  const handleApproveProject = async (projectId: string, projectData: any) => {
     try {
       const res = await approveProject(projectId);
       if (res.success) {
         message.success(t('pjRequest_page.table.approveSuccess'));
         await fetchProjectData();
         setIsModalOpen(false);
+
+        // Send email notification
+        try {
+          await sendEmail({
+            to: projectData.customer.emailContact,
+            subject: `Dự án ${projectData.name} đã được duyệt`,
+            templateName: "projectApprove.template",
+            data: {
+              username: projectData.customer.name,
+              projectName: projectData.name,
+              senderName: profile?.name,
+              link: `${import.meta.env.VITE_HOST}/project/${projectId}`
+            }
+          });
+        } catch (emailError) {
+          console.error('Lỗi khi gửi email thông báo:', emailError);
+          message.warning('Dự án đã được duyệt nhưng không thể gửi email thông báo');
+        }
       } else {
         message.error(res.message || t('pjRequest_page.table.approveError'));
       }

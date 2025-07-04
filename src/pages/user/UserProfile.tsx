@@ -55,8 +55,8 @@ const UserProfile = () => {
                 {user?.email}
               </Descriptions.Item>
               <Descriptions.Item label="Trạng thái">
-                <Tag color={user?.isActive === true ? 'green' : 'red'}>
-                  {user?.isActive === true ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
+                <Tag color={user?.isActive  ? 'green' : 'red'}>
+                  {user?.isActive  ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
                 </Tag>
               </Descriptions.Item>
               {/* <Descriptions.Item label="Ngày tạo">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
 import { loginSuccess , setProfile } from '../../common/stores/auth/authSlice';
@@ -121,7 +121,7 @@ const Login: React.FC = () => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block size="large" loading={loading}>
+            <Button type="primary" htmlType="submit" block size="large" loading={loading} icon={<LoginOutlined />}>
               {t('login')}
             </Button>
           </Form.Item>

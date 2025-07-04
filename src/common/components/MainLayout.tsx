@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Button, Dropdown, Modal } from 'antd';
+import { Layout, Menu, Avatar, Button, Dropdown, Modal, Divider } from 'antd';
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -93,7 +93,6 @@ const MainLayout: React.FC = () => {
           />
           <div style={{ fontWeight: 700, fontSize: 20 }}>{t('title')}</div>
         </div>
-        <LanguageSwitcher />
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Dropdown
             menu={{
@@ -119,6 +118,18 @@ const MainLayout: React.FC = () => {
                     <Button onClick={()=>{handleUserProfile(user?._id?? '')}} type="link">
                       {t('personal_info')}
                     </Button>
+                  ),
+                },
+                {
+                  key: 'divider',
+                  type: 'divider',
+                },
+                {
+                  key: 'language',
+                  label: (
+                    <div style={{ padding: '4px 0' }}>
+                      <LanguageSwitcher />
+                    </div>
                   ),
                 },
               ],
@@ -164,17 +175,19 @@ const MainLayout: React.FC = () => {
             boxShadow: '2px 0 8px #f0f1f2',
             position: 'fixed',
             height: 'calc(100vh - 64px)',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column'
           }}
-          width={220}
+          width={260}
         >
           <Menu
             mode="inline"
             theme="light"
             defaultSelectedKeys={['1']}
             style={{ 
-              height: '100%', 
-              borderRight: 0
+              borderRight: 0,
+              flex: 1
             }}
             onClick={({ key }) => handleMenuClick(key)}
           >
@@ -211,9 +224,36 @@ const MainLayout: React.FC = () => {
               </Menu.Item>
             </Menu.SubMenu>
           </Menu>
+          
+          <div style={{ 
+            borderTop: '1px solid #f0f0f0',
+            background: '#fff'
+          }}>
+            <Menu
+              mode="inline"
+              theme="light"
+              style={{ 
+                border: 'none',
+                background: '#f0f7ff'
+              }}
+              selectedKeys={[]}
+            >
+              <Menu.Item 
+                key="language-switcher" 
+                style={{ 
+                  padding: '0',
+                  margin: 0,
+                  height: '40px',
+                  lineHeight: '40px'
+                }}
+              >
+                <LanguageSwitcher />
+              </Menu.Item>
+            </Menu>
+          </div>
         </Sider>
         <Layout style={{ 
-          marginLeft: collapsed ? '80px' : '220px',
+          marginLeft: collapsed ? '80px' : '260px',
           transition: 'margin-left 0.2s',
           background: '#fff',
           padding: '0 24px'

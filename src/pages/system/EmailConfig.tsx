@@ -1,9 +1,11 @@
-import { SaveOutlined } from '@ant-design/icons';
-import { Card, Form, Input, Select, Switch, Button, message, Spin } from 'antd';
+import { SaveOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Select, Switch, Button, message, Spin, Space } from 'antd';
 import { useState, useEffect } from 'react';
 import { createEmailConfig, getEmailConfig, updateEmailConfig } from './services/mail.service';
-import {   selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
+import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
+import GmailTutorial from '../../common/components/GmailTutorial';
+
 interface MailConfig {
   _id: string;
   serviceName: string;
@@ -22,6 +24,7 @@ const EmailConfig = () => {
   const [encryptionMethod, setEncryptionMethod] = useState('SSL');
   const [loading, setLoading] = useState(true);
   const [mailConfig, setMailConfig] = useState<MailConfig | null>(null);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile);
   useEffect(() => {
@@ -122,7 +125,23 @@ const EmailConfig = () => {
   return (
     <div className="p-6">
       {contextHolder}
-      <Card title={mailConfig ? "Cập nhật cấu hình Email" : "Tạo mới cấu hình Email"} className="w-full max-w-4xl mx-auto">
+      <Card 
+        title={
+          <div className="flex justify-between items-center">
+            <span>{mailConfig ? "Cập nhật cấu hình Email" : "Tạo mới cấu hình Email"}</span>
+          </div>
+        } 
+        className="w-full max-w-4xl mx-auto"
+      >
+        <div className="flex justify-end mb-4">
+          <Button
+            type="default"
+            icon={<QuestionCircleOutlined />}
+            onClick={() => setIsTutorialOpen(true)}
+          >
+            Hướng dẫn tạo App Password
+          </Button>
+        </div>
         <Form
           form={form}
           layout="vertical"
@@ -222,6 +241,10 @@ const EmailConfig = () => {
           </Form.Item>
         </Form>
       </Card>
+      <GmailTutorial 
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
+      />
     </div>
   );
 };

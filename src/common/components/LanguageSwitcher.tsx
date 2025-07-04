@@ -10,19 +10,58 @@ const LanguageSwitcher: React.FC = () => {
     const newLang = i18n.language === 'vi' ? 'ja' : 'vi';
     i18n.changeLanguage(newLang);
   };
-  console.log('i18n ------', i18n.language);
-  
-  const buttonText = i18n.language === 'vi' ? 'VI - JA' : 'JA - VI';
+
+  const getCurrentLanguage = () => {
+    switch (i18n.language) {
+      case 'vi':
+        return {
+          code: 'VI',
+          name: 'Tiếng Việt',
+          flag: '🇻🇳'
+        };
+      case 'ja':
+        return {
+          code: 'JA',
+          name: '日本語',
+          flag: '🇯🇵'
+        };
+      default:
+        return {
+          code: 'VI',
+          name: 'Tiếng Việt',
+          flag: '🇻🇳'
+        };
+    }
+  };
+
+  const currentLang = getCurrentLanguage();
+
   return (
-    <div>
-      <Button
-        icon={<GlobalOutlined />}
-        onClick={changeLanguage}
-        style={{ display: 'flex', alignItems: 'center' }}
-      >
-        {buttonText}
-      </Button>
-    </div>
+    <Button
+      type="text"
+      onClick={changeLanguage}
+      style={{
+        width: '100%',
+        height: '40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        padding: '0 24px',
+        border: 'none',
+        boxShadow: 'none',
+        background: 'transparent'
+      }}
+    >
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        gap: '12px'
+      }}>
+        <GlobalOutlined />
+        <span>{currentLang.code}</span>
+        <span>{currentLang.flag}</span>
+      </div>
+    </Button>
   );
 };
 

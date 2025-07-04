@@ -147,7 +147,6 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId, project }) => {
           console.log(`FormData ${key}:`, value);
         }
       }
-
       await createReport(formData);
       message.success(t('ReportTable.messages.createSuccess'));
       handleCloseModal();

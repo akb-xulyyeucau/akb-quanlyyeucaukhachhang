@@ -6,15 +6,19 @@ import dayjs from 'dayjs';
 import { DeleteOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import ReportFormModal from './ReportFormModal';
 import ReportDetailModal from './ReportDetailModal';
-import type { IReport } from '../interfaces/project.interface';
+import type { IReport, IProject } from '../interfaces/project.interface';
 import { useDebounce } from '../../../common/hooks/useDebounce';
 import { useTranslation } from 'react-i18next';
+import { sendEmail } from '../services/mail.service';
+import { useSelector } from 'react-redux';
+import { selectUserProfile, selectAuthUser } from '../../../common/stores/auth/authSelector';
 
 interface ReportTableProps {
   projectId: string;
+  project?: IProject;
 }
 
-const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
+const ReportTable: React.FC<ReportTableProps> = ({ projectId, project }) => {
   const { t } = useTranslation('projectDetail');
   const [report, setReport] = useState<IReport[]>([]);
   const [page] = useState(1);
@@ -22,7 +26,8 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<IReport | null>(null);
   const [loading, setLoading] = useState(false);
-
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile);
   // UI states
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('');
@@ -145,9 +150,37 @@ const ReportTable: React.FC<ReportTableProps> = ({ projectId }) => {
 
       await createReport(formData);
       message.success(t('ReportTable.messages.createSuccess'));
-
       handleCloseModal();
-      fetchReport(); // Refresh the table data
+      fetchReport();
+      // Send email notification
+      if (project) {
+        if (user?.role === "admin" || user?.role === "pm") {
+          await sendEmail({
+            to: project.customer?.emailContact,
+            subject: `Dự án ${project.name} đã thêm một tài liệu mới bởi ${profile?.name || user?.email}`,
+            templateName: "nextPhase.template.template",
+            data: {
+              username: project.customer?.name,
+              projectName: project.name,
+              senderName: profile?.name || user?.email,
+              content : values.mainContent,
+              link: `${import.meta.env.VITE_HOST}/project/${projectId}`
+            }
+          });
+        } else {
+          await sendEmail({
+            to: project.pm?.emailContact,
+            subject: `Dự án ${project.name} đã thêm một báo cáo mới bởi ${profile?.name || user?.email}`,
+            templateName: "nextPhase.template.template",
+            data: {
+              username: project.customer?.name,
+              projectName: project.name,
+              senderName: profile?.name || user?.email,
+              link: `${import.meta.env.VITE_HOST}/project/${projectId}`
+            }
+          });
+        }
+      }
     } catch (error) {
       console.error('Error submitting report:', error);
       message.error(t('ReportTable.messages.createError'));

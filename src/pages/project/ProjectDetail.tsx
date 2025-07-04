@@ -17,6 +17,7 @@ import { selectUserProfile, selectAuthUser } from '../../common/stores/auth/auth
 import { useSelector } from 'react-redux';
 import AccessLimit from '../../common/components/AccessLimit';
 import { useTranslation } from 'react-i18next';
+import { sendEmail } from './services/mail.service';
 
 const { Title, Link } = Typography;
 
@@ -101,6 +102,32 @@ const ProjectDetail = () => {
         await fetchProjectDetail();
         message.success(t('projectDocument.message.addSuccess'));
         setOpenModalAdd(false);
+        if(user?.role === "admin" || user?.role === "pm"){
+          await sendEmail({
+            to : project?.customer?.emailContact,
+            subject : `Dự án ${project?.name} đã thêm một tài liệu mới bởi ${profile?.name || user?.email}`,
+            templateName : "addDocInProject.template",
+            data : {
+              username : project?.customer?.name,
+              projectName : project?.name,
+              senderName : profile?.name || user?.email,
+              link : `${import.meta.env.VITE_HOST}/project/${pid}`
+            }
+          })
+        }
+        else{
+          await sendEmail({
+            to : project?.pm?.emailContact,
+            subject : `Dự án ${project?.name} đã thêm một tài liệu mới bởi ${profile?.name || user?.email}`,
+            templateName : "addDocInProject.template",
+            data : {
+              username : project?.customer?.name,
+              projectName : project?.name,
+              senderName : profile?.name || user?.email,
+              link : `${import.meta.env.VITE_HOST}/project/${pid}`
+            }
+          })
+        }
       } else {
         message.error(response.message || t('projectDocument.message.addFail'));
       }
@@ -389,6 +416,7 @@ const ProjectDetail = () => {
               </Space>
               <PhaseProject
                 projectId={pid || ''}
+                project={project}
                 projectStatus={project?.status || ''}
                 onEndingProject={showEndingPhaseConfirm}
               />
@@ -397,6 +425,7 @@ const ProjectDetail = () => {
               <Title level={3}> {t('projectReport.title')} {project?.name}</Title>
               <ReportTable
                 projectId={pid || ''}
+                project={project}
               />
             </div>
           </Space >

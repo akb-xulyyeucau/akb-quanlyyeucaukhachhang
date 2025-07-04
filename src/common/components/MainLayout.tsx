@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Layout, Menu, Avatar, Button, Dropdown, Modal } from 'antd';
 import {
   MenuUnfoldOutlined,
+  ProjectOutlined,
+  //AppstoreOutlined
+  FormOutlined,
   MenuFoldOutlined,
   UserOutlined,
   LogoutOutlined,
@@ -21,7 +24,7 @@ import { useNavigate, Outlet } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout as logoutRedux } from '../../common/stores/auth/authSlice';
-import { selectAuthUser , selectUserProfile } from '../../common/stores/auth/authSelector';
+import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/authSelector';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -33,7 +36,7 @@ const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const user = useSelector(selectAuthUser);
   const userProfile = useSelector(selectUserProfile) || "";
-  
+
   const toggleCollapsed = () => {
     setCollapsed(!collapsed);
   };
@@ -59,7 +62,7 @@ const MainLayout: React.FC = () => {
     navigate(`/${key}`);
   };
 
-  const handleUserProfile = (uId : string )=>{
+  const handleUserProfile = (uId: string) => {
     navigate(`/user-profile/${uId}`);
   }
 
@@ -116,7 +119,7 @@ const MainLayout: React.FC = () => {
                 {
                   key: 'action',
                   label: (
-                    <Button onClick={()=>{handleUserProfile(user?._id?? '')}} type="link">
+                    <Button onClick={() => { handleUserProfile(user?._id ?? '') }} type="link">
                       {t('personal_info')}
                     </Button>
                   ),
@@ -149,7 +152,7 @@ const MainLayout: React.FC = () => {
           </Button>
         </div>
       </Header>
-      <Layout style={{ 
+      <Layout style={{
         marginTop: '64px',
         background: '#fff',
         display: 'flex',
@@ -172,20 +175,20 @@ const MainLayout: React.FC = () => {
             mode="inline"
             theme="light"
             defaultSelectedKeys={['1']}
-            style={{ 
-              height: '100%', 
+            style={{
+              height: '100%',
               borderRight: 0
             }}
             onClick={({ key }) => handleMenuClick(key)}
           >
             <Menu.Item key="home" icon={<HomeOutlined />}>
               {t('menu.home')}
-            </Menu.Item> 
-             <Menu.SubMenu key="project" title={t('menu.customer_projects')} icon={<ProfileOutlined />}>
-              <Menu.Item key="customers-projects" icon={<IdcardOutlined />}>
+            </Menu.Item>
+            <Menu.SubMenu key="project" title={t('menu.customer_projects')} icon={<ProfileOutlined />}>
+              <Menu.Item key="customers-projects" icon={<ProjectOutlined />}>
                 {t('menu.customer_projects')}
               </Menu.Item>
-              <Menu.Item key="customers-projects-request" icon={<IdcardOutlined />}>
+              <Menu.Item key="customers-projects-request" icon={<FormOutlined />}>
                 {t('menu.customer_projects_request')}
               </Menu.Item>
             </Menu.SubMenu>
@@ -212,13 +215,13 @@ const MainLayout: React.FC = () => {
             </Menu.SubMenu>
           </Menu>
         </Sider>
-        <Layout style={{ 
+        <Layout style={{
           marginLeft: collapsed ? '80px' : '220px',
           transition: 'margin-left 0.2s',
           background: '#fff',
           padding: '0 24px'
         }}>
-          <Content style={{ 
+          <Content style={{
             minHeight: 'calc(100vh - 64px)',
             background: 'white',
             padding: '10px',

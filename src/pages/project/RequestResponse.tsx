@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { LineChartOutlined } from '@ant-design/icons';
 import {
   Card,
   Col,
@@ -15,7 +14,7 @@ import {
 } from 'antd';
 import { Line } from 'react-chartjs-2';
 import { Pie } from 'react-chartjs-2';
-import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined, FileSearchOutlined, StarOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined, FileSearchOutlined, StarOutlined, LineChartOutlined } from '@ant-design/icons';
 import { Chart, registerables } from 'chart.js';
 import { useEffect, useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';

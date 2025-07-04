@@ -26,5 +26,10 @@
         "byMonth": "月別",
         "byQuarter": "四半期別",
         "reset": "リセット"
+    },
+    "StatisticCard": {
+        "allProjectTotal": "要求中および有効化されたプロジェクトの合計",
+        "activatedProjectTotal": "有効化されたプロジェクトの合計",
+        "requestingProjectTotal": "未承認プロジェクト要求の合計"
     }
 }

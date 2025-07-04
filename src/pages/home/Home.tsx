@@ -28,7 +28,7 @@ import {
 } from "recharts";
 import { useState } from "react";
 
-const {  Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
 const Dashboard = () => {
@@ -132,8 +132,9 @@ const Dashboard = () => {
                   </Col>
                   <Col>
                     <Text style={{ color: changeColor, fontWeight: 600, fontSize: 18 }}>
-                      <ChangeIcon style={{ marginRight: 4 }} />
+
                       {Math.abs(item.change)}%
+                      <ChangeIcon style={{ marginRight: 4 }} />
                     </Text>
                   </Col>
                 </Row>

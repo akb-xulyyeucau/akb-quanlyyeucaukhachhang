@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Avatar, Button, Dropdown, Modal, Divider } from 'antd';
+import { Layout, Menu, Avatar, Button, Dropdown, Modal } from 'antd';
 import {
   MenuUnfoldOutlined,
   ProjectOutlined,

@@ -28,7 +28,7 @@ import {
 } from "recharts";
 import { useState } from "react";
 
-const { Title, Text } = Typography;
+const {  Text } = Typography;
 const { Option } = Select;
 
 const Dashboard = () => {
@@ -91,7 +91,7 @@ const Dashboard = () => {
   return (
     <div style={{ padding: '35px 25px' }}>
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Title level={4} style={{ margin: 0 }}>Tổng quan dự án & khách hàng</Title>
+        {/* <Title level={4} style={{ margin: 0 }}>Tổng quan dự án & khách hàng</Title> */}
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <Select
             defaultValue="month"
@@ -183,7 +183,7 @@ const Dashboard = () => {
                   outerRadius={90}
                   label
                 >
-                  {ratingStats.map((entry, index) => (
+                  {ratingStats.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={["#FF4D4F", "#FAAD14", "#FADB14", "#52C41A", "#1890FF"][index]} />
                   ))}
                 </Pie>

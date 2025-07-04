@@ -2,191 +2,215 @@ import {
   Card,
   Col,
   Row,
-  Button,
-  Avatar,
-  Rate,
   Typography,
-  Progress,
-  Carousel,
-  Space,
+  Select,
+  DatePicker,
 } from "antd";
 import {
-  PlusOutlined,
   FolderOutlined,
   FileOutlined,
   UserOutlined,
   StarFilled,
+  ArrowUpOutlined,
+  ArrowDownOutlined,
 } from "@ant-design/icons";
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  LabelList,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+import { useState } from "react";
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 const Dashboard = () => {
-  const progressData = [
-    { name: "E-learning", percent: 80, phase: "Kiểm thử" },
-    { name: "Quản lý kho", percent: 60, phase: "Phát triển" },
-    { name: "CRM Client", percent: 90, phase: "Triển khai" },
-  ];
-
-  const growthData = [
-    { month: "T1", projects: 2 },
-    { month: "T2", projects: 4 },
-    { month: "T3", projects: 5 },
-    { month: "T4", projects: 6 },
-    { month: "T5", projects: 8 },
-  ];
+  const [timeRange, setTimeRange] = useState("month");
 
   const metrics = [
-    { icon: <FolderOutlined />, label: "Tổng dự án", value: 18 },
-    { icon: <FolderOutlined />, label: "Đang thực hiện", value: 5 },
-    { icon: <FileOutlined />, label: "Tài liệu", value: 120 },
-    { icon: <UserOutlined />, label: "Khách hàng", value: 9 },
-    { icon: <StarFilled style={{ color: '#fadb14' }} />, label: "Đánh giá TB", value: 4.3 },
+    { icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />, label: "Yêu cầu mới", value: 3, change: 0 },
+    { icon: <FolderOutlined style={{ fontSize: 32, color: '#722ed1' }} />, label: "Đang thực hiện", value: 5, change: -5 },
+    { icon: <FolderOutlined style={{ fontSize: 32, color: '#fa8c16' }} />, label: "Đã thực hiện", value: 13, change: 8 },
+    { icon: <FolderOutlined style={{ fontSize: 32, color: '#13c2c2' }} />, label: "Tổng dự án", value: 18, change: 2 },
+    { icon: <UserOutlined style={{ fontSize: 32, color: '#eb2f96' }} />, label: "Khách hàng ", value: 9, change: 110 },
+    { icon: <StarFilled style={{ fontSize: 32, color: '#fadb14' }} />, label: "Đánh giá TB", value: 4.3, change: 1.2 },
   ];
 
-  const recentReviews = [
-    {
-      name: "Nguyễn Văn A",
-      project: "Hệ thống E-learning",
-      rating: 5,
-      comment: "Dự án rất hiệu quả và đúng tiến độ.",
-    },
-    {
-      name: "Trần Thị B",
-      project: "Quản lý kho ABC",
-      rating: 4,
-      comment: "Hài lòng với hỗ trợ, cần cải thiện thêm UI.",
-    },
+  const progressData = [
+    { name: "E-learning", percent: 22 },
+    { name: "Quản lý kho", percent: 85 },
+    { name: "CRM Client", percent: 90 },
+    { name: "Quản lý kho", percent: 54 },
+    { name: "CRM Client", percent: 76 },
+    { name: "E-learning", percent: 80 },
+
+
   ];
 
-  const today = new Date();
-  const monthYear = today.toLocaleDateString("vi-VN", { month: "long", year: "numeric" });
+  const ratingStats = [
+    { name: "1 sao", value: 2 },
+    { name: "2 sao", value: 3 },
+    { name: "3 sao", value: 6 },
+    { name: "4 sao", value: 10 },
+    { name: "5 sao", value: 15 },
+  ];
+
+  const feedbackStats = [
+    { name: "Nguyễn Văn A", value: 12 },
+    { name: "Trần Thị B", value: 8 },
+    { name: "Công ty X", value: 5 },
+  ];
+
+  const renderDatePicker = () => {
+    switch (timeRange) {
+      case "month":
+        return (
+          <DatePicker picker="month" placeholder="Chọn tháng/năm" style={{ marginLeft: 8 }} />
+        );
+      case "quarter":
+        return (
+          <DatePicker picker="quarter" placeholder="Chọn quý/năm" style={{ marginLeft: 8 }} />
+        );
+      case "year":
+        return (
+          <DatePicker picker="year" placeholder="Chọn năm" style={{ marginLeft: 8 }} />
+        );
+      default:
+        return null;
+    }
+  };
+
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: 16 }}>
-      {/* Header */}
-      <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
-        <Title level={5} style={{ margin: 0 }}>Trang chủ</Title>
-        <Space>
-          <Button size="small" type="default" style={{ padding: 15 }}>📩 3 yêu cầu mới</Button>
-          <Button size="small" type="primary" style={{ padding: 15 }} icon={<PlusOutlined />}>Tạo yêu cầu</Button>
-        </Space>
+    <div style={{ padding: '35px 25px' }}>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+        <Title level={4} style={{ margin: 0 }}>Tổng quan dự án & khách hàng</Title>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Select
+            defaultValue="month"
+            style={{ width: 140 }}
+            onChange={(value) => setTimeRange(value)}
+          >
+            <Option value="month">Theo tháng</Option>
+            <Option value="quarter">Theo quý</Option>
+            <Option value="year">Theo năm</Option>
+          </Select>
+          {renderDatePicker()}
+        </div>
       </Row>
 
-      {/* Thống kê */}
-      <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
-        {metrics.map((item, index) => (
-          <Col key={index} flex="1">
-            <Card
-              size="small"
-              bodyStyle={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: 8,
-                height: '100%',
-              }}
-              style={{ minWidth: 140 }}
-            >
-              <div style={{ fontSize: 16, marginRight: 8 }}>{item.icon}</div>
-              <div>
-                <Text strong>{item.value}</Text><br />
-                <Text type="secondary" style={{ fontSize: 12 }}>{item.label}</Text>
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {/* Hàng 1: KPI cards - 6 card trên 1 hàng */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+        {metrics.map((item, index) => {
+          const isPositive = item.change >= 0;
+          const changeColor = isPositive ? '#52c41a' : '#ff4d4f';
+          const ChangeIcon = isPositive ? ArrowUpOutlined : ArrowDownOutlined;
 
-
-      {/* Tiến độ + Lịch */}
-      <Row gutter={12} style={{ marginBottom: 16 }}>
-        <Col span={16}>
-          <Card size="small" title={<Text strong>Tiến độ các dự án</Text>}>
-            {progressData.map((item, index) => (
-              <div key={index} style={{ marginBottom: 12 }}>
-                <Text strong>{item.name}</Text>
-                <Row justify="space-between" align="middle" style={{ marginTop: 4 }}>
-                  <Col style={{ flex: 1, maxWidth: '75%' }}>
-                    <Progress percent={item.percent} size="small" strokeWidth={10} status="active" />
+          return (
+            <Col key={index} xs={24} sm={12} md={8} lg={4} xl={4}>
+              <Card
+                size="default"
+                bodyStyle={{ padding: 20 }}
+                style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+              >
+                <Row align="middle" justify="space-between">
+                  <Col>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <div style={{ marginRight: 12 }}>{item.icon}</div>
+                      <div>
+                        <Text strong style={{ fontSize: 21 }}>{item.value}</Text><br />
+                        <Text type="secondary" style={{ fontSize: 14 }}>{item.label}</Text>
+                      </div>
+                    </div>
                   </Col>
-                  <Col style={{ minWidth: 100, textAlign: 'right', paddingLeft: 8 }}>
-                    <div style={{ fontSize: 13 }}>{item.phase}</div>
-                    <div style={{ fontSize: 11, color: '#888' }}>Ngày: 30/06/2025</div>
+                  <Col>
+                    <Text style={{ color: changeColor, fontWeight: 600, fontSize: 18 }}>
+                      <ChangeIcon style={{ marginRight: 4 }} />
+                      {Math.abs(item.change)}%
+                    </Text>
                   </Col>
                 </Row>
-              </div>
-            ))}
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card size="small" title={<Text strong>{monthYear}</Text>} bodyStyle={{ padding: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              <Calendar
-                view="month"
-                showNavigation={false}
-                calendarType="iso8601"
-                tileContent={() => null}
-                locale="vi"
-                className="no-border-calendar"
-              />
-            </div>
-          </Card>
-        </Col>
+              </Card>
+            </Col>
+          );
+        })}
       </Row>
 
-      {/* Đánh giá + Biểu đồ */}
-      <Row gutter={12}>
+      {/* Hàng 2: Biểu đồ cột tiến độ */}
+      <Card
+        size="default"
+        title={<Text strong style={{ fontSize: 16 }}>Biểu đồ tiến độ dự án</Text>}
+        style={{ marginBottom: 32, borderRadius: 12, }}
+        bodyStyle={{ padding: 14 }}
+      >
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={progressData}>
+            <XAxis dataKey="name" />
+            <YAxis domain={[0, 100]} tickFormatter={(value) => `${value}%`} />
+            <Tooltip formatter={(value) => `${value}%`} />
+            <Bar dataKey="percent" fill="#1890ff" barSize={110}>
+              <LabelList dataKey="percent" position="top" formatter={(value) => `${value}%`} />
+            </Bar>
+
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      {/* Hàng 3: PieChart + BarChart ngang */}
+      <Row gutter={16}>
         <Col span={12}>
-          <Card size="small" title={<Text strong>Đánh giá gần đây</Text>} style={{ height: 240 }} bodyStyle={{ height: 200, overflow: "hidden", padding: 20 }}>
-            <Carousel autoplay dots={false} vertical slidesToShow={2}>
-              {recentReviews.map((review, index) => (
-                <div key={index}>
-                  <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-                    <Avatar size="small" icon={<UserOutlined />} />
-                    <div>
-                      <Text strong>{review.name}</Text> - <Text type="secondary">{review.project}</Text>
-                    </div>
-                  </div>
-                  <Rate disabled defaultValue={review.rating} style={{ fontSize: 21, marginTop: 7 }} />
-                  <div><Text>{review.comment}</Text></div>
-                </div>
-              ))}
-            </Carousel>
+          <Card
+            size="default"
+            title={<Text strong style={{ fontSize: 16 }}>Tỷ lệ đánh giá theo sao (1-5)</Text>}
+            bodyStyle={{ padding: 24 }}
+            style={{ borderRadius: 12 }}
+          >
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={ratingStats}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  label
+                >
+                  {ratingStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={["#FF4D4F", "#FAAD14", "#FADB14", "#52C41A", "#1890FF"][index]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </Card>
         </Col>
 
         <Col span={12}>
-          <Card size="small" title={<Text strong>Tăng trưởng dự án</Text>} style={{ height: 240 }} bodyStyle={{ padding: 8 }}>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={growthData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
+          <Card
+            size="default"
+            title={<Text strong style={{ fontSize: 16 }}>Top 3 khách hàng phản hồi nhiều nhất</Text>}
+            bodyStyle={{ padding: 24 }}
+            style={{ borderRadius: 12 }}
+          >
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={feedbackStats} layout="vertical">
+                <XAxis type="number" />
+                <YAxis dataKey="name" type="category" />
                 <Tooltip />
-                <Line type="monotone" dataKey="projects" stroke="#1890ff" strokeWidth={2} />
-              </LineChart>
+                <Bar dataKey="value" fill="#722ed1" />
+              </BarChart>
             </ResponsiveContainer>
           </Card>
         </Col>
       </Row>
-
-      {/* Inline CSS to remove calendar border */}
-      <style>{`
-        .no-border-calendar.react-calendar {
-          border: none !important;
-          box-shadow: none !important;
-        }
-      `}</style>
     </div>
   );
 };

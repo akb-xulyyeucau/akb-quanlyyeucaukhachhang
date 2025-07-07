@@ -1,33 +1,35 @@
 import React from 'react';
 import { Modal, Typography, Steps, Button, Space } from 'antd';
-import { 
-  LockOutlined, 
-  SafetyCertificateOutlined, 
+import {
+  LockOutlined,
+  SafetyCertificateOutlined,
   GoogleOutlined,
   SecurityScanOutlined,
   KeyOutlined,
   CopyOutlined,
   CloseCircleOutlined
 } from '@ant-design/icons';
-
-const { Title, Text, Paragraph } = Typography;
+import { useTranslation } from 'react-i18next';
+const { Title, Paragraph } = Typography;
 
 interface GmailTutorialProps {
   isOpen: boolean;
   onClose: () => void;
+  t: (key: string) => string; // Translation function
 }
 
 const GmailTutorial: React.FC<GmailTutorialProps> = ({ isOpen, onClose }) => {
+  const [t] = useTranslation('emailConfig')
   const steps = [
     {
-      title: 'Truy cập Google Account',
+      title: t('gmailAppPasswordTutorial.steps.step1.title'),
       description: (
         <>
           <Paragraph>
-            Truy cập trang quản lý tài khoản Google:
+            {t('gmailAppPasswordTutorial.steps.step1.description')}
             <br />
-            <a href="https://myaccount.google.com/" target="_blank" rel="noopener noreferrer">
-              https://myaccount.google.com/
+            <a href={t('gmailAppPasswordTutorial.steps.step1.url')} target="_blank" rel="noopener noreferrer">
+              {t('gmailAppPasswordTutorial.steps.step1.url')}
             </a>
           </Paragraph>
         </>
@@ -35,27 +37,30 @@ const GmailTutorial: React.FC<GmailTutorialProps> = ({ isOpen, onClose }) => {
       icon: <GoogleOutlined />
     },
     {
-      title: 'Kiểm tra Security',
+      title: t('gmailAppPasswordTutorial.steps.step2.title'),
       description: (
         <>
           <Paragraph>
-            Vào phần Security (Bảo mật)
-            <br />
-            Kiểm tra và đảm bảo đã bật 2-Step Verification
+            {t('gmailAppPasswordTutorial.steps.step2.description').split('\n').map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                {index < t('gmailAppPasswordTutorial.steps.step2.description').split('\n').length - 1 && <br />}
+              </React.Fragment>
+            ))}
           </Paragraph>
         </>
       ),
       icon: <SecurityScanOutlined />
     },
     {
-      title: 'Truy cập App Passwords',
+      title: t('gmailAppPasswordTutorial.steps.step3.title'),
       description: (
         <>
           <Paragraph>
-            Sau khi bật 2-Step Verification, truy cập:
+            {t('gmailAppPasswordTutorial.steps.step3.description')}
             <br />
-            <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">
-              https://myaccount.google.com/apppasswords
+            <a href={t('gmailAppPasswordTutorial.steps.step3.url')} target="_blank" rel="noopener noreferrer">
+              {t('gmailAppPasswordTutorial.steps.step3.url')}
             </a>
           </Paragraph>
         </>
@@ -63,30 +68,32 @@ const GmailTutorial: React.FC<GmailTutorialProps> = ({ isOpen, onClose }) => {
       icon: <KeyOutlined />
     },
     {
-      title: 'Tạo mật khẩu ứng dụng',
+      title: t('gmailAppPasswordTutorial.steps.step4.title'),
       description: (
         <>
           <Paragraph>
-            - Trong phần Select app, chọn Mail
-            <br />
-            - Trong phần Select device, chọn Other → đặt tên như MERN App
-            <br />
-            - Bấm Generate
+            {t('gmailAppPasswordTutorial.steps.step4.description').split('\n').map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                {index < t('gmailAppPasswordTutorial.steps.step4.description').split('\n').length - 1 && <br />}
+              </React.Fragment>
+            ))}
           </Paragraph>
         </>
       ),
       icon: <SafetyCertificateOutlined />
     },
     {
-      title: 'Sao chép mật khẩu',
+      title: t('gmailAppPasswordTutorial.steps.step5.title'),
       description: (
         <>
           <Paragraph>
-            Google sẽ hiển thị một dãy 16 ký tự
-            <br />
-            Sao chép dãy ký tự đó - đây chính là App Password của bạn
-            <br />
-            Dùng nó để cấu hình gửi email
+            {t('gmailAppPasswordTutorial.steps.step5.description').split('\n').map((line, index) => (
+              <React.Fragment key={index}>
+                {line}
+                {index < t('gmailAppPasswordTutorial.steps.step5.description').split('\n').length - 1 && <br />}
+              </React.Fragment>
+            ))}
           </Paragraph>
         </>
       ),
@@ -99,7 +106,9 @@ const GmailTutorial: React.FC<GmailTutorialProps> = ({ isOpen, onClose }) => {
       title={
         <Space>
           <LockOutlined />
-          <Title level={4} style={{ margin: 0 }}>Hướng dẫn tạo App Password cho Gmail</Title>
+          <Title level={4} style={{ margin: 0 }}>
+            {t('gmailAppPasswordTutorial.title')}
+          </Title>
         </Space>
       }
       open={isOpen}
@@ -107,19 +116,19 @@ const GmailTutorial: React.FC<GmailTutorialProps> = ({ isOpen, onClose }) => {
       width={800}
       footer={[
         <Button key="close" icon={<CloseCircleOutlined />} onClick={onClose}>
-          Đóng
+          {t('gmailAppPasswordTutorial.closeButton')}
         </Button>
       ]}
     >
       <div style={{ padding: '20px 0' }}>
         <div style={{ marginBottom: 24 }}>
-          <Title level={5}>Yêu cầu trước:</Title>
+          <Title level={5}>{t('gmailAppPasswordTutorial.requirements.title')}</Title>
           <ul>
-            <li>Bật xác minh 2 bước (2-Step Verification) cho tài khoản Gmail</li>
-            <li>Tài khoản phải không bị chặn đăng nhập từ ứng dụng kém bảo mật</li>
+            <li>{t('gmailAppPasswordTutorial.requirements.item1')}</li>
+            <li>{t('gmailAppPasswordTutorial.requirements.item2')}</li>
           </ul>
         </div>
-        
+
         <Steps
           direction="vertical"
           current={-1}

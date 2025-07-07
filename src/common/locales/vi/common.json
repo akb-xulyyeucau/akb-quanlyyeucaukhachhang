@@ -1,4 +1,7 @@
 {
   "welcome": "Chào mừng bạn đến với ứng dụng",
-  "switch_language": "Chuyển ngôn ngữ"
+  "switch_language": "Chuyển ngôn ngữ",
+  "accessLimit": "Bạn không có quyền truy cập vào trang này.",
+  "backToHomePage": "Quay lại trang chủ",
+  "notFound": "Xin lỗi, trang bạn tìm kiếm không tồn tại."
 }

@@ -61,7 +61,7 @@
     "company_name_label": "会社名",
     "address_label": "住所",
     "note_label": "メモ",
-    "name_label" : "フルネーム"
+    "name_label": "フルネーム"
   },
   "user_page": {
     "add_user_button": "ユーザーを登録",
@@ -95,6 +95,12 @@
     "delete_confirm_content_prefix": "ユーザー",
     "delete_ok_text": "削除",
     "delete_cancel_text": "キャンセル",
-    "delete_confirm_content" : "ユーザーの削除を確認しますか?"
+    "delete_confirm_content": "ユーザーの削除を確認しますか?"
+  },
+  "userStatisticCard": {
+    "accountTotal": "総アカウント数",
+    "activatedAccountTotal": "有効化されたアカウント数",
+    "PMAccountTotal": "プロジェクトマネージャーアカウント数",
+    "customerAccountTotal": "顧客アカウント数"
   }
 }

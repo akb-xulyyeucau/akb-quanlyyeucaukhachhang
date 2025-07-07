@@ -7,7 +7,7 @@ import MainLayout from '../components/MainLayout';
 import Customer from '../../pages/customer/Customer';
 import Project from '../../pages/project/Project';
 import ProjectRequest from '../../pages/project/ProjectRequest';
-import Setting from '../../pages/system/Setting';
+// import Setting from '../../pages/system/Setting';
 import EmailConfig from '../../pages/system/EmailConfig';
 import UserProfile from '../../pages/user/UserProfile';
 import ProjectDetail from '../../pages/project/ProjectDetail';
@@ -40,7 +40,7 @@ const AppRoute = () => {
         <Route path='project/:pid' element= {<ProjectDetail/>}/>
         <Route path='/request-response/:pId' element= {<RequestResponse/>}/>
         <Route path='system-email' element= {<EmailConfig/>}/>
-        <Route path='system-setting' element= {<Setting/>}/>
+        {/* <Route path='system-setting' element= {<Setting/>}/> */}
         {/* Thêm các route con khác tại đây */}
         <Route index element={<Home />} />
       </Route>

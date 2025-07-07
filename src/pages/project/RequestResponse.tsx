@@ -1,5 +1,4 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { LineChartOutlined } from '@ant-design/icons';
 import {
   Card,
   Col,
@@ -15,7 +14,7 @@ import {
 } from 'antd';
 import { Line } from 'react-chartjs-2';
 import { Pie } from 'react-chartjs-2';
-import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined, FileSearchOutlined, StarOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FileTextOutlined, UserOutlined, ClockCircleOutlined, FileSearchOutlined, StarOutlined, LineChartOutlined } from '@ant-design/icons';
 import { Chart, registerables } from 'chart.js';
 import { useEffect, useState } from 'react';
 import ProjectRatingModal from './components/ProjectRatingModal';
@@ -75,7 +74,7 @@ const RequestResponse = () => {
 
   // Tạo màu: giai đoạn đã hoàn thành là xanh, chưa hoàn thành là xám
   const progressColors = Array.from({ length: totalPhases }, (_, i) =>
-    i < currentPhase ? '#1890ff' : '#d9d9d9'
+    i < currentPhase ? '#00FF00' : '#FF9933'
   );
 
   // Dữ liệu: giai đoạn đã hoàn thành là 1, chưa hoàn thành là 1 (để Pie chart chia đều)

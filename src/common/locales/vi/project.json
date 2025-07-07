@@ -26,5 +26,10 @@
         "placeholderMonth": "Chọn tháng",
         "placeholderQuarter": "Chọn quý",
         "reset": "Đặt lại"
+    },
+    "StatisticCard": {
+        "allProjectTotal": "Tổng số dự án đang yêu cầu và đã kích hoạt",
+        "activatedProjectTotal": "Tổng số dự án được kích hoạt",
+        "requestingProjectTotal": "Tổng yêu cầu dự án chưa duyệt"
     }
 }

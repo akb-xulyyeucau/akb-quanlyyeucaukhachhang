@@ -18,6 +18,11 @@ import viProjectDetail from '../../locales/vi/projectDetail.json';
 import jaProjectDetail from '../../locales/ja/projectDetail.json';
 import viProjectResponse from '../../locales/vi/projectResponse.json';
 import jaProjectResponse from '../../locales/ja/projectResponse.json';
+import viEmailConfig from '../../locales/vi/emailConfig.json';
+import jaEmailConfig from '../../locales/ja/emailConfig.json';
+
+
+
 
 const savedLanguage = localStorage.getItem('language') || 'vi';
 
@@ -35,6 +40,7 @@ i18n
         project: viProject,
         projectDetail: viProjectDetail,
         projectResponse: viProjectResponse,
+        emailConfig: viEmailConfig
         // login: viLogin,
       },
       ja: {
@@ -47,12 +53,13 @@ i18n
         project: jaProject,
         projectDetail: jaProjectDetail,
         projectResponse: jaProjectResponse,
+        emailConfig: jaEmailConfig
         // login: jaLogin,
       },
     },
     lng: savedLanguage,
     fallbackLng: 'vi',
-    ns: ['common', 'login', 'mainLayout', 'user', 'customer', 'projectRequest', 'project', 'projectDetail', 'projectResponse'], // Định nghĩa các namespace
+    ns: ['common', 'login', 'mainLayout', 'user', 'customer', 'projectRequest', 'project', 'projectDetail', 'projectResponse', 'emailConfig'], // Định nghĩa các namespace
     defaultNS: 'common', // Namespace mặc định
     interpolation: {
       escapeValue: false,

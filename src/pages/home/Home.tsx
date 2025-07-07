@@ -29,14 +29,16 @@ import {
   Cell,
 } from "recharts";
 import { useState } from "react";
+import { Dayjs } from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
 
 const Dashboard = () => {
-  // State cho bộ lọc thời gian và số lượng top khách hàng
-  const [timeRange, setTimeRange] = useState("month");
+  const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [topCustomers, setTopCustomers] = useState(3);
   const navigate = useNavigate();
 
@@ -102,25 +104,43 @@ const Dashboard = () => {
   const averageRating = ratingStats.reduce((sum, item, index) => sum + (index + 1) * item.value, 0) / totalRatings;
 
   // Hàm render bộ lọc thời gian
-  const renderDatePicker = () => {
+  const renderRangePicker = () => {
+    const commonProps = {
+      style: { width: 140 },
+      allowClear: false,
+    };
     switch (timeRange) {
-      case "month": return <DatePicker picker="month" style={{ marginLeft: 8 }} placeholder="Chọn tháng/năm" />;
-      case "quarter": return <DatePicker picker="quarter" style={{ marginLeft: 8 }} placeholder="Chọn quý/năm" />;
-      case "year": return <DatePicker picker="year" style={{ marginLeft: 8 }} placeholder="Chọn năm" />;
-      default: return null;
+      case 'month':
+        return (
+          <>
+            <DatePicker picker="month" placeholder="Start month" {...commonProps} onChange={setStartDate} />
+            <span style={{ margin: '0 6px' }}>→</span>
+            <DatePicker picker="month" placeholder="End month" {...commonProps} onChange={setEndDate} />
+          </>
+        );
+      case 'quarter':
+        return (
+          <>
+            <DatePicker picker="quarter" placeholder="Start quarter" {...commonProps} onChange={setStartDate} />
+            <span style={{ margin: '0 6px' }}>→</span>
+            <DatePicker picker="quarter" placeholder="End quarter" {...commonProps} onChange={setEndDate} />
+          </>
+        );
+      case 'year':
+        return (
+          <>
+            <DatePicker picker="year" placeholder="Start year" {...commonProps} onChange={setStartDate} />
+            <span style={{ margin: '0 6px' }}>→</span>
+            <DatePicker picker="year" placeholder="End year" {...commonProps} onChange={setEndDate} />
+          </>
+        );
+      default:
+        return null;
     }
   };
 
   // Tooltip tuỳ chỉnh cho biểu đồ tiến độ dự án
-  const CustomTooltip = ({
-    active,
-    payload,
-    label,
-  }: {
-    active?: boolean;
-    payload?: any[];
-    label?: string;
-  }) => {
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: any[]; label?: string; }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -136,7 +156,7 @@ const Dashboard = () => {
 
   // Xử lý chuyển hướng khi click vào cột dự án
   const handleBarClick = (data: { activeLabel: any; }) => {
-    if (data && data.activeLabel) {
+    if (data?.activeLabel) {
       const projectName = data.activeLabel;
       navigate(`/projects/${encodeURIComponent(projectName)}`);
     }
@@ -144,16 +164,23 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: '35px 25px', background: '#f4f6f8', minHeight: '100vh' }}>
-      {/* Header bộ lọc thời gian */}
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
         <Title level={3} style={{ margin: 0 }}>Tổng quan dự án & khách hàng</Title>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Select defaultValue="month" style={{ width: 140 }} onChange={(value) => setTimeRange(value)}>
+          <Select
+            value={timeRange}
+            style={{ width: 140 }}
+            onChange={(value) => {
+              setTimeRange(value);
+              setStartDate(null);
+              setEndDate(null);
+            }}
+          >
             <Option value="month">Theo tháng</Option>
             <Option value="quarter">Theo quý</Option>
             <Option value="year">Theo năm</Option>
           </Select>
-          {renderDatePicker()}
+          {renderRangePicker()}
           <AntTooltip title="Làm mới">
             <ReloadOutlined style={{ fontSize: 20, cursor: 'pointer' }} />
           </AntTooltip>

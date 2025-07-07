@@ -9,13 +9,8 @@ import {
   CopyOutlined,
   CloseCircleOutlined
 } from '@ant-design/icons';
-<<<<<<< HEAD
-
-const { Title, Paragraph } = Typography;
-=======
 import { useTranslation } from 'react-i18next';
-const { Title, Text, Paragraph } = Typography;
->>>>>>> d534201ad70215f5eed1643f0e2da367f476124a
+const { Title, Paragraph } = Typography;
 
 interface GmailTutorialProps {
   isOpen: boolean;

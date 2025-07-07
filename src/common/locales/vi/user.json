@@ -61,7 +61,7 @@
     "company_name_label": "Công ty",
     "address_label": "Địa chỉ",
     "note_label": "Ghi chú",
-     "name_label" : "Họ tên"
+    "name_label": "Họ tên"
   },
   "user_page": {
     "add_user_button": "Đăng ký người dùng",
@@ -90,12 +90,17 @@
       "action": "Chức năng",
       "view_button": "Chi tiết",
       "delete_button": "Xóa"
-      
     },
     "delete_confirm_title": "Xác nhận xóa người dùng",
     "delete_confirm_content_prefix": "Bạn có chắc chắn muốn xóa người dùng",
     "delete_ok_text": "Xóa",
     "delete_cancel_text": "Hủy",
-    "delete_confirm_content" : "bạn có xác nhận xóa người dùng không ?"
+    "delete_confirm_content": "bạn có xác nhận xóa người dùng không ?"
+  },
+  "userStatisticCard": {
+    "accountTotal": "Tổng số tài khoản",
+    "activatedAccountTotal": "Tổng số tài khoản kích hoạt",
+    "PMAccountTotal": "Tổng số tài khoản quản lý dự án",
+    "customerAccountTotal": "Tổng số tài khoản khách hàng"
   }
 }

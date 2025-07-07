@@ -21,8 +21,8 @@ const AppFooter: React.FC = () => {
   const [hoveredLink, setHoveredLink] = React.useState<string | null>(null);
 
   return (
-    <Footer 
-      style={{ 
+    <Footer
+      style={{
         background: '#fff',
         padding: '24px 0',
         color: 'rgba(0, 0, 0, 0.65)',
@@ -30,7 +30,7 @@ const AppFooter: React.FC = () => {
         boxShadow: '0 -1px 2px rgba(0, 0, 0, 0.03)'
       }}
     >
-      <div style={{ 
+      <div style={{
         maxWidth: 1400,
         margin: '0 auto',
         display: 'flex',
@@ -39,15 +39,15 @@ const AppFooter: React.FC = () => {
         padding: '0 50px',
         width: '100%'
       }}>
-        <Space 
+        <Space
           split={<Divider type="vertical" />}
           style={{
             paddingRight: 24
           }}
         >
           <Text strong>© 2025 AKB-SOFTWARE</Text>
-          <Link 
-            href="https://www.akb.com.vn/about" 
+          <Link
+            href="https://www.akb.com.vn/about"
             target="_blank"
             style={{
               ...linkStyle,
@@ -58,8 +58,8 @@ const AppFooter: React.FC = () => {
           >
             About Us
           </Link>
-          <Link 
-            href="https://www.akb.com.vn/contact" 
+          <Link
+            href="https://www.akb.com.vn/contact"
             target="_blank"
             style={{
               ...linkStyle,
@@ -72,21 +72,21 @@ const AppFooter: React.FC = () => {
           </Link>
         </Space>
 
-        <Space 
+        <Space
           size="large"
           style={{
             paddingLeft: 24
           }}
         >
-          <Link 
-            href="https://linkedin.com/company/akb-software" 
+          <Link
+            href="https://linkedin.com/company/akb-software"
             target="_blank"
             style={{
               transform: hoveredIcon === 'linkedin' ? 'translateY(-2px)' : 'none',
               display: 'inline-block'
             }}
           >
-            <LinkedinOutlined 
+            <LinkedinOutlined
               style={{
                 ...iconStyle,
                 color: hoveredIcon === 'linkedin' ? '#1890ff' : 'rgba(0, 0, 0, 0.65)'
@@ -95,15 +95,15 @@ const AppFooter: React.FC = () => {
               onMouseLeave={() => setHoveredIcon(null)}
             />
           </Link>
-          <Link 
-            href="https://www.akb.com.vn" 
+          <Link
+            href="https://www.akb.com.vn"
             target="_blank"
             style={{
               transform: hoveredIcon === 'web' ? 'translateY(-2px)' : 'none',
               display: 'inline-block'
             }}
           >
-            <GlobalOutlined 
+            <GlobalOutlined
               style={{
                 ...iconStyle,
                 color: hoveredIcon === 'web' ? '#1890ff' : 'rgba(0, 0, 0, 0.65)'

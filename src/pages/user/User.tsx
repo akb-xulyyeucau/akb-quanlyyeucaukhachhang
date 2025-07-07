@@ -6,9 +6,9 @@ import ModalAddUser from "./components/ModalAddUser";
 import dayjs from "dayjs";
 import { useDebounce } from "../../common/hooks/useDebounce";
 import ModalUserDetail from "./components/ModalUserDetail";
-import { deleteUser, createUser, getUsersPaging, deleteProfile , userStatistic} from "./services/user.service";
+import { deleteUser, createUser, getUsersPaging, deleteProfile, userStatistic } from "./services/user.service";
 import { useTranslation } from 'react-i18next';
-import {   selectAuthUser  } from '../../common/stores/auth/authSelector';
+import { selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 import AccessLimit from "../../common/components/AccessLimit";
 import StatisticCard from '../../common/components/StatisticCard';
@@ -37,10 +37,10 @@ const User = () => {
   const [openView, setOpenView] = useState(false);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [statistic , setUserStatistic] = useState<IUserStatistic>();
+  const [statistic, setUserStatistic] = useState<IUserStatistic>();
   const user = useSelector(selectAuthUser);
   // const profile = useSelector(selectUserProfile);
-  if(user?.role==='guest' || user?.role==='pm') return(<><AccessLimit/></>);
+  if (user?.role === 'guest' || user?.role === 'pm') return (<><AccessLimit /></>);
   useEffect(() => {
     fetchUsers();
     fetchUserStatistic();
@@ -76,7 +76,7 @@ const User = () => {
     try {
       const res = await userStatistic();
       setUserStatistic(res.data);
-    } catch (error : any) {
+    } catch (error: any) {
       throw new Error(error.message)
     }
   }
@@ -190,7 +190,7 @@ const User = () => {
   const showDeleteConfirm = (record: any) => {
     Modal.confirm({
       title: t('user_page.delete_confirm_title'),
-      content: t('user_page.delete_confirm_content') , //+ { alias: record.alias } ,
+      content: t('user_page.delete_confirm_content'), //+ { alias: record.alias } ,
       okText: t('user_page.delete_ok_text'),
       okType: "danger",
       cancelText: t('user_page.delete_cancel_text'),
@@ -262,54 +262,54 @@ const User = () => {
     setErrorMessage(''); // Reset thông báo lỗi
   };
   const handleResetError = () => {
-  setIsError(false);
-  setErrorMessage('');
-};
+    setIsError(false);
+    setErrorMessage('');
+  };
 
   return (
     <div>
-        <div
-          style={{
-              marginBottom: 16,
-              display: 'flex',
-              gap: 16,
-              flexWrap: 'wrap',
-              justifyContent: 'flex-start',
-              width: '100%',  
-            }}
-        >
-          <StatisticCard
-            icon={<LineChartOutlined />}
-            title="Tổng số tài khoản"
-            number={statistic?.totalUsers||0}
-            percent={100}
-            color="#1890FF"
-          />
-          <StatisticCard
-            icon={<PieChartOutlined />}
-            title="Tổng số tài khoản kích hoạt"
-            number={statistic?.totalActive || 0}
-            percent={statistic?.percentActive}
-            color="#52C41A"
-          />
-          <StatisticCard
-            icon={<PieChartOutlined />}
-            title="Tổng số tài khoản quản lý dự án"
-            number={statistic?.totalPM || 0}
-            percent={statistic?.percentPM}
-            color="#FAAD14"
-          />
-          <StatisticCard
-            icon={<PieChartOutlined />}
-            title="Tổng số tài khoản khách hàng"
-            number={statistic?.totalCustomer||0}
-            percent={statistic?.percentCustomer}
-            color="#13C2C2"
-          />
-        </div>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          gap: 16,
+          flexWrap: 'wrap',
+          justifyContent: 'flex-start',
+          width: '100%',
+        }}
+      >
+        <StatisticCard
+          icon={<LineChartOutlined />}
+          title={t('userStatisticCard.accountTotal')}
+          number={statistic?.totalUsers || 0}
+          percent={100}
+          color="#1890FF"
+        />
+        <StatisticCard
+          icon={<PieChartOutlined />}
+          title={t('userStatisticCard.activatedAccountTotal')}
+          number={statistic?.totalActive || 0}
+          percent={statistic?.percentActive}
+          color="#52C41A"
+        />
+        <StatisticCard
+          icon={<PieChartOutlined />}
+          title={t('userStatisticCard.PMAccountTotal')}
+          number={statistic?.totalPM || 0}
+          percent={statistic?.percentPM}
+          color="#FAAD14"
+        />
+        <StatisticCard
+          icon={<PieChartOutlined />}
+          title={t('userStatisticCard.customerAccountTotal')}
+          number={statistic?.totalCustomer || 0}
+          percent={statistic?.percentCustomer}
+          color="#13C2C2"
+        />
+      </div>
 
       <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
-       
+
         <Col>
           <Button
             type="primary"
@@ -350,9 +350,9 @@ const User = () => {
                 style={{ width: 150 }}
                 placeholder={<span><FilterOutlined /> {t('user_page.filter_status_placeholder')}</span>}
                 value={isActive || undefined}
-                onChange={value => { 
-                  setIsActive(value); 
-                  setPage(1); 
+                onChange={value => {
+                  setIsActive(value);
+                  setPage(1);
                 }}
               >
                 <Option value="true">{i18n.language === 'vi' ? "Đã kích hoạt" : "有効"}</Option>

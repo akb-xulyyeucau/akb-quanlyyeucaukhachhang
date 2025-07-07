@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Table, Input, Button, Select, Space, message, Modal, Tooltip  , Tag} from 'antd';
+import { Table, Input, Button, Select, Space, message, Modal, Tooltip, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { ICustomer, ICustomerStatisticResponse } from './interface/customer.interface';
-import { getCustomerPanition , updateCustomerById , deleteCustomerById , updateUserActive, customerStatistc} from './services/customer.service';
+import { getCustomerPanition, updateCustomerById, deleteCustomerById, updateUserActive, customerStatistc } from './services/customer.service';
 import { useDebounce } from '../../common/hooks/useDebounce';
-import { DeleteOutlined , EyeOutlined, LineChartOutlined, PieChartOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EyeOutlined, LineChartOutlined, PieChartOutlined } from '@ant-design/icons';
 import ModalProfileForm from '../user/components/ModalProfileForm';
 import { useTranslation } from 'react-i18next';
-import {   selectAuthUser } from '../../common/stores/auth/authSelector';
+import { selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 import AccessLimit from '../../common/components/AccessLimit';
 import StatisticCard from '../../common/components/StatisticCard';
@@ -27,10 +27,10 @@ const Customer = () => {
   const [openProfileModal, setOpenProfileModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<ICustomer | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
-  const [statistic , setStaitistic] = useState<ICustomerStatisticResponse>();
+  const [statistic, setStaitistic] = useState<ICustomerStatisticResponse>();
   const debouncedSearch = useDebounce(search, 400);
   const user = useSelector(selectAuthUser);
-  if(user?.role === 'guest') return(<><AccessLimit/></>)  
+  if (user?.role === 'guest') return (<><AccessLimit /></>)
 
   const fetchCustomers = async () => {
     setLoading(true);
@@ -57,7 +57,7 @@ const Customer = () => {
       setStaitistic(res.data);
       console.log(res.data);
     } catch (error) {
-      
+
     }
   }
 
@@ -65,7 +65,7 @@ const Customer = () => {
     fetchCustomers();
     fetchCustomerStatistic();
   }, [page, limit, debouncedSearch, sort, sortBy]);
-   
+
   const handleEdit = (record: ICustomer) => {
     setEditingCustomer(record);
     console.log(record)
@@ -91,22 +91,22 @@ const Customer = () => {
     }
   };
 
-const handleDelete = (record: ICustomer) => {
+  const handleDelete = (record: ICustomer) => {
     Modal.confirm({
       title: t('handleDelete.title_confirm'),
-      content:  t('handleDelete.content_confirm'),
-      okText:  t('handleDelete.okText'),
+      content: t('handleDelete.content_confirm'),
+      okText: t('handleDelete.okText'),
       okType: 'danger',
-      cancelText:  t('handleDelete.cancelText'),
+      cancelText: t('handleDelete.cancelText'),
       onOk: async () => {
         try {
           await deleteCustomerById(record._id);
           await updateUserActive(record.userId, false);
-          message.success( t('handleDelete.success_message'));
+          message.success(t('handleDelete.success_message'));
           fetchCustomers();
           fetchCustomerStatistic();
         } catch (err: any) {
-          message.error( t('handleDelete.error_message'));
+          message.error(t('handleDelete.error_message'));
         }
       },
     });
@@ -139,7 +139,7 @@ const handleDelete = (record: ICustomer) => {
 
     },
     {
-      title:t('customer_page.table.email'),
+      title: t('customer_page.table.email'),
       dataIndex: 'emailContact',
       key: 'emailContact',
       align: 'center',
@@ -167,7 +167,7 @@ const handleDelete = (record: ICustomer) => {
       render: (text: string) => <Tooltip title={text}>{text}</Tooltip>,
     },
     {
-      title:  t('customer_page.table.function'),
+      title: t('customer_page.table.function'),
       key: 'action',
       align: 'center',
       width: 200,
@@ -179,7 +179,7 @@ const handleDelete = (record: ICustomer) => {
             onClick={() => handleEdit(record)}
             size="small"
           >
-             {t('customer_page.table.detail_function')}
+            {t('customer_page.table.detail_function')}
           </Button>
           <Button
             type="default"
@@ -188,7 +188,7 @@ const handleDelete = (record: ICustomer) => {
             onClick={() => handleDelete(record)}
             size="small"
           >
-             {t('customer_page.table.delete_function')}
+            {t('customer_page.table.delete_function')}
           </Button>
         </Space>
       ),
@@ -197,59 +197,59 @@ const handleDelete = (record: ICustomer) => {
 
   return (
     <div>
-       <div
-          style={{
-              marginBottom: 16,
-              display: 'flex',
-              gap: 16,
-              flexWrap: 'wrap',
-              justifyContent: 'flex-start',
-              width: '100%',  
-            }}
-        >
-          <StatisticCard
-            icon={<LineChartOutlined />}
-            title="Tổng số khách hàng"
-            number={statistic?.totalCustomer || 0}
-            percent={100}
-            color="#1890FF"
-          />
-          <StatisticCard
-            icon={<PieChartOutlined />}
-            title="Tổng số khách hàng có dự án"
-            number={statistic?.totalCustomerInProject || 0}
-            percent={statistic?.percentProjectWithCustomer}
-            color="#52C41A"
-          />
-          {statistic?.customersWithProjects.map((item, index) => (
-            <Tooltip
-              key={item.customerName}
-              placement="bottom"
-              title={
-                item.projects && item.projects.length > 0 ? (
-                  <ul style={{ margin: 0, padding: '0 16px', listStyle: 'disc'}}>
-                    <div>Danh sách dự án của {item.customerName}</div>
-                    {item.projects.map((proj: { name: string }, idx: number) => (
-                      <li key={idx}>{proj.name}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  <span>Không có dự án</span>
-                )
-              }
-            >
-              <div>
-                <StatisticCard
-                  icon={<PieChartOutlined />}
-                  title={`Tổng số dự án của ${item.customerName}`}
-                  number={item.projectCount}
-                  percent={item.percentProject}
-                  color= {index % 2 === 0 ? "#FAAD14" : "#13C2C2"}
-                />
-              </div>
-            </Tooltip>
-          ))}
-        </div>
+      <div
+        style={{
+          marginBottom: 16,
+          display: 'flex',
+          gap: 16,
+          flexWrap: 'wrap',
+          justifyContent: 'flex-start',
+          width: '100%',
+        }}
+      >
+        <StatisticCard
+          icon={<LineChartOutlined />}
+          title={t('customerStatisCard.customerTotal')}
+          number={statistic?.totalCustomer || 0}
+          percent={100}
+          color="#1890FF"
+        />
+        <StatisticCard
+          icon={<PieChartOutlined />}
+          title={t('customerStatisCard.inProjectCustomer')}
+          number={statistic?.totalCustomerInProject || 0}
+          percent={statistic?.percentProjectWithCustomer}
+          color="#52C41A"
+        />
+        {statistic?.customersWithProjects.map((item, index) => (
+          <Tooltip
+            key={item.customerName}
+            placement="bottom"
+            title={
+              item.projects && item.projects.length > 0 ? (
+                <ul style={{ margin: 0, padding: '0 16px', listStyle: 'disc' }}>
+                  <div>{t('customerStatisCard.projectsBy')} {item.customerName}</div>
+                  {item.projects.map((proj: { name: string }, idx: number) => (
+                    <li key={idx}>{proj.name}</li>
+                  ))}
+                </ul>
+              ) : (
+                <span>{t('customerStatisCard.noneProject')}</span>
+              )
+            }
+          >
+            <div>
+              <StatisticCard
+                icon={<PieChartOutlined />}
+                title={t('customerStatisCard.projectsBy', { customerName: item.customerName })}
+                number={item.projectCount}
+                percent={item.percentProject}
+                color={index % 2 === 0 ? "#FAAD14" : "#13C2C2"}
+              />
+            </div>
+          </Tooltip>
+        ))}
+      </div>
       <Space style={{ marginBottom: 16 }}>
         <Input
           placeholder={t('customer_page.search_placeholder')}
@@ -266,9 +266,9 @@ const handleDelete = (record: ICustomer) => {
           </Option>
           <Option value="name">{t('customer_page.sort_by_name')}</Option>
         </Select>
-        <Select value={sort} 
-        onChange={v => setSort(v)} 
-        style={{ width: 150 }}>
+        <Select value={sort}
+          onChange={v => setSort(v)}
+          style={{ width: 150 }}>
           <Option value="asc">{t('customer_page.sort_asc')}</Option>
           <Option value="desc">{t('customer_page.sort_desc')}</Option>
         </Select>
@@ -283,7 +283,7 @@ const handleDelete = (record: ICustomer) => {
           pageSize: limit,
           total: total,
           showSizeChanger: true,
-          pageSizeOptions: ['2','10', '20', '50', '100'],
+          pageSizeOptions: ['2', '10', '20', '50', '100'],
           onChange: (p, l) => {
             setPage(p);
             setLimit(l || 10);
@@ -291,7 +291,7 @@ const handleDelete = (record: ICustomer) => {
         }}
         scroll={{ x: true }}
       />
-        <ModalProfileForm
+      <ModalProfileForm
         open={openProfileModal}
         onCancel={() => {
           setOpenProfileModal(false);

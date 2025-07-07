@@ -102,5 +102,22 @@
     "activatedAccountTotal": "有効化されたアカウント数",
     "PMAccountTotal": "プロジェクトマネージャーアカウント数",
     "customerAccountTotal": "顧客アカウント数"
+  },
+  "userProfile": {
+    "title": "ユーザー情報",
+    "alias": "コード",
+    "email": "メールアドレス",
+    "status": "ステータス",
+    "isActiveStatus": "有効",
+    "inActiveStatus": "無効",
+    "personalInformation": {
+      "Title": "個人情報",
+      "alias": "コード",
+      "email": "メールアドレス",
+      "phoneNumber": "電話番号",
+      "birth": "生年月日",
+      "company": "会社",
+      "address": "住所"
+    }
   }
 }

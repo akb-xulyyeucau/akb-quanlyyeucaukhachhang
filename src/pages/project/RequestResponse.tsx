@@ -75,7 +75,7 @@ const RequestResponse = () => {
 
   // Tạo màu: giai đoạn đã hoàn thành là xanh, chưa hoàn thành là xám
   const progressColors = Array.from({ length: totalPhases }, (_, i) =>
-    i < currentPhase ? '#1890ff' : '#d9d9d9'
+    i < currentPhase ? '#00FF00' : '#FF9933'
   );
 
   // Dữ liệu: giai đoạn đã hoàn thành là 1, chưa hoàn thành là 1 (để Pie chart chia đều)

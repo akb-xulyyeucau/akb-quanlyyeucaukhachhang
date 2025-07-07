@@ -35,10 +35,12 @@ const { Text, Title } = Typography;
 const { Option } = Select;
 
 const Dashboard = () => {
+  // State cho bộ lọc thời gian và số lượng top khách hàng
   const [timeRange, setTimeRange] = useState("month");
   const [topCustomers, setTopCustomers] = useState(3);
   const navigate = useNavigate();
 
+  // Mảng các card thông số tổng quan
   const metrics = [
     {
       icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />, label: "Yêu cầu mới", value: 3, change: null,
@@ -62,6 +64,7 @@ const Dashboard = () => {
     },
   ];
 
+  // Dữ liệu tiến độ các dự án
   const progressData = [
     { name: "E-learning", percent: 22, owner: "Nguyễn Văn A", deadline: "2025-07-20" },
     { name: "Quản lý kho", percent: 85, owner: "Trần Thị B", deadline: "2025-07-25" },
@@ -71,6 +74,7 @@ const Dashboard = () => {
     { name: "E-learning", percent: 80, owner: "Trần Thị B", deadline: "2025-07-30" },
   ];
 
+  // Dữ liệu tỉ lệ đánh giá sao
   const ratingStats = [
     { name: "1 sao", value: 2 },
     { name: "2 sao", value: 3 },
@@ -79,6 +83,7 @@ const Dashboard = () => {
     { name: "5 sao", value: 15 },
   ];
 
+  // Dữ liệu số lượng phản hồi từ khách hàng
   const allFeedbackStats = [
     { name: "Nguyễn Văn A", value: 34 },
     { name: "Trần Thị B", value: 18 },
@@ -89,11 +94,14 @@ const Dashboard = () => {
     { name: "Đỗ Thị F", value: 1 },
   ];
 
+  // Lấy top khách hàng theo lựa chọn
   const feedbackStats = allFeedbackStats.slice(0, topCustomers);
 
+  // Tính tổng số lượt đánh giá và điểm trung bình
   const totalRatings = ratingStats.reduce((sum, item) => sum + item.value, 0);
   const averageRating = ratingStats.reduce((sum, item, index) => sum + (index + 1) * item.value, 0) / totalRatings;
 
+  // Hàm render bộ lọc thời gian
   const renderDatePicker = () => {
     switch (timeRange) {
       case "month": return <DatePicker picker="month" style={{ marginLeft: 8 }} placeholder="Chọn tháng/năm" />;
@@ -103,6 +111,7 @@ const Dashboard = () => {
     }
   };
 
+  // Tooltip tuỳ chỉnh cho biểu đồ tiến độ dự án
   const CustomTooltip = ({
     active,
     payload,
@@ -125,6 +134,7 @@ const Dashboard = () => {
     return null;
   };
 
+  // Xử lý chuyển hướng khi click vào cột dự án
   const handleBarClick = (data: { activeLabel: any; }) => {
     if (data && data.activeLabel) {
       const projectName = data.activeLabel;
@@ -134,6 +144,7 @@ const Dashboard = () => {
 
   return (
     <div style={{ padding: '35px 25px', background: '#f4f6f8', minHeight: '100vh' }}>
+      {/* Header bộ lọc thời gian */}
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
         <Title level={3} style={{ margin: 0 }}>Tổng quan dự án & khách hàng</Title>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -149,6 +160,7 @@ const Dashboard = () => {
         </div>
       </Row>
 
+      {/* Các card thông số tổng quan */}
       <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
         {metrics.map((item, index) => {
           const isPositive = item.change !== null && item.change >= 0;
@@ -221,6 +233,8 @@ const Dashboard = () => {
           );
         })}
       </Row>
+
+      {/* Biểu đồ tiến độ dự án */}
       <Card title={<Text strong style={{ fontSize: 16 }}>Biểu đồ tiến độ dự án</Text>} style={{ marginBottom: 32, borderRadius: 16 }} bodyStyle={{ padding: 14, background: '#fff' }}>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={progressData} onClick={handleBarClick}>
@@ -239,6 +253,8 @@ const Dashboard = () => {
       </Card>
 
       <Row gutter={16} style={{ alignItems: 'stretch' }}>
+
+        {/* Card tỉ lệ đánh giá từ khách hàng */}
         <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Card
@@ -276,6 +292,9 @@ const Dashboard = () => {
                       <br />
                       <Text strong>{totalRatings}</Text>{" "} lượt đánh giá đã ghi nhận
                     </div>
+
+
+                    {/* Chú thích màu cho các mức sao */}
                     <div style={{ marginTop: 10, marginLeft: 35 }}>
                       <Row gutter={8}>
                         <Col span={12}>
@@ -310,6 +329,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </Col>
+                {/* Biểu đồ tròn tỉ lệ đánh giá */}
                 <Col span={14} style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
                   <ResponsiveContainer width="100%" height={290}>
                     <PieChart>
@@ -327,6 +347,7 @@ const Dashboard = () => {
           </div>
         </Col>
 
+        {/* Card số lượng báo cáo từ khách hàng */}
         <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
           <Card
             title={
@@ -346,6 +367,7 @@ const Dashboard = () => {
             bodyStyle={{ padding: 24, background: '#fff', height: '100%', display: 'flex', flexDirection: 'column' }}
             style={{ borderRadius: 16, height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}
           >
+            {/* Biểu đồ cột ngang số lượng báo cáo */}
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={feedbackStats} layout="vertical" margin={{ right: 50, left: 0, top: 0, bottom: 0 }}>
                 <XAxis type="number" />

@@ -16,7 +16,6 @@ import {
   IdcardOutlined,
   ProfileOutlined,
   TagOutlined,
-  DatabaseOutlined
 } from '@ant-design/icons';
 import { logout } from './logout.service';
 const { Header, Sider, Content } = Layout;
@@ -222,9 +221,9 @@ const MainLayout: React.FC = () => {
               <Menu.Item key="system-email" icon={<MailOutlined />}>
                 {t('menu.system_email')}
               </Menu.Item>
-              <Menu.Item key="system-setting" icon={<DatabaseOutlined />}>
+              {/* <Menu.Item key="system-setting" icon={<DatabaseOutlined />}>
                 {t('menu.system_setting')}
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu.SubMenu>
           </Menu>
 

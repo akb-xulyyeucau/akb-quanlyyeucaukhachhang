@@ -16,6 +16,7 @@ interface MailConfig {
   pass: string;
   secure: boolean;
   senderName: string;
+  isActive : boolean
 }
 
 const EmailConfig = () => {
@@ -77,9 +78,10 @@ const EmailConfig = () => {
         user: values.emailAddress,
         pass: values.password,
         secure: parseInt(values.port) === 465 ? true : false,
-        senderName: values.senderName
+        senderName: values.senderName,
+        isActive : values.isActive
       };
-
+      console.log("Data ====: " , mailData);
       if (mailConfig) {
         // Update existing config
         const response = await updateEmailConfig(mailData);
@@ -147,17 +149,18 @@ const EmailConfig = () => {
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
-            emailService: 'Gmail',
-            encryptionMethod: 'SSL',
-            emailAddress: profile?.emailContact || '',
-            senderName: profile?.name || '',
-            host: 'smtp.gmail.com',
-            secure: true
+            emailService: mailConfig?.serviceName || 'Gmail',
+            encryptionMethod: mailConfig?.encryptMethod ||'SSL',
+            emailAddress: mailConfig?.user ||profile?.emailContact || '',
+            senderName:mailConfig?.senderName || profile?.name || '',
+            host:mailConfig?.host || 'smtp.gmail.com',
+            secure: mailConfig?.secure || true,
+            isActive : mailConfig?.isActive || false
           }}
         >
           <div className="flex justify-between items-center mb-4">
             <div className="text-lg">Bật/tắt cấu hình gửi email</div>
-            <Form.Item name="secure" valuePropName="checked" noStyle>
+            <Form.Item name="isActive" valuePropName="checked" noStyle>
               <Switch />
             </Form.Item>
           </div>

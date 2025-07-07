@@ -10,7 +10,7 @@ import {
   CloseCircleOutlined
 } from '@ant-design/icons';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 interface GmailTutorialProps {
   isOpen: boolean;

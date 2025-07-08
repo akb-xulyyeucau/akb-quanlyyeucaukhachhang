@@ -28,80 +28,98 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dayjs } from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
+import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
+import { useSelector } from "react-redux";
+import { getHomeData } from "./services/home.service";
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [topCustomers, setTopCustomers] = useState(3);
+  const [dashboardData, setDashboardData] = useState<any>(null);
   const navigate = useNavigate();
+  const user = useSelector(selectAuthUser);
+  const profile = useSelector(selectUserProfile);
 
   // Mảng các card thông số tổng quan
   const metrics = [
     {
-      icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />, label: "Yêu cầu mới", value: 3, change: null,
-      colorStart: '#e6f7ff', colorEnd: '#bae7ff', route: '/customers-projects-request'
+      icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />, 
+      label: "Yêu cầu mới", 
+      value: dashboardData?.newRequests || 0, 
+      change: null,
+      colorStart: '#e6f7ff', 
+      colorEnd: '#bae7ff', 
+      route: '/customers-projects-request'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#722ed1' }} />, label: "Đang thực hiện", value: 5, change: null,
-      colorStart: '#f9f0ff', colorEnd: '#d3adf7', route: '/customers-projects'
+      icon: <FolderOutlined style={{ fontSize: 32, color: '#722ed1' }} />, 
+      label: "Đang thực hiện", 
+      value: dashboardData?.inProgressProjects || 0, 
+      change: null,
+      colorStart: '#f9f0ff', 
+      colorEnd: '#d3adf7', 
+      route: '/customers-projects'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#fa8c16' }} />, label: "Đã thực hiện", value: 13, change: 8,
-      colorStart: '#fff7e6', colorEnd: '#ffd591', route: '/customers-projects'
+      icon: <FolderOutlined style={{ fontSize: 32, color: '#fa8c16' }} />, 
+      label: "Đã thực hiện", 
+      value: dashboardData?.completedProjects || 0, 
+      change: dashboardData?.completedProjectsChange?.percentageChange || 0,
+      colorStart: '#fff7e6', 
+      colorEnd: '#ffd591', 
+      route: '/customers-projects'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#13c2c2' }} />, label: "Tổng dự án", value: 18, change: 2,
-      colorStart: '#e6fffb', colorEnd: '#87e8de', route: '/customers-projects'
-    },
-    {
-      icon: <UserOutlined style={{ fontSize: 32, color: '#eb2f96' }} />, label: "Khách hàng", value: 9, change: 110,
-      colorStart: '#fff0f6', colorEnd: '#ffadd2', route: '/customers'
-    },
+      icon: <FolderOutlined style={{ fontSize: 32, color: '#13c2c2' }} />, 
+      label: "Tổng dự án", 
+      value: dashboardData?.totalProjects || 0, 
+      change: dashboardData?.totalProjectsChange?.percentageChange || 0,
+      colorStart: '#e6fffb', 
+      colorEnd: '#87e8de', 
+      route: '/customers-projects'
+    }
   ];
 
   // Dữ liệu tiến độ các dự án
-  const progressData = [
-    { name: "E-learning", percent: 22, owner: "Nguyễn Văn A", deadline: "2025-07-20" },
-    { name: "Quản lý kho", percent: 85, owner: "Trần Thị B", deadline: "2025-07-25" },
-    { name: "CRM Client", percent: 90, owner: "Lê Văn C", deadline: "2025-07-15" },
-    { name: "Quản lý kho", percent: 54, owner: "Công ty X", deadline: "2025-07-22" },
-    { name: "CRM Client", percent: 76, owner: "Nguyễn Văn A", deadline: "2025-07-28" },
-    { name: "E-learning", percent: 80, owner: "Trần Thị B", deadline: "2025-07-30" },
-  ];
+  const progressData = dashboardData?.projects?.map((project: any) => ({
+    name: project.name,
+    percent: Math.round((project.currentPhase / (project.totalPhases || 1)) * 100),
+    owner: project.pm.name,
+    deadline: new Date(project.day).toISOString().split('T')[0]
+  })) || [];
 
   // Dữ liệu tỉ lệ đánh giá sao
-  const ratingStats = [
-    { name: "1 sao", value: 2 },
-    { name: "2 sao", value: 3 },
-    { name: "3 sao", value: 6 },
-    { name: "4 sao", value: 10 },
-    { name: "5 sao", value: 15 },
-  ];
+  const ratingStats = dashboardData?.ratingStats ? [
+    { name: "1 sao", value: dashboardData.ratingStats.oneStar },
+    { name: "2 sao", value: dashboardData.ratingStats.twoStar },
+    { name: "3 sao", value: dashboardData.ratingStats.threeStar },
+    { name: "4 sao", value: dashboardData.ratingStats.fourStar },
+    { name: "5 sao", value: dashboardData.ratingStats.fiveStar },
+  ] : [];
+
+  // Tính tổng số lượt đánh giá và điểm trung bình
+  const totalRatings = dashboardData?.ratingStats?.total || 0;
+  const averageRating = ratingStats.reduce((sum, item, index) => sum + (index + 1) * item.value, 0) / (totalRatings || 1);
 
   // Dữ liệu số lượng phản hồi từ khách hàng
-  const allFeedbackStats = [
-    { name: "Nguyễn Văn A", value: 34 },
-    { name: "Trần Thị B", value: 18 },
-    { name: "Công ty X", value: 15 },
-    { name: "Lê Văn C", value: 14 },
-    { name: "Phạm Thị D", value: 3 },
-    { name: "Hoàng Văn E", value: 2 },
-    { name: "Đỗ Thị F", value: 1 },
-  ];
+  const allFeedbackStats = dashboardData?.reportStats?.topReporters?.map((reporter: any) => ({
+    name: reporter.customerName,
+    value: reporter.totalReports
+  })) || [];
 
   // Lấy top khách hàng theo lựa chọn
   const feedbackStats = allFeedbackStats.slice(0, topCustomers);
 
-  // Tính tổng số lượt đánh giá và điểm trung bình
-  const totalRatings = ratingStats.reduce((sum, item) => sum + item.value, 0);
-  const averageRating = ratingStats.reduce((sum, item, index) => sum + (index + 1) * item.value, 0) / totalRatings;
+  // Kiểm tra role để hiển thị phần rating và report
+  const canViewStatistics = user?.role === 'admin' || user?.role === 'pm';
 
   // Hàm render bộ lọc thời gian
   const renderRangePicker = () => {
@@ -161,6 +179,19 @@ const Dashboard = () => {
       navigate(`/projects/${encodeURIComponent(projectName)}`);
     }
   };
+
+  const fetchHomeData = async () => {
+    try {
+      const response = await getHomeData(user?.role || '', timeRange, startDate?.format('YYYY-MM-DD') || '', endDate?.format('YYYY-MM-DD') || '');
+      setDashboardData(response.data);
+    } catch (error) {
+      console.error('Lỗi khi lấy dữ liệu:', error);
+    }
+  }
+
+  useEffect(() => {
+    fetchHomeData();
+  }, [timeRange, startDate, endDate]);
 
   return (
     <div style={{ padding: '35px 25px', background: '#f4f6f8', minHeight: '100vh' }}>
@@ -280,133 +311,135 @@ const Dashboard = () => {
       </Card>
 
       <Row gutter={16} style={{ alignItems: 'stretch' }}>
-
-        {/* Card tỉ lệ đánh giá từ khách hàng */}
-        <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <Card
-              style={{
-                background: '#fff',
-                borderRadius: 16,
-                padding: 0,
-                height: '100%',
-                border: '1px solid #f0f0f0',
-                display: 'flex',
-                flexDirection: 'column',
-                flex: 1,
-              }}
-              bodyStyle={{ padding: 27, height: '100%', display: 'flex', flexDirection: 'column' }}
-            >
-              <Row gutter={16} style={{ height: '100%' }}>
-                <Col span={10} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'left' }}>
-                    {<Text strong style={{ fontSize: 18, marginBottom: 25 }}>Tỉ lệ đánh giá từ khách hàng</Text>}
-                    <div style={{
-                      textAlign: 'center',
-                      marginTop: 5,
-                      marginBottom: 15,
-                      border: '2px solid #fadb14',
-                      borderRadius: 12,
-                      padding: '12px 16px',
-                      backgroundColor: '#fffbe6',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text strong style={{ fontSize: 25 }}>{averageRating.toFixed(1)}</Text>
-                        <StarFilled style={{ fontSize: 23, color: '#fadb14', marginLeft: 8 }} />
-                      </div>
-                      <Text type="secondary" style={{ fontSize: 14, marginBottom: 5, display: 'inline-block' }}>Đánh giá trung bình</Text>
-                      <br />
-                      <Text strong>{totalRatings}</Text>{" "} lượt đánh giá đã ghi nhận
-                    </div>
-
-
-                    {/* Chú thích màu cho các mức sao */}
-                    <div style={{ marginTop: 10, marginLeft: 35 }}>
-                      <Row gutter={8}>
-                        <Col span={12}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <div style={{ width: 16, height: 16, backgroundColor: '#1890FF', borderRadius: 2, marginRight: 8 }}></div>
-                              <Text style={{ fontSize: 14 }}>5 sao</Text>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <div style={{ width: 16, height: 16, backgroundColor: '#FADB14', borderRadius: 2, marginRight: 8 }}></div>
-                              <Text style={{ fontSize: 14 }}>3 sao</Text>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <div style={{ width: 16, height: 16, backgroundColor: '#FF4D4F', borderRadius: 2, marginRight: 8 }}></div>
-                              <Text style={{ fontSize: 14 }}>1 sao</Text>
-                            </div>
-                          </div>
-                        </Col>
-                        <Col span={12}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <div style={{ width: 16, height: 16, backgroundColor: '#52C41A', borderRadius: 2, marginRight: 8 }}></div>
-                              <Text style={{ fontSize: 14 }}>4 sao</Text>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                              <div style={{ width: 16, height: 16, backgroundColor: '#FAAD14', borderRadius: 2, marginRight: 8 }}></div>
-                              <Text style={{ fontSize: 14 }}>2 sao</Text>
-                            </div>
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  </div>
-                </Col>
-                {/* Biểu đồ tròn tỉ lệ đánh giá */}
-                <Col span={14} style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-                  <ResponsiveContainer width="100%" height={290}>
-                    <PieChart>
-                      <Pie data={ratingStats} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label>
-                        {ratingStats.map((_entry, index) => (
-                          <Cell key={`cell-${index}`} fill={["#FF4D4F", "#FAAD14", "#FADB14", "#52C41A", "#1890FF"][index]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </Col>
-              </Row>
-            </Card>
-          </div>
-        </Col>
-
-        {/* Card số lượng báo cáo từ khách hàng */}
-        <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
-          <Card
-            title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text strong style={{ fontSize: 16 }}>Số lượng báo cáo từ khách hàng</Text>
-                <Select
-                  defaultValue={3}
-                  style={{ width: 150 }}
-                  onChange={(value) => setTopCustomers(value)}
+        {canViewStatistics && (
+          <>
+            {/* Card tỉ lệ đánh giá từ khách hàng */}
+            <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <Card
+                  style={{
+                    background: '#fff',
+                    borderRadius: 16,
+                    padding: 0,
+                    height: '100%',
+                    border: '1px solid #f0f0f0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
+                  }}
+                  bodyStyle={{ padding: 27, height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
-                  <Option value={3}>Top 3 nhiều nhất</Option>
-                  <Option value={5}>Top 5 nhiều nhất</Option>
-                  <Option value={7}>Top 7 nhiều nhất</Option>
-                </Select>
+                  <Row gutter={16} style={{ height: '100%' }}>
+                    <Col span={10} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'left' }}>
+                        {<Text strong style={{ fontSize: 18, marginBottom: 25 }}>Tỉ lệ đánh giá từ khách hàng</Text>}
+                        <div style={{
+                          textAlign: 'center',
+                          marginTop: 5,
+                          marginBottom: 15,
+                          border: '2px solid #fadb14',
+                          borderRadius: 12,
+                          padding: '12px 16px',
+                          backgroundColor: '#fffbe6',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Text strong style={{ fontSize: 25 }}>{averageRating.toFixed(1)}</Text>
+                            <StarFilled style={{ fontSize: 23, color: '#fadb14', marginLeft: 8 }} />
+                          </div>
+                          <Text type="secondary" style={{ fontSize: 14, marginBottom: 5, display: 'inline-block' }}>Đánh giá trung bình</Text>
+                          <br />
+                          <Text strong>{totalRatings}</Text>{" "} lượt đánh giá đã ghi nhận
+                        </div>
+
+                        {/* Chú thích màu cho các mức sao */}
+                        <div style={{ marginTop: 10, marginLeft: 35 }}>
+                          <Row gutter={8}>
+                            <Col span={12}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ width: 16, height: 16, backgroundColor: '#1890FF', borderRadius: 2, marginRight: 8 }}></div>
+                                  <Text style={{ fontSize: 14 }}>5 sao</Text>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ width: 16, height: 16, backgroundColor: '#FADB14', borderRadius: 2, marginRight: 8 }}></div>
+                                  <Text style={{ fontSize: 14 }}>3 sao</Text>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ width: 16, height: 16, backgroundColor: '#FF4D4F', borderRadius: 2, marginRight: 8 }}></div>
+                                  <Text style={{ fontSize: 14 }}>1 sao</Text>
+                                </div>
+                              </div>
+                            </Col>
+                            <Col span={12}>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ width: 16, height: 16, backgroundColor: '#52C41A', borderRadius: 2, marginRight: 8 }}></div>
+                                  <Text style={{ fontSize: 14 }}>4 sao</Text>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                  <div style={{ width: 16, height: 16, backgroundColor: '#FAAD14', borderRadius: 2, marginRight: 8 }}></div>
+                                  <Text style={{ fontSize: 14 }}>2 sao</Text>
+                                </div>
+                              </div>
+                            </Col>
+                          </Row>
+                        </div>
+                      </div>
+                    </Col>
+                    {/* Biểu đồ tròn tỉ lệ đánh giá */}
+                    <Col span={14} style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                      <ResponsiveContainer width="100%" height={290}>
+                        <PieChart>
+                          <Pie data={ratingStats} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={110} label>
+                            {ratingStats.map((_entry, index) => (
+                              <Cell key={`cell-${index}`} fill={["#FF4D4F", "#FAAD14", "#FADB14", "#52C41A", "#1890FF"][index]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </Col>
+                  </Row>
+                </Card>
               </div>
-            }
-            bodyStyle={{ padding: 24, background: '#fff', height: '100%', display: 'flex', flexDirection: 'column' }}
-            style={{ borderRadius: 16, height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}
-          >
-            {/* Biểu đồ cột ngang số lượng báo cáo */}
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={feedbackStats} layout="vertical" margin={{ right: 50, left: 0, top: 0, bottom: 0 }}>
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={110} />
-                <Tooltip />
-                <Bar dataKey="value" fill="#9254de">
-                  <LabelList dataKey="value" position="right" offset={16} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </Col>
+            </Col>
+
+            {/* Card số lượng báo cáo từ khách hàng */}
+            <Col span={12} style={{ display: 'flex', flexDirection: 'column' }}>
+              <Card
+                title={
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text strong style={{ fontSize: 16 }}>Số lượng báo cáo từ khách hàng</Text>
+                    <Select
+                      defaultValue={3}
+                      style={{ width: 150 }}
+                      onChange={(value) => setTopCustomers(value)}
+                    >
+                      <Option value={3}>Top 3 nhiều nhất</Option>
+                      <Option value={5}>Top 5 nhiều nhất</Option>
+                      <Option value={7}>Top 7 nhiều nhất</Option>
+                    </Select>
+                  </div>
+                }
+                bodyStyle={{ padding: 24, background: '#fff', height: '100%', display: 'flex', flexDirection: 'column' }}
+                style={{ borderRadius: 16, height: '100%', display: 'flex', flex: 1, flexDirection: 'column' }}
+              >
+                {/* Biểu đồ cột ngang số lượng báo cáo */}
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={feedbackStats} layout="vertical" margin={{ right: 50, left: 0, top: 0, bottom: 0 }}>
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={110} />
+                    <Tooltip />
+                    <Bar dataKey="value" fill="#9254de">
+                      <LabelList dataKey="value" position="right" offset={16} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </Card>
+            </Col>
+          </>
+        )}
       </Row>
     </div>
   );

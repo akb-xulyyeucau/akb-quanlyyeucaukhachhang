@@ -194,9 +194,10 @@ const Dashboard = () => {
   }, [timeRange, startDate, endDate]);
 
   return (
-    <div style={{ padding: '35px 25px', background: '#f4f6f8', minHeight: '100vh' }}>
+    <Card style={{ padding: '15px 15px', minHeight: '100vh', marginTop: 20 }}>
+
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Title level={3} style={{ margin: 0 }}>Tổng quan dự án & khách hàng</Title>
+        <Title level={3} style={{ margin: 0 }}>Trang tổng quan </Title>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Select
             value={timeRange}
@@ -230,11 +231,13 @@ const Dashboard = () => {
               key={index}
               xs={24}
               sm={12}
-              md={8}
-              lg={6}
+              md={12}
+              lg={Math.floor(24 / metrics.length)}
               xl={Math.floor(24 / metrics.length)}
-              style={{ minWidth: 265 }}
+              style={{ minWidth: "20%" }} // nhỏ nhất vẫn giữ được bố cục
             >
+
+
               <div
                 onClick={() => navigate(item.route)}
                 style={{
@@ -245,6 +248,9 @@ const Dashboard = () => {
                   boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
                   transition: 'all 0.3s ease',
                   minHeight: 100,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
                 }}
                 onMouseEnter={e => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
@@ -441,7 +447,8 @@ const Dashboard = () => {
           </>
         )}
       </Row>
-    </div>
+
+    </Card >
   );
 };
 

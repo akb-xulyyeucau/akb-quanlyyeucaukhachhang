@@ -3,12 +3,15 @@ import { Card, Row, Col, Typography, Descriptions, Avatar, Tag, Divider } from '
 import { UserOutlined, MailOutlined, PhoneOutlined, HomeOutlined, BankOutlined, CalendarOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
+import { selectUserProfile, selectAuthUser } from '../../common/stores/auth/authSelector';
 dayjs.extend(utc);
+import { useTranslation } from 'react-i18next';
+
 
 const { Title } = Typography;
 
 const UserProfile = () => {
+  const [t] = useTranslation('user');
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile);
 
@@ -46,17 +49,17 @@ const UserProfile = () => {
           </Col>
 
           <Col span={24}>
-            <Divider orientation="left">Thông tin người dùng</Divider>
+            <Divider orientation="left"> {t('userProfile.title')} </Divider>
             <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered>
-              <Descriptions.Item label="Mã">
+              <Descriptions.Item label={t('userProfile.alias')}>
                 {user?.alias}
               </Descriptions.Item>
-              <Descriptions.Item label={<><MailOutlined /> Email</>}>
+              <Descriptions.Item label={<><MailOutlined />  {t('userProfile.email')}</>}>
                 {user?.email}
               </Descriptions.Item>
-              <Descriptions.Item label="Trạng thái">
-                <Tag color={user?.isActive  ? 'green' : 'red'}>
-                  {user?.isActive  ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
+              <Descriptions.Item label={t('userProfile.status')}>
+                <Tag color={user?.isActive ? 'green' : 'red'}>
+                  {user?.isActive ? t('userProfile.isActiveStatus') : t('userProfile.inActiveStatus')}
                 </Tag>
               </Descriptions.Item>
               {/* <Descriptions.Item label="Ngày tạo">
@@ -70,27 +73,27 @@ const UserProfile = () => {
 
           {profile && (
             <Col span={24}>
-              <Divider orientation="left">Thông tin cá nhân</Divider>
+              <Divider orientation="left">{t('userProfile.personalInformation.Title')}</Divider>
               <Descriptions column={{ xs: 1, sm: 2, md: 3 }} bordered>
-                <Descriptions.Item label="Mã">
+                <Descriptions.Item label={t('userProfile.personalInformation.alias')}>
                   {profile.alias}
                 </Descriptions.Item>
-                <Descriptions.Item label={<><MailOutlined /> Email liên hệ</>}>
+                <Descriptions.Item label={<><MailOutlined /> {t('userProfile.personalInformation.email')}</>}>
                   {profile.emailContact}
                 </Descriptions.Item>
-                <Descriptions.Item label={<><PhoneOutlined /> Số điện thoại</>}>
+                <Descriptions.Item label={<><PhoneOutlined /> {t('userProfile.personalInformation.phoneNumber')}</>}>
                   {profile.phoneContact}
                 </Descriptions.Item>
-                <Descriptions.Item label={<><CalendarOutlined /> Ngày sinh</>}>
+                <Descriptions.Item label={<><CalendarOutlined /> {t('userProfile.personalInformation.birth')}</>}>
                   {profile.dob ? dayjs(profile.dob).format('DD/MM/YYYY') : 'N/A'}
                 </Descriptions.Item>
-                
+
                 {user?.role === 'guest' && (
                   <>
-                    <Descriptions.Item label={<><BankOutlined /> Công ty</>}>
+                    <Descriptions.Item label={<><BankOutlined /> {t('userProfile.personalInformation.company')}</>}>
                       {profile.companyName || 'N/A'}
                     </Descriptions.Item>
-                    <Descriptions.Item label={<><HomeOutlined /> Địa chỉ</>}>
+                    <Descriptions.Item label={<><HomeOutlined /> {t('userProfile.personalInformation.address')}</>}>
                       {profile.address || 'N/A'}
                     </Descriptions.Item>
                   </>

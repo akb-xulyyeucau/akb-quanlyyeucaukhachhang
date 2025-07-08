@@ -7,8 +7,6 @@ import { useSelector } from 'react-redux';
 import { selectAuthUser } from '../../../common/stores/auth/authSelector';
 import { uploadDocument } from '../services/document.service';
 import { useTranslation } from 'react-i18next';
-// import PopupMailConfirm from '../../../common/components/PopupMailConfirm';
-
 
 interface ModalAddDocumentProps {
   open: boolean;

@@ -1,12 +1,24 @@
 import { SaveOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Card, Form, Input, Select, Switch, Button, message, Spin, Space } from 'antd';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createEmailConfig, getEmailConfig, updateEmailConfig } from './services/mail.service';
 import { selectAuthUser, selectUserProfile } from '../../common/stores/auth/authSelector';
 import { useSelector } from 'react-redux';
 import GmailTutorial from '../../common/components/GmailTutorial';
 import { useTranslation } from 'react-i18next';
 
+interface FormValues {
+  emailService: string;
+  encryptionMethod: string;
+  emailAddress: string;
+  password: string;
+  senderName: string;
+  host: string;
+  port: string;
+  secure: boolean;
+  isActive: boolean;
+  [key: string]: string | boolean; // Add index signature
+}
 
 interface MailConfig {
   _id: string;
@@ -18,19 +30,58 @@ interface MailConfig {
   pass: string;
   secure: boolean;
   senderName: string;
-  isActive : boolean
+  isActive: boolean;
 }
+
+const DEFAULT_VALUES: FormValues = {
+  emailService: 'Gmail',
+  encryptionMethod: 'SSL',
+  emailAddress: '',
+  password: '',
+  senderName: '',
+  host: 'smtp.gmail.com',
+  port: '465',
+  secure: true,
+  isActive: false
+};
 
 const EmailConfig = () => {
   const [t] = useTranslation('emailConfig')
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<FormValues>();
   const [messageApi, contextHolder] = message.useMessage();
   const [encryptionMethod, setEncryptionMethod] = useState('SSL');
   const [loading, setLoading] = useState(true);
   const [mailConfig, setMailConfig] = useState<MailConfig | null>(null);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [initialValues, setInitialValues] = useState<FormValues | null>(null);
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile);
+
+  // Watch all form fields
+  const formValues = Form.useWatch([], form);
+
+  // Check if form has changes
+  const isFormChanged = useMemo(() => {
+    if (!initialValues || !formValues) return false;
+    
+    const fieldsToCompare = [
+      'emailService',
+      'encryptionMethod',
+      'emailAddress',
+      'password',
+      'senderName',
+      'host',
+      'port',
+      'isActive'
+    ] as const;
+
+    return fieldsToCompare.some(field => {
+      const initialValue = initialValues[field];
+      const currentValue = formValues[field];
+      return initialValue !== currentValue;
+    });
+  }, [initialValues, formValues]);
+
   useEffect(() => {
     fetchMailConfig();
   }, []);
@@ -44,7 +95,7 @@ const EmailConfig = () => {
       const response = await getEmailConfig();
       if (response.success && response.data) {
         setMailConfig(response.data);
-        form.setFieldsValue({
+        const values: FormValues = {
           emailService: response.data.serviceName,
           encryptionMethod: response.data.encryptMethod,
           emailAddress: response.data.user,
@@ -52,8 +103,11 @@ const EmailConfig = () => {
           senderName: response.data.senderName,
           host: response.data.host,
           port: response.data.port.toString(),
-          secure: response.data.secure
-        });
+          secure: Boolean(response.data.secure),
+          isActive: Boolean(response.data.isActive)
+        };
+        form.setFieldsValue(values);
+        setInitialValues(values);
         setEncryptionMethod(response.data.encryptMethod);
       }
     } catch (error) {
@@ -62,6 +116,28 @@ const EmailConfig = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getInitialFormValues = (): FormValues => {
+    if (!mailConfig) {
+      return {
+        ...DEFAULT_VALUES,
+        emailAddress: profile?.emailContact || '',
+        senderName: profile?.name || ''
+      };
+    }
+
+    return {
+      emailService: mailConfig.serviceName,
+      encryptionMethod: mailConfig.encryptMethod,
+      emailAddress: mailConfig.user || profile?.emailContact || '',
+      senderName: mailConfig.senderName || profile?.name || '',
+      host: mailConfig.host,
+      port: mailConfig.port.toString(),
+      password: mailConfig.pass,
+      secure: mailConfig.secure,
+      isActive: mailConfig.isActive
+    };
   };
 
   const onFinish = async (values: any) => {
@@ -151,15 +227,7 @@ const EmailConfig = () => {
           form={form}
           layout="vertical"
           onFinish={onFinish}
-          initialValues={{
-            emailService: mailConfig?.serviceName || 'Gmail',
-            encryptionMethod: mailConfig?.encryptMethod ||'SSL',
-            emailAddress: mailConfig?.user ||profile?.emailContact || '',
-            senderName:mailConfig?.senderName || profile?.name || '',
-            host:mailConfig?.host || 'smtp.gmail.com',
-            secure: mailConfig?.secure || true,
-            isActive : mailConfig?.isActive || false
-          }}
+          initialValues={getInitialFormValues()}
         >
           <div className="flex justify-between items-center mb-4">
             <div className="text-lg"> {t('emailConfig.form.switchConfigMode')} </div>
@@ -241,6 +309,7 @@ const EmailConfig = () => {
               htmlType="submit"
               icon={<SaveOutlined />}
               loading={loading}
+              disabled={mailConfig ? !isFormChanged : false}
             >
               {mailConfig ? t('emailConfig.form.updateConfigTitle') : t('emailConfig.form.createConfigTitle')}
             </Button>
@@ -249,9 +318,9 @@ const EmailConfig = () => {
       </Card>
       <GmailTutorial
         isOpen={isTutorialOpen}
-        onClose={() => setIsTutorialOpen(false)} t={function (key: string): string {
-          throw new Error('Function not implemented.');
-        }} />
+        onClose={() => setIsTutorialOpen(false)}
+        t={t}
+      />
     </div>
   );
 };

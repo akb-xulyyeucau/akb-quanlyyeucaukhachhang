@@ -17,6 +17,7 @@ interface ReportFormModalProps {
 interface FileWithGlobalIndex extends Omit<UploadFile, 'originFileObj'> {
   globalIndex?: number;
   originFileObj?: RcFile;
+  uniqueId?: string;
 }
 
 interface FileListType {
@@ -87,7 +88,8 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
     const updatedFiles = info.fileList.map((file: UploadFile): FileWithGlobalIndex => ({
       ...file,
       status: uploadProgress[file.uid] >= 100 ? 'done' : 'uploading',
-      originFileObj: file.originFileObj
+      originFileObj: file.originFileObj,
+      uniqueId: file.uid + '_' + index // Add unique identifier combining file uid and index
     }));
 
     console.log('Updated files for index', index, ':', updatedFiles);
@@ -167,13 +169,13 @@ const ReportFormModal: React.FC<ReportFormModalProps> = ({
   };
 
   const renderUploadItem: ItemRender = (_originNode, file: FileWithGlobalIndex, _fileList, actions) => (
-    <div style={{ display: 'flex', alignItems: 'center', padding: '8px 0' }}>
+    <div key={file.uniqueId} style={{ display: 'flex', alignItems: 'center', padding: '8px 0' }}>
       {getFileIcon(file.type || '')}
       <Space direction="vertical" size={0} style={{ marginLeft: 8, flex: 1 }}>
         <Text strong>
           {file.name}
           {typeof file.globalIndex === 'number' && (
-            <Text type="secondary"> ({t('ReportFormModal.fileNumber', { number: file.globalIndex })})</Text>
+            <Text type="secondary"> ({t('ReportFormModal.fileNumber', { number: file.globalIndex + 1 })})</Text>
           )}
         </Text>
         <div style={{ width: '100%' }}>

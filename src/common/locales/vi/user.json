@@ -102,5 +102,22 @@
     "activatedAccountTotal": "Tổng số tài khoản kích hoạt",
     "PMAccountTotal": "Tổng số tài khoản quản lý dự án",
     "customerAccountTotal": "Tổng số tài khoản khách hàng"
+  },
+  "userProfile": {
+    "title": "Thông tin người dùng",
+    "alias": "Mã",
+    "email": "Email",
+    "status": "Trạng thái",
+    "isActiveStatus": "Đã kích hoạt",
+    "inActiveStatus": "Chưa kích hoạt",
+    "personalInformation": {
+      "Title": " Thông tin cá nhân",
+      "alias": "Mã",
+      "email": "Email",
+      "phoneNumber": "Số điện thoại",
+      "birth": "Ngày sinh",
+      "company": "Công ty",
+      "address": "Địa chỉ"
+    }
   }
 }

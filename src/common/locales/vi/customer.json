@@ -34,7 +34,8 @@
     "customerStatisCard": {
         "customerTotal": "Tổng số khách hàng",
         "inProjectCustomer": "Tổng số khách hàng có dự án",
-        "projectsBy": "Dự án của {{customerName}}",
+        "projectsByName": "Dự án của {{customerName}}",
+        "projectsBy": "Dự án của",
         "noneProject": "Không có dự án"
     }
 }

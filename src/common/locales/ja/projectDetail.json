@@ -2,7 +2,7 @@
     "backToProjectList": "プロジェクト一覧に戻る",
     "projectOverview": "プロジェクトの評価を表示",
     "projectInfor": {
-        "title": "プロジェクトの評価を表示",
+        "title": "プロジェクト情報",
         "alias": "コード",
         "name": "プロジェクト名",
         "PM": "プロジェクトマネージャー",

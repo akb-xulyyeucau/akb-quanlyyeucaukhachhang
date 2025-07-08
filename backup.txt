@@ -203,7 +203,7 @@ const Dashboard = () => {
               md={12}
               lg={Math.floor(24 / metrics.length)}
               xl={Math.floor(24 / metrics.length)}
-              style={{ minWidth: "20%" }} // nhỏ nhất vẫn giữ được bố cục
+              style={{ minWidth: 280 }} // nhỏ nhất vẫn giữ được bố cục
             >
 
 
@@ -415,7 +415,7 @@ const Dashboard = () => {
         </Col>
       </Row>
 
-    </Card >
+    </Card>
   );
 };
 

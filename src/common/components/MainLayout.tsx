@@ -179,7 +179,7 @@ const MainLayout: React.FC = () => {
             height: 'calc(100vh - 64px)',
             overflowY: 'auto',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
           }}
           width={260}
         >
@@ -228,30 +228,10 @@ const MainLayout: React.FC = () => {
           </Menu>
 
           <div style={{
-            borderTop: '1px solid #f0f0f0',
+
             background: '#fff'
           }}>
-            <Menu
-              mode="inline"
-              theme="light"
-              style={{
-                border: 'none',
-                background: '#f0f7ff'
-              }}
-              selectedKeys={[]}
-            >
-              <Menu.Item
-                key="language-switcher"
-                style={{
-                  padding: '0',
-                  margin: 0,
-                  height: '40px',
-                  lineHeight: '40px'
-                }}
-              >
-                <LanguageSwitcher />
-              </Menu.Item>
-            </Menu>
+
           </div>
         </Sider>
         <Layout style={{
@@ -262,7 +242,7 @@ const MainLayout: React.FC = () => {
         }}>
           <Content style={{
             minHeight: 'calc(100vh - 64px)',
-            background: 'white',
+            background: '#fff',
             padding: '10px',
             overflowY: 'auto'
           }}>
@@ -271,7 +251,7 @@ const MainLayout: React.FC = () => {
           <AppFooter />
         </Layout>
       </Layout>
-    </Layout>
+    </Layout >
   );
 };
 

@@ -34,11 +34,13 @@ import { useNavigate } from "react-router-dom";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
-import { selectUserProfile , selectAuthUser } from '../../common/stores/auth/authSelector';
+import { selectUserProfile, selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useSelector } from "react-redux";
 import { getHomeData } from "./services/home.service";
+import { useTranslation } from "react-i18next";
 
 const Dashboard = () => {
+  const [t] = useTranslation('home');
   const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
@@ -51,44 +53,43 @@ const Dashboard = () => {
   // Mảng các card thông số tổng quan
   const metrics = [
     {
-      icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />, 
-      label: "Yêu cầu mới", 
-      value: dashboardData?.newRequests || 0, 
+      icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />,
+      label: t("statisticCard.newRequestLabel"),
+      value: dashboardData?.newRequests || 0,
       change: null,
-      colorStart: '#e6f7ff', 
-      colorEnd: '#bae7ff', 
+      colorStart: '#e6f7ff',
+      colorEnd: '#bae7ff',
       route: '/customers-projects-request'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#722ed1' }} />, 
-      label: "Đang thực hiện", 
-      value: dashboardData?.inProgressProjects || 0, 
+      icon: <FolderOutlined style={{ fontSize: 32, color: '#722ed1' }} />,
+      label: t("statisticCard.inProgressLabel"),
+      value: dashboardData?.inProgressProjects || 0,
       change: null,
-      colorStart: '#f9f0ff', 
-      colorEnd: '#d3adf7', 
+      colorStart: '#f9f0ff',
+      colorEnd: '#d3adf7',
       route: '/customers-projects'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#fa8c16' }} />, 
-      label: "Đã thực hiện", 
-      value: dashboardData?.completedProjects || 0, 
+      icon: <FolderOutlined style={{ fontSize: 32, color: '#fa8c16' }} />,
+      label: t("statisticCard.completedLabel"),
+      value: dashboardData?.completedProjects || 0,
       change: dashboardData?.completedProjectsChange?.percentageChange || 0,
-      colorStart: '#fff7e6', 
-      colorEnd: '#ffd591', 
+      colorStart: '#fff7e6',
+      colorEnd: '#ffd591',
       route: '/customers-projects'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#13c2c2' }} />, 
-      label: "Tổng dự án", 
-      value: dashboardData?.totalProjects || 0, 
+      icon: <FolderOutlined style={{ fontSize: 32, color: '#13c2c2' }} />,
+      label: t("statisticCard.totalLabel"),
+      value: dashboardData?.totalProjects || 0,
       change: dashboardData?.totalProjectsChange?.percentageChange || 0,
-      colorStart: '#e6fffb', 
-      colorEnd: '#87e8de', 
+      colorStart: '#e6fffb',
+      colorEnd: '#87e8de',
       route: '/customers-projects'
     }
   ];
 
-  // Dữ liệu tiến độ các dự án
   const progressData = dashboardData?.projects?.map((project: any) => ({
     name: project.name,
     percent: Math.round((project.currentPhase / (project.totalPhases || 1)) * 100),
@@ -96,13 +97,12 @@ const Dashboard = () => {
     deadline: new Date(project.day).toISOString().split('T')[0]
   })) || [];
 
-  // Dữ liệu tỉ lệ đánh giá sao
   const ratingStats = dashboardData?.ratingStats ? [
-    { name: "1 sao", value: dashboardData.ratingStats.oneStar },
-    { name: "2 sao", value: dashboardData.ratingStats.twoStar },
-    { name: "3 sao", value: dashboardData.ratingStats.threeStar },
-    { name: "4 sao", value: dashboardData.ratingStats.fourStar },
-    { name: "5 sao", value: dashboardData.ratingStats.fiveStar },
+    { name: t("customerRatingStatistic.stars.1"), value: dashboardData.ratingStats.oneStar },
+    { name: t("customerRatingStatistic.stars.2"), value: dashboardData.ratingStats.twoStar },
+    { name: t("customerRatingStatistic.stars.3"), value: dashboardData.ratingStats.threeStar },
+    { name: t("customerRatingStatistic.stars.4"), value: dashboardData.ratingStats.fourStar },
+    { name: t("customerRatingStatistic.stars.5"), value: dashboardData.ratingStats.fiveStar },
   ] : [];
 
   // Tính tổng số lượt đánh giá và điểm trung bình
@@ -131,25 +131,25 @@ const Dashboard = () => {
       case 'month':
         return (
           <>
-            <DatePicker picker="month" placeholder="Start month" {...commonProps} onChange={setStartDate} />
+            <DatePicker picker="month" placeholder={t("timeFilter.startMonth")} {...commonProps} onChange={setStartDate} />
             <span style={{ margin: '0 6px' }}>→</span>
-            <DatePicker picker="month" placeholder="End month" {...commonProps} onChange={setEndDate} />
+            <DatePicker picker="month" placeholder={t("timeFilter.endMonth")} {...commonProps} onChange={setEndDate} />
           </>
         );
       case 'quarter':
         return (
           <>
-            <DatePicker picker="quarter" placeholder="Start quarter" {...commonProps} onChange={setStartDate} />
+            <DatePicker picker="quarter" placeholder={t("timeFilter.startQuarter")} {...commonProps} onChange={setStartDate} />
             <span style={{ margin: '0 6px' }}>→</span>
-            <DatePicker picker="quarter" placeholder="End quarter" {...commonProps} onChange={setEndDate} />
+            <DatePicker picker="quarter" placeholder={t("timeFilter.endQuarter")} {...commonProps} onChange={setEndDate} />
           </>
         );
       case 'year':
         return (
           <>
-            <DatePicker picker="year" placeholder="Start year" {...commonProps} onChange={setStartDate} />
+            <DatePicker picker="year" placeholder={t("timeFilter.startYear")} {...commonProps} onChange={setStartDate} />
             <span style={{ margin: '0 6px' }}>→</span>
-            <DatePicker picker="year" placeholder="End year" {...commonProps} onChange={setEndDate} />
+            <DatePicker picker="year" placeholder={t("timeFilter.endYear")} {...commonProps} onChange={setEndDate} />
           </>
         );
       default:
@@ -164,8 +164,8 @@ const Dashboard = () => {
       return (
         <div style={{ background: '#fff', padding: 12, border: '1px solid #ccc', borderRadius: 8 }}>
           <p><strong>{label}</strong></p>
-          <p>Tiến độ: {data.percent}%</p>
-          <p>Phụ trách: {data.owner}</p>
+          <p>{t("tooltip.progress")}: {data.percent}%</p>
+          <p>{t("tooltip.owner")}: {data.owner}</p>
         </div>
       );
     }
@@ -173,19 +173,13 @@ const Dashboard = () => {
   };
 
   // Xử lý chuyển hướng khi click vào cột dự án
-  const handleBarClick = (data: { activeLabel: any; }) => {
-    if (data?.activeLabel) {
-      const projectName = data.activeLabel;
-      navigate(`/projects/${encodeURIComponent(projectName)}`);
-    }
-  };
 
   const fetchHomeData = async () => {
     try {
       const response = await getHomeData(user?.role || '', timeRange, startDate?.format('YYYY-MM-DD') || '', endDate?.format('YYYY-MM-DD') || '');
       setDashboardData(response.data);
     } catch (error) {
-      console.error('Lỗi khi lấy dữ liệu:', error);
+      console.error(t("error.fetchData"), error);
     }
   }
 
@@ -197,7 +191,7 @@ const Dashboard = () => {
     <Card style={{ padding: '15px 15px', minHeight: '100vh', marginTop: 20 }}>
 
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Title level={3} style={{ margin: 0 }}>Trang tổng quan </Title>
+        <Title level={3} style={{ margin: 0 }}>{t("pageTitle")}</Title>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Select
             value={timeRange}
@@ -208,13 +202,16 @@ const Dashboard = () => {
               setEndDate(null);
             }}
           >
-            <Option value="month">Theo tháng</Option>
-            <Option value="quarter">Theo quý</Option>
-            <Option value="year">Theo năm</Option>
+            <Option value="month">{t("timeFilter.byMonth")}</Option>
+            <Option value="quarter">{t("timeFilter.byQuarter")}</Option>
+            <Option value="year">{t("timeFilter.byYear")}</Option>
           </Select>
           {renderRangePicker()}
-          <AntTooltip title="Làm mới">
-            <ReloadOutlined style={{ fontSize: 20, cursor: 'pointer' }} />
+          <AntTooltip title={t("timeFilter.refresh")}>
+            <ReloadOutlined
+              style={{ fontSize: 20, cursor: 'pointer' }}
+              onClick={fetchHomeData}
+            />
           </AntTooltip>
         </div>
       </Row>
@@ -236,7 +233,6 @@ const Dashboard = () => {
               xl={Math.floor(24 / metrics.length)}
               style={{ minWidth: "20%" }} // nhỏ nhất vẫn giữ được bố cục
             >
-
 
               <div
                 onClick={() => navigate(item.route)}
@@ -299,9 +295,9 @@ const Dashboard = () => {
       </Row>
 
       {/* Biểu đồ tiến độ dự án */}
-      <Card title={<Text strong style={{ fontSize: 16 }}>Biểu đồ tiến độ dự án</Text>} style={{ marginBottom: 32, borderRadius: 16 }} bodyStyle={{ padding: 14, background: '#fff' }}>
+      <Card title={<Text strong style={{ fontSize: 16 }}>{t("progressBar.title")}</Text>} style={{ marginBottom: 32, borderRadius: 16 }} bodyStyle={{ padding: 14, background: '#fff' }}>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={progressData} onClick={handleBarClick}>
+          <BarChart data={progressData} >
             <XAxis dataKey="name" />
             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
             <Tooltip
@@ -338,7 +334,7 @@ const Dashboard = () => {
                   <Row gutter={16} style={{ height: '100%' }}>
                     <Col span={10} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'left' }}>
-                        {<Text strong style={{ fontSize: 18, marginBottom: 25 }}>Tỉ lệ đánh giá từ khách hàng</Text>}
+                        <Text strong style={{ fontSize: 18, marginBottom: 25 }}>{t("customerRatingStatistic.title")}</Text>
                         <div style={{
                           textAlign: 'center',
                           marginTop: 5,
@@ -353,9 +349,11 @@ const Dashboard = () => {
                             <Text strong style={{ fontSize: 25 }}>{averageRating.toFixed(1)}</Text>
                             <StarFilled style={{ fontSize: 23, color: '#fadb14', marginLeft: 8 }} />
                           </div>
-                          <Text type="secondary" style={{ fontSize: 14, marginBottom: 5, display: 'inline-block' }}>Đánh giá trung bình</Text>
+                          <Text type="secondary" style={{ fontSize: 14, marginBottom: 5, display: 'inline-block' }}>
+                            {t("customerRatingStatistic.averageRating")}
+                          </Text>
                           <br />
-                          <Text strong>{totalRatings}</Text>{" "} lượt đánh giá đã ghi nhận
+                          <Text strong>{totalRatings}</Text>{" "} {t("customerRatingStatistic.ratingsRecorded")}
                         </div>
 
                         {/* Chú thích màu cho các mức sao */}
@@ -365,15 +363,15 @@ const Dashboard = () => {
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <div style={{ width: 16, height: 16, backgroundColor: '#1890FF', borderRadius: 2, marginRight: 8 }}></div>
-                                  <Text style={{ fontSize: 14 }}>5 sao</Text>
+                                  <Text style={{ fontSize: 14 }}>{t("customerRatingStatistic.legend.5stars")}</Text>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <div style={{ width: 16, height: 16, backgroundColor: '#FADB14', borderRadius: 2, marginRight: 8 }}></div>
-                                  <Text style={{ fontSize: 14 }}>3 sao</Text>
+                                  <Text style={{ fontSize: 14 }}>{t("customerRatingStatistic.legend.3stars")}</Text>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <div style={{ width: 16, height: 16, backgroundColor: '#FF4D4F', borderRadius: 2, marginRight: 8 }}></div>
-                                  <Text style={{ fontSize: 14 }}>1 sao</Text>
+                                  <Text style={{ fontSize: 14 }}>{t("customerRatingStatistic.legend.1stars")}</Text>
                                 </div>
                               </div>
                             </Col>
@@ -381,11 +379,11 @@ const Dashboard = () => {
                               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <div style={{ width: 16, height: 16, backgroundColor: '#52C41A', borderRadius: 2, marginRight: 8 }}></div>
-                                  <Text style={{ fontSize: 14 }}>4 sao</Text>
+                                  <Text style={{ fontSize: 14 }}>{t("customerRatingStatistic.legend.4stars")}</Text>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                   <div style={{ width: 16, height: 16, backgroundColor: '#FAAD14', borderRadius: 2, marginRight: 8 }}></div>
-                                  <Text style={{ fontSize: 14 }}>2 sao</Text>
+                                  <Text style={{ fontSize: 14 }}>{t("customerRatingStatistic.legend.2stars")}</Text>
                                 </div>
                               </div>
                             </Col>
@@ -416,15 +414,15 @@ const Dashboard = () => {
               <Card
                 title={
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Text strong style={{ fontSize: 16 }}>Số lượng báo cáo từ khách hàng</Text>
+                    <Text strong style={{ fontSize: 16 }}>{t("customerReportStatistic.title")}</Text>
                     <Select
                       defaultValue={3}
                       style={{ width: 150 }}
                       onChange={(value) => setTopCustomers(value)}
                     >
-                      <Option value={3}>Top 3 nhiều nhất</Option>
-                      <Option value={5}>Top 5 nhiều nhất</Option>
-                      <Option value={7}>Top 7 nhiều nhất</Option>
+                      <Option value={3}>{t("customerReportStatistic.top3")}</Option>
+                      <Option value={5}>{t("customerReportStatistic.top5")}</Option>
+                      <Option value={7}>{t("customerReportStatistic.top7")}</Option>
                     </Select>
                   </div>
                 }
@@ -436,7 +434,9 @@ const Dashboard = () => {
                   <BarChart data={feedbackStats} layout="vertical" margin={{ right: 50, left: 0, top: 0, bottom: 0 }}>
                     <XAxis type="number" />
                     <YAxis dataKey="name" type="category" width={110} />
-                    <Tooltip />
+                    <Tooltip
+                      isAnimationActive={false}
+                      position={undefined} />
                     <Bar dataKey="value" fill="#9254de">
                       <LabelList dataKey="value" position="right" offset={16} />
                     </Bar>

@@ -34,7 +34,8 @@
     "customerStatisCard": {
         "customerTotal": "顧客の総数",
         "inProjectCustomer": "プロジェクトを持つ顧客の総数",
-        "projectsBy": "{{customerName}}のプロジェクト",
+        "projectsByName": "{{customerName}}のプロジェクト",
+        "projectsBy": "のプロジェクト",
         "noneProject": "プロジェクトがありません"
     }
 }

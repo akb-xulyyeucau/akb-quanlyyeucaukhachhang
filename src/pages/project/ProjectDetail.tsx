@@ -17,8 +17,6 @@ import { selectUserProfile, selectAuthUser } from '../../common/stores/auth/auth
 import { useSelector } from 'react-redux';
 import AccessLimit from '../../common/components/AccessLimit';
 import { useTranslation } from 'react-i18next';
-import { sendEmail } from './services/mail.service';
-import PopupMailConfirm from '../../common/components/PopupMailConfirm';
 
 const { Title, Link } = Typography;
 
@@ -36,7 +34,6 @@ const ProjectDetail = () => {
   const [senderFilter, setSenderFilter] = useState<string>('all');
   const [filteredDocuments, setFilteredDocuments] = useState<any[]>([]);
   const [error, setError] = useState(false);
-  const [showMailConfirm , setShowMailConfirm ] = useState(false);
   const user = useSelector(selectAuthUser);
   const profile = useSelector(selectUserProfile);
 
@@ -98,39 +95,12 @@ const ProjectDetail = () => {
 
   const handleAddDocument = async (document: IDocument) => {
     try {
-      setShowMailConfirm(true);
       const response = await addDocumentToProject(pid || '', document._id || '');
       if (response.success) {
         await updateTrashDocument(document._id || '');
         await fetchProjectDetail();
         message.success(t('projectDocument.message.addSuccess'));
         setOpenModalAdd(false);
-        if(user?.role === "admin" || user?.role === "pm"){
-          await sendEmail({
-            to : project?.customer?.emailContact,
-            subject : `Dự án ${project?.name} đã thêm một tài liệu mới bởi ${profile?.name || user?.email}`,
-            templateName : "addDocInProject.template",
-            data : {
-              username : project?.customer?.name,
-              projectName : project?.name,
-              senderName : profile?.name || user?.email,
-              link : `${import.meta.env.VITE_HOST}/project/${pid}`
-            }
-          })
-        }
-        else{
-          await sendEmail({
-            to : project?.pm?.emailContact,
-            subject : `Dự án ${project?.name} đã thêm một tài liệu mới bởi ${profile?.name || user?.email}`,
-            templateName : "addDocInProject.template",
-            data : {
-              username : project?.customer?.name,
-              projectName : project?.name,
-              senderName : profile?.name || user?.email,
-              link : `${import.meta.env.VITE_HOST}/project/${pid}`
-            }
-          })
-        }
       } else {
         message.error(response.message || t('projectDocument.message.addFail'));
       }
@@ -446,17 +416,6 @@ const ProjectDetail = () => {
         onClose={() => setOpenModalEdit(false)}
         document={selectedDocument}
         onSuccess={fetchProjectDetail}
-      />
-      <PopupMailConfirm
-        isVisible={showMailConfirm}
-        onCancel={() => setShowMailConfirm(false)}
-        onConfirm={() => {
-          setShowMailConfirm(false);
-          setOpenModalAdd(true); // Sau khi xác nhận mới mở modal upload
-        }}
-        emailRecipient={user?.role === 'admin' || user?.role === 'pm' ? project?.customer?.emailContact : project?.pm?.emailContact}
-        mailContentPreview={`Bạn sẽ gửi thông báo khi thêm tài liệu mới cho dự án "${project?.name}".`}
-        isLoading={false}
       />
     </div >
   );

@@ -10,11 +10,9 @@ import {
 import {
   FolderOutlined,
   FileOutlined,
-  UserOutlined,
   StarFilled,
   ArrowUpOutlined,
   ArrowDownOutlined,
-  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   BarChart,
@@ -32,9 +30,9 @@ import { useEffect, useState } from "react";
 import { Dayjs } from "dayjs";
 import { useNavigate } from "react-router-dom";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
-import { selectUserProfile, selectAuthUser } from '../../common/stores/auth/authSelector';
+import {  selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useSelector } from "react-redux";
 import { getHomeData } from "./services/home.service";
 import { useTranslation } from "react-i18next";
@@ -48,8 +46,6 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const navigate = useNavigate();
   const user = useSelector(selectAuthUser);
-  const profile = useSelector(selectUserProfile);
-
   // Mảng các card thông số tổng quan
   const metrics = [
     {
@@ -171,9 +167,7 @@ const Dashboard = () => {
     }
     return null;
   };
-
   // Xử lý chuyển hướng khi click vào cột dự án
-
   const fetchHomeData = async () => {
     try {
       const response = await getHomeData(user?.role || '', timeRange, startDate?.format('YYYY-MM-DD') || '', endDate?.format('YYYY-MM-DD') || '');
@@ -191,7 +185,7 @@ const Dashboard = () => {
     <Card style={{ padding: '15px 15px', minHeight: '100vh', marginTop: 20 }}>
 
       <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
-        <Title level={3} style={{ margin: 0 }}>{t("pageTitle")}</Title>
+        {/* <Title level={3} style={{ margin: 0 }}>{t("pageTitle")}</Title> */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Select
             value={timeRange}
@@ -208,10 +202,10 @@ const Dashboard = () => {
           </Select>
           {renderRangePicker()}
           <AntTooltip title={t("timeFilter.refresh")}>
-            <ReloadOutlined
+            {/* <ReloadOutlined
               style={{ fontSize: 20, cursor: 'pointer' }}
               onClick={fetchHomeData}
-            />
+            /> */}
           </AntTooltip>
         </div>
       </Row>

@@ -82,12 +82,13 @@ const Login: React.FC = () => {
           </p>
 
           {/* Căn giữa LanguageSwitcher */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
             <LanguageSwitcher />
           </div>
         </div>
 
-        <h2 style={{ textAlign: 'center', marginBottom: 24 }}>{t('login')}</h2>
+           
+        {/* <h2 style={{ textAlign: 'center', marginBottom: 24 }}>{t('login')}</h2> */}
 
         <Form
           name="login"

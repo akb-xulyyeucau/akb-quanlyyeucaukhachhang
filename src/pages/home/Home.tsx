@@ -416,7 +416,7 @@ const Dashboard = () => {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text strong style={{ fontSize: 16 }}>{t("customerReportStatistic.title")}</Text>
                     <Select
-                      defaultValue={3}
+                      value={topCustomers}
                       style={{ width: 150 }}
                       onChange={(value) => setTopCustomers(value)}
                     >

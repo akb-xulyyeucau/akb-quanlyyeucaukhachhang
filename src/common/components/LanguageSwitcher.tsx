@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
-import { GlobalOutlined } from '@ant-design/icons';
 
 const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation();
@@ -15,21 +14,18 @@ const LanguageSwitcher: React.FC = () => {
     switch (i18n.language) {
       case 'vi':
         return {
-          code: 'VI',
-          name: 'Tiếng Việt',
-          flag: '🇻🇳'
+          code: 'Tiếng Việt',
+          flag: './public/vn.png'
         };
       case 'ja':
         return {
-          code: 'JA',
-          name: '日本語',
-          flag: '🇯🇵'
+          code: '日本語',
+          flag: './public/jp.jpg'
         };
       default:
         return {
-          code: 'VI',
-          name: 'Tiếng Việt',
-          flag: '🇻🇳'
+          code: 'Tiếng Việt',
+          flag: './public/vn.png'
         };
     }
   };
@@ -37,31 +33,38 @@ const LanguageSwitcher: React.FC = () => {
   const currentLang = getCurrentLanguage();
 
   return (
-    <Button
-      type="text"
-      onClick={changeLanguage}
+   <Button
+    type="text"
+    onClick={changeLanguage}
+    style={{
+      width: '100%',
+      height: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center', // <-- căn giữa theo chiều ngang
+      border: 'none',
+      boxShadow: 'none',
+      background: 'transparent',
+      fontSize: 16,
+      padding: 0 // <-- loại bỏ padding đẩy lệch trái
+    }}
+  >
+    <div
       style={{
-        width: '100%',
-        height: '40px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '0 24px',
-        border: 'none',
-        boxShadow: 'none',
-        background: 'transparent'
+        gap: '12px'
       }}
     >
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center',
-        gap: '12px'
-      }}>
-        <GlobalOutlined />
-        <span>{currentLang.code}</span>
-        <span>{currentLang.flag}</span>
-      </div>
-    </Button>
+      <img
+        src={currentLang.flag}
+        alt="flag"
+        style={{ width: 24, height: 16, objectFit: 'cover', borderRadius: 2 }}
+      />
+      <span>{currentLang.code}</span>
+    </div>
+  </Button>
+
   );
 };
 

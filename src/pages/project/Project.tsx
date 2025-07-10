@@ -325,9 +325,11 @@ const CustomerProject = () => {
           onChange: (p, l) => {
             setPage(p);
             setLimit(l || 10);
+
           },
         }}
         scroll={{ x: true }}
+
       />
     </div>
   );

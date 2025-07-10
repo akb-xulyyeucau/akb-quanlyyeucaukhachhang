@@ -241,7 +241,7 @@ const Customer = () => {
             <div>
               <StatisticCard
                 icon={<PieChartOutlined />}
-                title={t('customerStatisCard.projectsBy', { customerName: item.customerName })}
+                title={t('customerStatisCard.projectsByName', { customerName: item.customerName })}
                 number={item.projectCount}
                 percent={item.percentProject}
                 color={index % 2 === 0 ? "#FAAD14" : "#13C2C2"}

@@ -33,35 +33,38 @@ const LanguageSwitcher: React.FC = () => {
   const currentLang = getCurrentLanguage();
 
   return (
-    <Button
-      type="text"
-      onClick={changeLanguage}
+   <Button
+    type="text"
+    onClick={changeLanguage}
+    style={{
+      width: '100%',
+      height: '40px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center', // <-- căn giữa theo chiều ngang
+      border: 'none',
+      boxShadow: 'none',
+      background: 'transparent',
+      fontSize: 16,
+      padding: 0 // <-- loại bỏ padding đẩy lệch trái
+    }}
+  >
+    <div
       style={{
-        width: '100%',
-        height: '40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        padding: '0 24px',
-        border: 'none',
-        boxShadow: 'none',
-        background: 'transparent',
-        fontSize: 16
-      }}
-    >
-      <div style={{
         display: 'flex',
         alignItems: 'center',
         gap: '12px'
-      }}>
-        <img
-          src={currentLang.flag}
-          alt="flag"
-          style={{ width: 24, height: 16, objectFit: 'cover', borderRadius: 2 }}
-        />
-        <span>{currentLang.code}</span>
-      </div>
-    </Button>
+      }}
+    >
+      <img
+        src={currentLang.flag}
+        alt="flag"
+        style={{ width: 24, height: 16, objectFit: 'cover', borderRadius: 2 }}
+      />
+      <span>{currentLang.code}</span>
+    </div>
+  </Button>
+
   );
 };
 

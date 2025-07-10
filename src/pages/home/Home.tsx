@@ -9,10 +9,12 @@ import {
 } from "antd";
 import {
   FolderOutlined,
-  FileOutlined,
   StarFilled,
   ArrowUpOutlined,
   ArrowDownOutlined,
+  FileProtectOutlined,
+  FileSyncOutlined,
+  FormOutlined,
 } from "@ant-design/icons";
 import {
   BarChart,
@@ -32,7 +34,7 @@ import { useNavigate } from "react-router-dom";
 
 const { Text } = Typography;
 const { Option } = Select;
-import {  selectAuthUser } from '../../common/stores/auth/authSelector';
+import { selectAuthUser } from '../../common/stores/auth/authSelector';
 import { useSelector } from "react-redux";
 import { getHomeData } from "./services/home.service";
 import { useTranslation } from "react-i18next";
@@ -49,7 +51,7 @@ const Dashboard = () => {
   // Mảng các card thông số tổng quan
   const metrics = [
     {
-      icon: <FileOutlined style={{ fontSize: 32, color: '#1890ff' }} />,
+      icon: <FormOutlined style={{ fontSize: 32, color: '#1890ff' }} />,
       label: t("statisticCard.newRequestLabel"),
       value: dashboardData?.newRequests || 0,
       change: null,
@@ -58,7 +60,7 @@ const Dashboard = () => {
       route: '/customers-projects-request'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#722ed1' }} />,
+      icon: <FileSyncOutlined style={{ fontSize: 32, color: '#722ed1' }} />,
       label: t("statisticCard.inProgressLabel"),
       value: dashboardData?.inProgressProjects || 0,
       change: null,
@@ -67,7 +69,7 @@ const Dashboard = () => {
       route: '/customers-projects'
     },
     {
-      icon: <FolderOutlined style={{ fontSize: 32, color: '#fa8c16' }} />,
+      icon: <FileProtectOutlined style={{ fontSize: 32, color: '#fa8c16' }} />,
       label: t("statisticCard.completedLabel"),
       value: dashboardData?.completedProjects || 0,
       change: dashboardData?.completedProjectsChange?.percentageChange || 0,
@@ -202,10 +204,7 @@ const Dashboard = () => {
           </Select>
           {renderRangePicker()}
           <AntTooltip title={t("timeFilter.refresh")}>
-            {/* <ReloadOutlined
-              style={{ fontSize: 20, cursor: 'pointer' }}
-              onClick={fetchHomeData}
-            /> */}
+
           </AntTooltip>
         </div>
       </Row>

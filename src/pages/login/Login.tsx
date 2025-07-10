@@ -68,26 +68,26 @@ const Login: React.FC = () => {
       background: '#f0f2f5'
     }}>
       <Card style={{ width: 400, boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-        <div style={{ textAlign: 'center', marginBottom: 10, fontSize: '15px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 25, fontSize: '40px' }}>
           <img
             src="/akb-icon.ico"
             alt="Logo"
             style={{
               width: '100px',
-              marginBottom: '16px'
+              marginBottom: '10px'
             }}
           />
-          <p style={{ fontSize: '12px', color: '#8c8c8c' }}>
-            <em>{t('slogan')}</em>
+          <p style={{ fontSize: '15px', color: '#333', fontWeight: 500 }}>
+            {t('slogan')}
           </p>
 
           {/* Căn giữa LanguageSwitcher */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <LanguageSwitcher />
           </div>
         </div>
 
-           
+
         {/* <h2 style={{ textAlign: 'center', marginBottom: 24 }}>{t('login')}</h2> */}
 
         <Form
@@ -134,7 +134,7 @@ const Login: React.FC = () => {
           color: '#8c8c8c',
           marginTop: '16px'
         }}>
-          {t('slogan')} <br />
+
           <span style={{ fontSize: '12px', color: '#8c8c8c' }}><em>{t('footer')}</em></span>
         </div>
       </Card>

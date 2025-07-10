@@ -93,7 +93,7 @@ const MainLayout: React.FC = () => {
             alt="avatar"
             style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }}
           />
-          <div style={{ fontWeight: 700, fontSize: 20 }}>{t('title')}</div>
+          <div style={{ fontWeight: 500, fontSize: 17 }}>{t('title')}</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Dropdown
